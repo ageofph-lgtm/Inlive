@@ -11,7 +11,7 @@ const BRIDGE_HEADERS = {
   "api_key":"f8517554492e492090b62dd501ad7e14",
 };
 const SLIDE_DURATION = 30000;
-const JORDAN_URL = "https://media.base44.com/images/public/6a045759b56878764b71db11/0c790a3bc_Gemini_Generated_Image_6i6wgc6i6wgc6i6w.png";
+const JORDAN_URL = "https://media.base44.com/images/public/6a045759b56878764b71db11/b4686dedd_Gemini_Generated_Image_6i6wgc6i6wgc6i6w1.png";
 
 async function callBridge(p) {
   const r = await fetch(BRIDGE_URL,{method:"POST",headers:BRIDGE_HEADERS,body:JSON.stringify(p)});
@@ -1370,7 +1370,7 @@ export default function AoVivo(){
           paddingRight:"14px",borderRight:`1px solid ${D.line}`}}>
           <div style={{position:"relative",padding:"3px"}}>
             <HudCorners color={D.pink} size={8} thickness={1.5} inset={-1} opacity={0.9}/>
-            <img src="https://media.base44.com/images/public/6a045759b56878764b71db11/0c790a3bc_Gemini_Generated_Image_6i6wgc6i6wgc6i6w.png"
+            <img src="https://media.base44.com/images/public/6a045759b56878764b71db11/b4686dedd_Gemini_Generated_Image_6i6wgc6i6wgc6i6w1.png"
               alt="" style={{width:"clamp(34px,2.7vw,42px)",height:"clamp(34px,2.7vw,42px)",
               objectFit:"contain",filter:`drop-shadow(0 0 8px ${D.pink}aa)`,display:"block"}}/>
           </div>

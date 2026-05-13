@@ -6,12 +6,16 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import Painel from './pages/Painel';
-// Add page imports here
+import AoVivo from './pages/AoVivo';
+
+// Rota pública — sem auth
+function PublicRoute({ children }) {
+  return children;
+}
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
 
-  // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
@@ -20,18 +24,15 @@ const AuthenticatedApp = () => {
     );
   }
 
-  // Handle authentication errors
   if (authError) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
       navigateToLogin();
       return null;
     }
   }
 
-  // Render the main app
   return (
     <Routes>
       <Route path="/" element={<Painel />} />
@@ -40,19 +41,27 @@ const AuthenticatedApp = () => {
   );
 };
 
-
 function App() {
-
   return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClientInstance}>
-        <Router>
-          <AuthenticatedApp />
-        </Router>
-        <Toaster />
-      </QueryClientProvider>
-    </AuthProvider>
-  )
+    <Router>
+      <Routes>
+        {/* Rota pública fullscreen — sem auth, sem layout */}
+        <Route path="/ao-vivo" element={
+          <PublicRoute><AoVivo /></PublicRoute>
+        } />
+
+        {/* App principal autenticado */}
+        <Route path="/*" element={
+          <AuthProvider>
+            <QueryClientProvider client={queryClientInstance}>
+              <AuthenticatedApp />
+              <Toaster />
+            </QueryClientProvider>
+          </AuthProvider>
+        } />
+      </Routes>
+    </Router>
+  );
 }
 
 export default App

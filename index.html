@@ -1,29 +1,21 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" sizes="128x128" href="/icon-192.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/icon-192.png" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#c8102e" />
     <link rel="manifest" href="/manifest.json" />
     <title>Watcher Live — Oficina STILL</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
-    <script>
-      document.addEventListener('click', function requestFS() {
-        const el = document.documentElement;
-        if (!document.fullscreenElement) {
-          if (el.requestFullscreen) el.requestFullscreen();
-          else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-          else if (el.mozRequestFullScreen) el.mozRequestFullScreen();
-        }
-        document.removeEventListener('click', requestFS);
-      }, { once: true });
-    </script>
   </body>
 </html>

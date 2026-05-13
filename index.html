@@ -13,6 +13,31 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script>
+      // Auto fullscreen ao carregar a página
+      window.addEventListener('load', function() {
+        // Tenta fullscreen automático após interação do utilizador (requisito do browser)
+        function tryFullscreen() {
+          const el = document.documentElement;
+          if (el.requestFullscreen) el.requestFullscreen();
+          else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+          else if (el.mozRequestFullScreen) el.mozRequestFullScreen();
+          else if (el.msRequestFullscreen) el.msRequestFullscreen();
+        }
+        // Se já está instalado como PWA (standalone), vai fullscreen automaticamente
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+          tryFullscreen();
+        }
+        // Ao primeiro clique/toque, vai fullscreen
+        function onFirstInteraction() {
+          tryFullscreen();
+          document.removeEventListener('click', onFirstInteraction);
+          document.removeEventListener('keydown', onFirstInteraction);
+        }
+        document.addEventListener('click', onFirstInteraction);
+        document.addEventListener('keydown', onFirstInteraction);
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>

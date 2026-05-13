@@ -6,7 +6,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<AoVivo />} />
-        <Route path="/ao-vivo" element={<AoVivo />} />
+        <Route path="/AoVivo" element={<AoVivo />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

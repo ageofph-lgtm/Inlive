@@ -674,6 +674,25 @@ function RowItem({m, idx, D, forceCategory=null, showTimer=true, showDate=false}
           marginTop:"1px",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",letterSpacing:"0.02em"}}>
           {m.modelo||"—"}
         </div>
+        {tasks.length>0&&(
+          <div style={{display:"flex",flexWrap:"nowrap",gap:3,marginTop:3,overflow:"hidden"}}>
+            {tasks.slice(0,6).map((t,j)=>(
+              <span key={j} style={{
+                fontFamily:"monospace",fontSize:"8px",padding:"1px 5px",
+                background:t.concluida?`rgba(34,197,94,0.1)`:`rgba(${rgb},0.08)`,
+                color:t.concluida?"#16a34a":accent,
+                border:`1px solid ${t.concluida?"rgba(34,197,94,0.3)":`rgba(${rgb},0.3)`}`,
+                textDecoration:t.concluida?"line-through":"none",
+                clipPath:"polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)",
+                fontWeight:600,letterSpacing:"0.02em",whiteSpace:"nowrap",flexShrink:0,
+              }}>{t.texto}</span>
+            ))}
+            {tasks.length>6&&<span style={{fontFamily:"monospace",fontSize:"8px",
+              color:dark?"rgba(160,160,160,0.5)":"rgba(30,30,60,0.4)",flexShrink:0}}>
+              +{tasks.length-6}
+            </span>}
+          </div>
+        )}
       </div>
       <div style={{display:"flex",gap:4,flexShrink:0,alignItems:"center"}}>
         <HudTag color={accent} label={cat.label} glow={dark&&(catKey==="prio"||catKey==="express")}/>
@@ -1286,10 +1305,6 @@ export default function AoVivo(){
     ),
     concluidas:(()=>{
       const sorted=[...conSemana].sort((a,b)=>new Date(b.dataConclusao||0)-new Date(a.dataConclusao||0));
-      // mais rápido da semana (menor timer_accumulated_seconds com valor > 0)
-      const comTimer=sorted.filter(m=>(m.timer_accumulated_seconds||0)>0);
-      const maisRapidoId=comTimer.length>0?comTimer.reduce((min,m)=>m.timer_accumulated_seconds<min.timer_accumulated_seconds?m:min,comTimer[0]).id:null;
-      // colunas adaptativas: até 4 cols dependendo da quantidade
       const n=sorted.length;
       const cols=n<=4?2:n<=9?3:n<=16?4:5;
       return(
@@ -1299,7 +1314,7 @@ export default function AoVivo(){
             <div style={{
               display:"grid",
               gridTemplateColumns:`repeat(${cols},1fr)`,
-              gridAutoRows:"minmax(72px, 1fr)",
+              gridAutoRows:"minmax(80px, 1fr)",
               gap:6,
               flex:1,
               minHeight:0,
@@ -1308,26 +1323,22 @@ export default function AoVivo(){
               paddingRight:2,
             }}>
               {sorted.map((m,i)=>{
-                const cat=CAT[getMachineCategory(m)]||CAT.concluida;
-                const accent=D.green;
-                const rgb="34,197,94";
                 const dt=m.dataConclusao;
                 const dateStr=dt?new Date(dt).toLocaleDateString("pt-PT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"—";
                 const recon=m.recondicao||{};
                 const rLabel=recon.prata?"PRATA":recon.bronze?"BRONZE":null;
+                const tasks=m.tarefas||[];
                 return(
                   <div key={m.id} style={{
                     position:"relative",
-                    display:"flex",flexDirection:"column",justifyContent:"space-between",
+                    display:"flex",flexDirection:"column",gap:3,
                     padding:"6px 8px 5px",
                     background:D.dark
                       ?`linear-gradient(135deg,rgba(34,197,94,0.12) 0%,rgba(8,4,6,0.97) 100%)`
                       :`linear-gradient(135deg,rgba(34,197,94,0.1) 0%,rgba(255,255,255,0.97) 100%)`,
-                    border:m.id===maisRapidoId?`1.5px solid #F59E0B`:`1px solid rgba(34,197,94,0.35)`,
-                    borderTop:m.id===maisRapidoId?`3px solid #F59E0B`:`2px solid #22C55E`,
-                    boxShadow:m.id===maisRapidoId
-                      ?(D.dark?`0 0 18px rgba(245,158,11,0.35)`:`0 2px 10px rgba(245,158,11,0.2)`)
-                      :(D.dark?`0 0 14px rgba(34,197,94,0.18)`:`0 2px 8px rgba(34,197,94,0.12)`),
+                    border:`1px solid rgba(34,197,94,0.35)`,
+                    borderTop:`2px solid #22C55E`,
+                    boxShadow:D.dark?`0 0 14px rgba(34,197,94,0.18)`:`0 2px 8px rgba(34,197,94,0.12)`,
                     overflow:"hidden",
                     clipPath:"polygon(0 0,calc(100% - 7px) 0,100% 7px,100% 100%,7px 100%,0 calc(100% - 7px))",
                   }}>
@@ -1336,52 +1347,57 @@ export default function AoVivo(){
                       fontSize:"8px",fontWeight:700,color:`rgba(34,197,94,0.4)`,letterSpacing:"0.1em"}}>
                       {String(i+1).padStart(2,"0")}
                     </div>
-                    {/* badge MAIS RÁPIDO */}
-                    {m.id===maisRapidoId&&(
-                      <div style={{position:"absolute",top:4,left:6,
-                        fontFamily:"'Orbitron',monospace",fontSize:"7px",fontWeight:900,
-                        letterSpacing:"0.1em",padding:"1px 6px",
-                        color:"#F59E0B",background:"rgba(245,158,11,0.15)",
-                        border:"1px solid rgba(245,158,11,0.5)",
-                        clipPath:"polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)"}}>
-                        ⚡ MAIS RÁPIDO
-                      </div>
-                    )}
                     {/* ícone ✓ */}
-                    <div style={{position:"absolute",bottom:5,right:7,opacity:0.2}}>
+                    <div style={{position:"absolute",bottom:5,right:7,opacity:0.12}}>
                       <CheckCircle2 size={22} color="#22C55E"/>
                     </div>
-                    {/* topo: série */}
+                    {/* série + modelo */}
                     <div>
                       <div style={{fontFamily:"'Orbitron',monospace",
                         fontSize:"clamp(10px,0.9vw,13px)",fontWeight:900,
                         color:D.dark?"#e8e8e8":"#0d0e1a",letterSpacing:"0.05em",lineHeight:1.1,
-                        textShadow:D.dark?`0 0 8px rgba(34,197,94,0.4)`:"none",
+                        textShadow:"none",
                         whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
-                        paddingRight:"18px"}}>
+                        paddingRight:"22px"}}>
                         {m.serie||"—"}
                       </div>
-                      <div style={{fontFamily:"monospace",fontSize:"9px",
+                      <div style={{fontFamily:"'Rajdhani',system-ui,sans-serif",fontSize:"11px",fontWeight:500,
                         color:D.dark?"rgba(140,140,140,0.7)":"rgba(30,30,60,0.55)",
-                        marginTop:2,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
+                        marginTop:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
                         {m.modelo||"—"}
                       </div>
                     </div>
-                    {/* timer final */}
-                    {(m.timer_accumulated_seconds>0)&&(
-                      <div style={{display:"flex",alignItems:"center",gap:4,marginTop:2}}>
-                        <span style={{fontFamily:"monospace",fontSize:"7px",color:"rgba(34,197,94,0.6)",letterSpacing:"0.1em"}}>⏱</span>
-                        <span style={{fontFamily:"'Orbitron',monospace",fontSize:"10px",fontWeight:700,
-                          color:"#22C55E",letterSpacing:"0.04em",
-                          textShadow:D.dark?"0 0 8px rgba(34,197,94,0.5)":"none"}}>
-                          {fmtHMS(m.timer_accumulated_seconds)}
-                        </span>
+                    {/* tarefas concluídas */}
+                    {tasks.length>0&&(
+                      <div style={{display:"flex",flexWrap:"wrap",gap:3,overflow:"hidden"}}>
+                        {tasks.map((t,j)=>(
+                          <span key={j} style={{
+                            fontFamily:"monospace",fontSize:"8px",padding:"1px 5px",
+                            background:`rgba(34,197,94,0.1)`,
+                            color:"#22C55E",
+                            border:`1px solid rgba(34,197,94,0.3)`,
+                            textDecoration:"line-through",
+                            clipPath:"polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)",
+                            fontWeight:600,letterSpacing:"0.03em",whiteSpace:"nowrap",
+                          }}>
+                            {t.texto}
+                          </span>
+                        ))}
                       </div>
                     )}
-                    {/* base: tags + data */}
+                    {/* rodapé: timer + tags + data */}
                     <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",
                       gap:4,marginTop:"auto",flexWrap:"nowrap",overflow:"hidden"}}>
-                      <div style={{display:"flex",gap:3,overflow:"hidden"}}>
+                      <div style={{display:"flex",gap:3,alignItems:"center",overflow:"hidden"}}>
+                        {(m.timer_accumulated_seconds>0)&&(
+                          <div style={{display:"flex",alignItems:"center",gap:3,flexShrink:0}}>
+                            <span style={{fontFamily:"monospace",fontSize:"7px",color:"rgba(34,197,94,0.6)"}}>⏱</span>
+                            <span style={{fontFamily:"'Orbitron',monospace",fontSize:"10px",fontWeight:700,
+                              color:"#22C55E",letterSpacing:"0.04em"}}>
+                              {fmtHMS(m.timer_accumulated_seconds)}
+                            </span>
+                          </div>
+                        )}
                         {rLabel&&<span style={{fontFamily:"'Orbitron',monospace",fontSize:"7px",fontWeight:700,
                           padding:"1px 4px",color:CAT.recon.accent,
                           background:`rgba(155,92,246,0.15)`,border:`1px solid rgba(155,92,246,0.35)`,
@@ -1391,7 +1407,7 @@ export default function AoVivo(){
                           padding:"1px 4px",color:"#F59E0B",
                           background:`rgba(245,158,11,0.15)`,border:`1px solid rgba(245,158,11,0.35)`,
                           clipPath:"polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)",
-                          whiteSpace:"nowrap",flexShrink:0}}>⚑ PRIO</span>}
+                          whiteSpace:"nowrap",flexShrink:0}}>⚑</span>}
                       </div>
                       <div style={{fontFamily:"monospace",fontSize:"8px",fontWeight:700,
                         color:"#22C55E",letterSpacing:"0.04em",flexShrink:0,whiteSpace:"nowrap"}}>

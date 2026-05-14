@@ -313,6 +313,31 @@ function BoardCell({m, D, forceCategory=null}){
             </span>
           </div>
         )}
+        {/* DATAS DE PREVISÃO — linha compacta sempre visível */}
+        {(m.previsao_inicio||m.previsao_fim)&&(
+          <div style={{marginTop:3,display:"flex",alignItems:"center",gap:5,flexWrap:"wrap"}}>
+            {m.previsao_inicio&&(
+              <span style={{fontFamily:"'Orbitron',monospace",fontSize:"7px",fontWeight:700,
+                letterSpacing:"0.08em",padding:"2px 6px",
+                color:"#4D9FFF",background:"rgba(77,159,255,0.10)",
+                border:"1px solid rgba(77,159,255,0.35)",
+                clipPath:"polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)",
+                whiteSpace:"nowrap"}}>
+                ▶ {new Date(m.previsao_inicio+"T12:00:00").toLocaleDateString("pt-PT",{day:"2-digit",month:"2-digit"})}
+              </span>
+            )}
+            {m.previsao_fim&&(
+              <span style={{fontFamily:"'Orbitron',monospace",fontSize:"7px",fontWeight:700,
+                letterSpacing:"0.08em",padding:"2px 6px",
+                color:"#22C55E",background:"rgba(34,197,94,0.10)",
+                border:"1px solid rgba(34,197,94,0.35)",
+                clipPath:"polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)",
+                whiteSpace:"nowrap"}}>
+                ✓ {new Date(m.previsao_fim+"T12:00:00").toLocaleDateString("pt-PT",{day:"2-digit",month:"2-digit"})}
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ── CORPO: task + chips — flex-grow, desaparece quando não há espaço ── */}
@@ -463,17 +488,17 @@ function CalendarFila({items, D, concluidas=[]}){
             <div key={key} style={{background:D.card,border:`1.5px solid ${isToday?D.blue+"66":D.line}`,
               borderRadius:"10px",overflow:"hidden"}}>
               {/* Header dia */}
-              <div style={{padding:"7px 10px",background:isToday?`${D.blue}14`:D.sub+"33",
-                borderBottom:`1px solid ${isToday?D.blue+"33":D.line}`,
+              <div style={{padding:"7px 10px",background:isToday?`rgba(200,16,46,0.12)`:D.sub+"33",
+                borderBottom:`1px solid ${isToday?"rgba(200,16,46,0.4)":D.line}`,
                 display:"flex",alignItems:"center",justifyContent:"space-between"}}>
                 <span style={{fontFamily:"'Orbitron',monospace",fontSize:"10px",fontWeight:900,
-                  color:isToday?D.blue:D.muted,letterSpacing:"0.1em",textTransform:"uppercase"}}>
+                  color:isToday?"#c8102e":D.muted,letterSpacing:"0.1em",textTransform:"uppercase"}}>
                   {d.toLocaleDateString("pt-PT",{weekday:"short"})}
                 </span>
-                <span style={{fontFamily:"monospace",fontSize:"9px",color:isToday?D.blue:D.muted}}>
+                <span style={{fontFamily:"monospace",fontSize:"9px",color:isToday?"#c8102e":D.muted}}>
                   {d.toLocaleDateString("pt-PT",{day:"2-digit",month:"2-digit"})}
                 </span>
-                {isToday&&<div style={{width:"5px",height:"5px",borderRadius:"50%",background:D.blue,animation:"blink 1.5s ease-in-out infinite"}}/>}
+                {isToday&&<div style={{width:"5px",height:"5px",borderRadius:"50%",background:"#c8102e",animation:"blink 1.5s ease-in-out infinite"}}/>}
               </div>
               {/* Máquinas */}
               <div style={{padding:"7px 8px",display:"flex",flexDirection:"column",gap:"5px",minHeight:"60px"}}>
@@ -505,6 +530,16 @@ function CalendarFila({items, D, concluidas=[]}){
                         whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
                         {m.modelo}
                       </div>
+                      {/* Data entrega */}
+                      {m.previsao_fim&&(
+                        <div style={{display:"flex",alignItems:"center",gap:3,marginTop:"3px"}}>
+                          <span style={{fontFamily:"monospace",fontSize:"7px",color:"#22C55E",opacity:0.8}}>✓</span>
+                          <span style={{fontFamily:"'Orbitron',monospace",fontSize:"8px",fontWeight:700,
+                            color:"#22C55E",letterSpacing:"0.06em"}}>
+                            {new Date(m.previsao_fim+"T12:00:00").toLocaleDateString("pt-PT",{day:"2-digit",month:"2-digit"})}
+                          </span>
+                        </div>
+                      )}
                       {/* Tarefas tiny */}
                       {(m.tarefas||[]).length>0&&(
                         <div style={{display:"flex",gap:"3px",flexWrap:"wrap",marginTop:"4px"}}>
@@ -699,11 +734,28 @@ function RowItem({m, idx, D, forceCategory=null, showTimer=true, showDate=false}
         {rLabel&&<HudTag color={CAT.recon.accent} label={rLabel} glow={false}/>}
         {m.prioridade&&catKey!=="prio"&&<HudTag color={CAT.prio.accent} label="⚑" glow={dark}/>}
       </div>
-      {showDate&&m.previsao_inicio&&(
-        <div style={{fontFamily:"'Orbitron',monospace",fontSize:"9px",fontWeight:700,
-          color:accent,letterSpacing:"0.06em",flexShrink:0,
-          textShadow:dark?`0 0 8px rgba(${rgb},0.5)`:"none"}}>
-          {new Date(m.previsao_inicio).toLocaleDateString("pt-PT",{day:"2-digit",month:"2-digit"})}
+      {showDate&&(m.previsao_inicio||m.previsao_fim)&&(
+        <div style={{display:"flex",flexDirection:"column",gap:2,flexShrink:0,alignItems:"flex-end"}}>
+          {m.previsao_inicio&&(
+            <div style={{display:"flex",alignItems:"center",gap:3}}>
+              <span style={{fontFamily:"monospace",fontSize:"7px",color:"#4D9FFF",opacity:0.8}}>▶</span>
+              <span style={{fontFamily:"'Orbitron',monospace",fontSize:"9px",fontWeight:800,
+                color:"#4D9FFF",letterSpacing:"0.06em",
+                textShadow:dark?"0 0 6px rgba(77,159,255,0.5)":"none",whiteSpace:"nowrap"}}>
+                {new Date(m.previsao_inicio+"T12:00:00").toLocaleDateString("pt-PT",{day:"2-digit",month:"2-digit"})}
+              </span>
+            </div>
+          )}
+          {m.previsao_fim&&(
+            <div style={{display:"flex",alignItems:"center",gap:3}}>
+              <span style={{fontFamily:"monospace",fontSize:"7px",color:"#22C55E",opacity:0.8}}>✓</span>
+              <span style={{fontFamily:"'Orbitron',monospace",fontSize:"9px",fontWeight:800,
+                color:"#22C55E",letterSpacing:"0.06em",
+                textShadow:dark?"0 0 6px rgba(34,197,94,0.5)":"none",whiteSpace:"nowrap"}}>
+                {new Date(m.previsao_fim+"T12:00:00").toLocaleDateString("pt-PT",{day:"2-digit",month:"2-digit"})}
+              </span>
+            </div>
+          )}
         </div>
       )}
       {/* timer: se concluída mostra acumulado estático; senão mostra live */}
@@ -1262,16 +1314,46 @@ export default function AoVivo(){
         {filaACP.length===0?<Empty label="Fila ACP vazia" D={D}/>:<CalendarFila items={filaACP} D={D} concluidas={totalCon}/>}
       </div>
     ),
-    nts:(
-      <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
-        <SlideHead title="NTS" icon={<ListOrdered size={16}/>} color={D.pink} D={D} count={ntsAnd.length+ntsAF.length}/>
-        {ntsAnd.length+ntsAF.length===0?<Empty label="Sem máquinas NTS" D={D}/>:
-          <div style={{display:"flex",flexDirection:"column",gap:"4px"}}>
-            {ntsAnd.length>0&&<><SecLabel label="▶ EM ANDAMENTO" D={D}/>{ntsAnd.map((m,i)=><RowItem key={m.id} m={m} idx={i} D={D} forceCategory="nts" showDate={true}/>)}</>}
-            {ntsAF.length>0&&<><SecLabel label="⏳ A FAZER — PREVISÃO ENTREGA" D={D}/>{ntsAF.map((m,i)=><RowItem key={m.id} m={m} idx={i} D={D} forceCategory="nts" showTimer={false} showDate={true}/>)}</>}
-          </div>}
-      </div>
-    ),
+    nts:(()=>{
+      // NTS a fazer: separar com/sem previsão
+      const ntsComPrev   = ntsAF.filter(m=>m.previsao_inicio);
+      const ntsSemPrev   = ntsAF.filter(m=>!m.previsao_inicio);
+      return(
+        <div style={{display:"flex",flexDirection:"column",height:"100%",gap:"8px",overflow:"hidden",flex:1}}>
+          <SlideHead title="NTS" icon={<ListOrdered size={16}/>} color={D.pink} D={D} count={ntsAnd.length+ntsAF.length}/>
+          {ntsAnd.length+ntsAF.length===0?<Empty label="Sem máquinas NTS" D={D}/>:
+            <>
+              {/* Em andamento */}
+              {ntsAnd.length>0&&(
+                <div style={{flexShrink:0}}>
+                  <SecLabel label="▶ EM ANDAMENTO" D={D}/>
+                  <div style={{display:"flex",flexDirection:"column",gap:"4px",marginTop:4}}>
+                    {ntsAnd.map((m,i)=><RowItem key={m.id} m={m} idx={i} D={D} forceCategory="nts" showDate={true}/>)}
+                  </div>
+                </div>
+              )}
+              {/* A fazer com previsão → CalendarFila */}
+              {ntsComPrev.length>0&&(
+                <div style={{flex:1,minHeight:0,display:"flex",flexDirection:"column"}}>
+                  <SecLabel label="📅 PREVISÃO DE ENTREGA — POR DIA" D={D}/>
+                  <div style={{flex:1,minHeight:0,marginTop:4}}>
+                    <CalendarFila items={ntsComPrev} D={D} concluidas={totalCon}/>
+                  </div>
+                </div>
+              )}
+              {/* A fazer sem previsão → lista compacta */}
+              {ntsSemPrev.length>0&&(
+                <div style={{flexShrink:0}}>
+                  <SecLabel label="⏳ SEM PREVISÃO" D={D}/>
+                  <div style={{display:"flex",flexDirection:"column",gap:"4px",marginTop:4}}>
+                    {ntsSemPrev.map((m,i)=><RowItem key={m.id} m={m} idx={i} D={D} forceCategory="nts" showTimer={false} showDate={false}/>)}
+                  </div>
+                </div>
+              )}
+            </>}
+        </div>
+      );
+    })(),
     recon:(()=>{
       const timerPriority=s=>s==="running"?0:s==="paused"?1:2;
       const reconAll=[...reconAnd,...reconAF].sort((a,b)=>timerPriority(a.timer_status)-timerPriority(b.timer_status));

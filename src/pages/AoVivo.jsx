@@ -266,20 +266,44 @@ function BoardCell({m, D, forceCategory=null}){
         </div>
       </div>
 
-      {/* ── LINHA 2: série + modelo ── sempre visível */}
+      {/* ── LINHA 2: série + modelo + baia ── sempre visível */}
       <div style={{zIndex:1,flexShrink:0,marginTop:3}}>
-        <div style={{fontFamily:"'Orbitron',monospace",
-          fontSize:"clamp(11px,1.1vw,15px)",fontWeight:900,
-          color:dark?"#f0f0f0":"#0d0e1a",letterSpacing:"0.06em",lineHeight:1.15,
-          textShadow:dark?`0 0 8px rgba(${rgb},0.35)`:"none",
-          whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
-          {m.serie||"—"}
+        <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"nowrap"}}>
+          <div style={{fontFamily:"'Orbitron',monospace",
+            fontSize:"clamp(11px,1.1vw,15px)",fontWeight:900,
+            color:dark?"#f0f0f0":"#0d0e1a",letterSpacing:"0.06em",lineHeight:1.15,
+            textShadow:dark?`0 0 8px rgba(${rgb},0.35)`:"none",
+            whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",flex:1,minWidth:0}}>
+            {m.serie||"—"}
+          </div>
+          {/* BAIA */}
+          {m.baia&&(
+            <span style={{fontFamily:"'Orbitron',monospace",fontSize:"8px",fontWeight:800,
+              letterSpacing:"0.12em",padding:"2px 6px",flexShrink:0,
+              color:"#4D9FFF",background:"rgba(77,159,255,0.12)",
+              border:"1px solid rgba(77,159,255,0.4)",
+              clipPath:"polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)"}}>
+              {m.baia}
+            </span>
+          )}
         </div>
         <div style={{fontFamily:"monospace",fontSize:"10px",
           color:dark?"rgba(150,150,150,0.7)":"rgba(30,30,60,0.6)",
           marginTop:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
           {m.modelo||"—"}
         </div>
+        {/* MOTIVO PAUSA — só aparece quando paused */}
+        {paused&&m.pausa_motivo&&(
+          <div style={{marginTop:3,display:"flex",alignItems:"center",gap:4}}>
+            <span style={{fontFamily:"'Orbitron',monospace",fontSize:"7px",fontWeight:800,
+              letterSpacing:"0.1em",padding:"2px 7px",
+              color:"#F59E0B",background:"rgba(245,158,11,0.12)",
+              border:"1px solid rgba(245,158,11,0.4)",
+              clipPath:"polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)"}}>
+              ⏸ {m.pausa_motivo.toUpperCase()}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* ── CORPO: task + chips — flex-grow, desaparece quando não há espaço ── */}
@@ -407,7 +431,7 @@ function BigBoard({items, D, isRecon=false}){
 // ─────────────────────────────────────────────────────────────────────────────
 //  CALENDAR FILA — sem scroll, compacto, tudo visível
 // ─────────────────────────────────────────────────────────────────────────────
-function CalendarFila({items, D}){
+function CalendarFila({items, D, concluidas=[]}){
   const monday = getMondayUTC(), friday = getFridayUTC();
   const days   = Array.from({length:5},(_,i)=>{ const d=new Date(monday); d.setUTCDate(monday.getUTCDate()+i); return d; });
   const todayStr = new Date().toISOString().slice(0,10);
@@ -445,7 +469,17 @@ function CalendarFila({items, D}){
               {/* Máquinas */}
               <div style={{padding:"7px 8px",display:"flex",flexDirection:"column",gap:"5px",minHeight:"60px"}}>
                 {ms.length===0
-                  ?<div style={{fontFamily:"monospace",fontSize:"9px",color:D.sub,textAlign:"center",paddingTop:"8px"}}>—</div>
+                  ?(()=>{
+                    const dayKey=d.toISOString().slice(0,10);
+                    const isPast=new Date(dayKey)<new Date(new Date().toISOString().slice(0,10));
+                    const conDia=concluidas.filter(m=>{const raw=m.dataConclusao||m.updated_date;if(!raw)return false;try{return new Date(raw).toISOString().slice(0,10)===dayKey;}catch{return false;}});
+                    return isPast&&conDia.length>0
+                      ?<div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",paddingTop:"8px",gap:2}}>
+                          <div style={{fontFamily:"'Orbitron',monospace",fontSize:"13px",fontWeight:900,color:D.green,textShadow:`0 0 8px rgba(34,197,94,0.5)`}}>{conDia.length}</div>
+                          <div style={{fontFamily:"monospace",fontSize:"7px",color:`rgba(34,197,94,0.6)`,letterSpacing:"0.1em"}}>CONCLUÍDAS</div>
+                        </div>
+                      :<div style={{fontFamily:"monospace",fontSize:"9px",color:D.sub,textAlign:"center",paddingTop:"8px"}}>—</div>;
+                  })()
                   :ms.map((m,i)=>(
                     <div key={i} style={{padding:"6px 8px",background:D.cardB,
                       borderLeft:`3px solid ${m.prioridade?D.yellow:D.blue}`,
@@ -903,6 +937,36 @@ function GanttChart({ machines, D }) {
         )}
       </div>
 
+      {/* ── Barra de carga por dia — vermelho se sobrecarregado ── */}
+      {ruleDays.length>0&&(
+        <div style={{display:"grid",gridTemplateColumns:`repeat(${numDays},1fr)`,gap:2,
+          flexShrink:0,marginBottom:4}}>
+          {ruleDays.map((d,i)=>{
+            const key=d.toISOString().slice(0,10);
+            const count=visibleBlocks.filter(b=>b.pi.toISOString().slice(0,10)<=key&&b.pf.toISOString().slice(0,10)>=key).length;
+            const isWE=d.getDay()===0||d.getDay()===6;
+            const isToday=key===new Date().toISOString().slice(0,10);
+            const overload=count>=4;
+            const warn=count===3;
+            const barColor=overload?"#EF4444":warn?"#F59E0B":D.blue;
+            return(
+              <div key={i} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:1}}>
+                <div style={{width:"100%",height:isToday?14:10,borderRadius:2,
+                  background:isWE?"rgba(255,255,255,0.04)":count===0?"rgba(255,255,255,0.04)":`rgba(${barColor.replace("#","").match(/../g).map(h=>parseInt(h,16)).join(",")},${Math.min(0.9,0.15+count*0.15)})`,
+                  border:`1px solid ${isToday?D.blue:overload?"rgba(239,68,68,0.5)":warn?"rgba(245,158,11,0.4)":"rgba(210,210,210,0.08)"}`,
+                  boxShadow:overload?`0 0 6px rgba(239,68,68,0.4)`:isToday?`0 0 4px ${D.blue}55`:"none",
+                  position:"relative",overflow:"hidden"}}>
+                  {count>0&&!isWE&&<div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                    <span style={{fontFamily:"'Orbitron',monospace",fontSize:"7px",fontWeight:900,
+                      color:overload?"#FCA5A5":warn?"#FCD34D":D.muted,letterSpacing:"0.05em"}}>{count}</span>
+                  </div>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       {/* ── Área de barras — rows fixas sem overflow ── */}
       <div style={{
         flex:1,overflow:"hidden",
@@ -1167,7 +1231,7 @@ export default function AoVivo(){
     fila_acp:(
       <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
         <SlideHead title="FILA — ACP" icon={<ListOrdered size={16}/>} color={D.blue} D={D} count={filaACP.length}/>
-        {filaACP.length===0?<Empty label="Fila ACP vazia" D={D}/>:<CalendarFila items={filaACP} D={D}/>}
+        {filaACP.length===0?<Empty label="Fila ACP vazia" D={D}/>:<CalendarFila items={filaACP} D={D} concluidas={totalCon}/>}
       </div>
     ),
     nts:(
@@ -1175,8 +1239,8 @@ export default function AoVivo(){
         <SlideHead title="NTS" icon={<ListOrdered size={16}/>} color={D.pink} D={D} count={ntsAnd.length+ntsAF.length}/>
         {ntsAnd.length+ntsAF.length===0?<Empty label="Sem máquinas NTS" D={D}/>:
           <div style={{display:"flex",flexDirection:"column",gap:"4px"}}>
-            {ntsAnd.length>0&&<><SecLabel label="▶ EM ANDAMENTO" D={D}/>{ntsAnd.map((m,i)=><RowItem key={m.id} m={m} idx={i} D={D} forceCategory="nts"/>)}</>}
-            {ntsAF.length>0&&<><SecLabel label="⏳ A FAZER" D={D}/>{ntsAF.map((m,i)=><RowItem key={m.id} m={m} idx={i} D={D} forceCategory="nts" showTimer={false}/>)}</>}
+            {ntsAnd.length>0&&<><SecLabel label="▶ EM ANDAMENTO" D={D}/>{ntsAnd.map((m,i)=><RowItem key={m.id} m={m} idx={i} D={D} forceCategory="nts" showDate={true}/>)}</>}
+            {ntsAF.length>0&&<><SecLabel label="⏳ A FAZER — PREVISÃO ENTREGA" D={D}/>{ntsAF.map((m,i)=><RowItem key={m.id} m={m} idx={i} D={D} forceCategory="nts" showTimer={false} showDate={true}/>)}</>}
           </div>}
       </div>
     ),
@@ -1213,6 +1277,9 @@ export default function AoVivo(){
     ),
     concluidas:(()=>{
       const sorted=[...conSemana].sort((a,b)=>new Date(b.dataConclusao||b.updated_date)-new Date(a.dataConclusao||a.updated_date));
+      // mais rápido da semana (menor timer_accumulated_seconds com valor > 0)
+      const comTimer=sorted.filter(m=>(m.timer_accumulated_seconds||0)>0);
+      const maisRapidoId=comTimer.length>0?comTimer.reduce((min,m)=>m.timer_accumulated_seconds<min.timer_accumulated_seconds?m:min,comTimer[0]).id:null;
       // colunas adaptativas: até 4 cols dependendo da quantidade
       const n=sorted.length;
       const cols=n<=4?2:n<=9?3:n<=16?4:5;
@@ -1247,9 +1314,11 @@ export default function AoVivo(){
                     background:D.dark
                       ?`linear-gradient(135deg,rgba(34,197,94,0.12) 0%,rgba(8,4,6,0.97) 100%)`
                       :`linear-gradient(135deg,rgba(34,197,94,0.1) 0%,rgba(255,255,255,0.97) 100%)`,
-                    border:`1px solid rgba(34,197,94,0.35)`,
-                    borderTop:`2px solid #22C55E`,
-                    boxShadow:D.dark?`0 0 14px rgba(34,197,94,0.18)`:`0 2px 8px rgba(34,197,94,0.12)`,
+                    border:m.id===maisRapidoId?`1.5px solid #F59E0B`:`1px solid rgba(34,197,94,0.35)`,
+                    borderTop:m.id===maisRapidoId?`3px solid #F59E0B`:`2px solid #22C55E`,
+                    boxShadow:m.id===maisRapidoId
+                      ?(D.dark?`0 0 18px rgba(245,158,11,0.35)`:`0 2px 10px rgba(245,158,11,0.2)`)
+                      :(D.dark?`0 0 14px rgba(34,197,94,0.18)`:`0 2px 8px rgba(34,197,94,0.12)`),
                     overflow:"hidden",
                     clipPath:"polygon(0 0,calc(100% - 7px) 0,100% 7px,100% 100%,7px 100%,0 calc(100% - 7px))",
                   }}>
@@ -1258,6 +1327,17 @@ export default function AoVivo(){
                       fontSize:"8px",fontWeight:700,color:`rgba(34,197,94,0.4)`,letterSpacing:"0.1em"}}>
                       {String(i+1).padStart(2,"0")}
                     </div>
+                    {/* badge MAIS RÁPIDO */}
+                    {m.id===maisRapidoId&&(
+                      <div style={{position:"absolute",top:4,left:6,
+                        fontFamily:"'Orbitron',monospace",fontSize:"7px",fontWeight:900,
+                        letterSpacing:"0.1em",padding:"1px 6px",
+                        color:"#F59E0B",background:"rgba(245,158,11,0.15)",
+                        border:"1px solid rgba(245,158,11,0.5)",
+                        clipPath:"polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)"}}>
+                        ⚡ MAIS RÁPIDO
+                      </div>
+                    )}
                     {/* ícone ✓ */}
                     <div style={{position:"absolute",bottom:5,right:7,opacity:0.2}}>
                       <CheckCircle2 size={22} color="#22C55E"/>
@@ -1320,6 +1400,17 @@ export default function AoVivo(){
   };
 
   // KPIs
+  // tempo médio das concluídas com timer (em horas)
+  const withTimer = totalCon.filter(m=>(m.timer_accumulated_seconds||0)>0);
+  const avgH = withTimer.length>0
+    ? Math.round(withTimer.reduce((s,m)=>s+(m.timer_accumulated_seconds||0),0)/withTimer.length/3600*10)/10
+    : 0;
+  // concluídas hoje
+  const todayStr2 = new Date().toISOString().slice(0,10);
+  const conHoje = totalCon.filter(m=>{
+    const raw=m.dataConclusao||m.updated_date; if(!raw)return false;
+    try{return new Date(raw).toISOString().slice(0,10)===todayStr2;}catch{return false;}
+  });
   const kpis=[
     {l:"ANDAMENTO",   v:andamento.length,            c:D.blue  },
     {l:"PRIORITÁRIAS",v:prioritarias.length,         c:D.yellow},
@@ -1328,6 +1419,8 @@ export default function AoVivo(){
     {l:"NTS",         v:ntsAnd.length+ntsAF.length,  c:D.pink  },
     {l:"RECON",       v:reconAnd.length+reconAF.length,c:D.purple},
     {l:"ESTA SEMANA", v:conSemana.length,             c:D.green },
+    {l:"HOJE",        v:conHoje.length,               c:D.cyan  },
+    {l:"MÉD.h/MÁQ",  v:avgH,                         c:D.silver},
     {l:"TOTAL 2026",  v:totalCon.length,              c:D.sub   },
   ];
 

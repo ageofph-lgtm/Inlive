@@ -1213,15 +1213,10 @@ export default function AoVivo(){
     const raw=m.dataConclusao||m.updated_date;if(!raw)return false;
     try{return new Date(raw)>=r30;}catch{return false;}
   });
-  // Comparar por data local (YYYY-MM-DD) para evitar desfasamentos UTC vs local
-  const mondayStr = (() => {
-    const n=new Date(), d=n.getDay(), b=d===0?6:d-1;
-    const m=new Date(n); m.setDate(n.getDate()-b); m.setHours(0,0,0,0); return m;
-  })();
   const conSemana=machines.filter(m=>{
     if(!m.estado?.startsWith("concluida")&&m.estado!=="concluida")return false;
     const raw=m.dataConclusao||m.updated_date;if(!raw)return false;
-    try{return new Date(raw)>=mondayStr;}catch{return false;}
+    try{return new Date(raw)>=monday;}catch{return false;}
   });
   const totalCon=machines.filter(m=>m.estado?.startsWith("concluida")||m.estado==="concluida");
 

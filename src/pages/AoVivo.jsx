@@ -26,21 +26,28 @@ function getMondayUTC(){ const n=new Date(),d=n.getUTCDay(),b=d===0?6:d-1,m=new 
 function getFridayUTC(){ const f=new Date(getMondayUTC()); f.setUTCDate(f.getUTCDate()+4); f.setUTCHours(23,59,59,999); return f; }
 
 // ── Design ────────────────────────────────────────────────────────────────────
+// Paleta reduzida: vermelho STILL como accent primário, verde para RUN,
+// âmbar para pausado/prio, cinza neutro para estados passivos
 const C = {
-  pink:"#FF2D78", blue:"#4D9FFF", green:"#22C55E",
-  yellow:"#F59E0B", purple:"#9B5CF6", bronze:"#CD7F32", silver:"#C0C0C0",
-  cyan:"#22D3EE", red:"#EF4444",
+  pink:"#c8102e",   // vermelho STILL — accent primário
+  blue:"#9ca3af",   // cinza neutro (era azul)
+  green:"#22C55E",  // verde — RUN ativo (estado crítico)
+  yellow:"#F59E0B", // âmbar — prioritária/pausa (estado crítico)
+  purple:"#a78bfa", // lilás suave — recon
+  bronze:"#CD7F32", silver:"#C0C0C0",
+  cyan:"#6b7280",   // cinza — era ciano
+  red:"#EF4444",
 };
 // ── PALETA SEMÂNTICA POR CATEGORIA ──────────────────────────────────
-// Cada categoria tem: accent (borda/glow), bg (fundo do card), rgb (para rgba())
+// Accent = cor da borda/tag; estados críticos terão glow, passivos não
 const CAT = {
-  prio:     { accent:"#EF4444", rgb:"239,68,68",    bg:"rgba(239,68,68,0.10)",   label:"PRIORITÁRIA" },
-  recon:    { accent:"#9B5CF6", rgb:"155,92,246",   bg:"rgba(155,92,246,0.10)",  label:"RECOND." },
-  nts:      { accent:"#FF2D78", rgb:"255,45,120",   bg:"rgba(255,45,120,0.10)",  label:"NTS" },
-  concluida:{ accent:"#22C55E", rgb:"34,197,94",    bg:"rgba(34,197,94,0.10)",   label:"CONCLUÍDA" },
-  fila:     { accent:"#e8e8e8", rgb:"232,232,232",  bg:"rgba(232,232,232,0.06)", label:"FILA ACP" },
-  express:  { accent:"#4D9FFF", rgb:"77,159,255",   bg:"rgba(77,159,255,0.10)",  label:"EXPRESS" },
-  andamento:{ accent:"#e8e8e8", rgb:"232,232,232",  bg:"rgba(232,232,232,0.06)", label:"EM ANDAMENTO" },
+  prio:     { accent:"#F59E0B", rgb:"245,158,11",   bg:"rgba(245,158,11,0.08)",  label:"PRIORITÁRIA" },
+  recon:    { accent:"#a78bfa", rgb:"167,139,250",  bg:"rgba(167,139,250,0.08)", label:"RECOND." },
+  nts:      { accent:"#c8102e", rgb:"200,16,46",    bg:"rgba(200,16,46,0.08)",   label:"NTS" },
+  concluida:{ accent:"#22C55E", rgb:"34,197,94",    bg:"rgba(34,197,94,0.08)",   label:"CONCLUÍDA" },
+  fila:     { accent:"#6b7280", rgb:"107,114,128",  bg:"rgba(107,114,128,0.05)", label:"FILA ACP" },
+  express:  { accent:"#c8102e", rgb:"200,16,46",    bg:"rgba(200,16,46,0.08)",   label:"EXPRESS" },
+  andamento:{ accent:"#6b7280", rgb:"107,114,128",  bg:"rgba(107,114,128,0.05)", label:"EM ANDAMENTO" },
 };
 // Resolver categoria de uma máquina
 function getMachineCategory(m){
@@ -54,40 +61,38 @@ function getMachineCategory(m){
 }
 // STARK ARMOR PALETTE — aplicada apenas no modo dark (d=true)
 const DT = d => ({
-  bg:      d?"#0a0408":"#f0f2f8",           // dark: carbono | light: azul frio claro
-  surface: d?"#14070b":"#ffffff",
-  card:    d?"#1a0a0e":"#ffffff",
-  cardB:   d?"#200c12":"#e2e4f0",
-  line:    d?"rgba(210,210,210,0.15)":"rgba(0,0,0,0.10)",
-  sub:     d?"rgba(210,210,210,0.08)":"rgba(0,0,0,0.05)",
-  text:    d?"#fff5e6":"#0d0e1a",           // dark: warm white | light: quase preto
-  muted:   d?"rgba(180,180,180,0.65)":"rgba(30,30,60,0.55)",
-  hudLine: d?"rgba(200,16,46,0.4)":"rgba(200,16,46,0.35)",
-  hudGlow: d?"rgba(200,16,46,0.12)":"rgba(200,16,46,0.08)",
-  scanBg:  d?"rgba(200,16,46,0.03)":"rgba(200,16,46,0.02)",
-  // card backgrounds para light mode
+  bg:      d?"#0c0c0e":"#f4f5f7",           // dark: quase preto neutro | light: cinza frio
+  surface: d?"#111114":"#ffffff",
+  card:    d?"#18181c":"#ffffff",
+  cardB:   d?"#1e1e24":"#e8e9ef",
+  line:    d?"rgba(255,255,255,0.08)":"rgba(0,0,0,0.10)",
+  sub:     d?"rgba(255,255,255,0.04)":"rgba(0,0,0,0.04)",
+  text:    d?"#f0f0f0":"#111118",
+  muted:   d?"rgba(160,160,160,0.7)":"rgba(40,40,60,0.55)",
+  hudLine: d?"rgba(200,16,46,0.3)":"rgba(200,16,46,0.25)",
+  hudGlow: d?"rgba(200,16,46,0.08)":"rgba(200,16,46,0.05)",
+  scanBg:  d?"rgba(200,16,46,0.02)":"rgba(200,16,46,0.01)",
   cardBg:  d?"rgba(255,255,255,0.01)":"rgba(255,255,255,0.85)",
   rowBg:   d?"rgba(255,255,255,0.015)":"rgba(255,255,255,0.7)",
-  rowHov:  d?"rgba(255,255,255,0.035)":"rgba(200,16,46,0.04)",
+  rowHov:  d?"rgba(255,255,255,0.03)":"rgba(200,16,46,0.04)",
   inputBg: d?"rgba(255,255,255,0.04)":"rgba(255,255,255,0.9)",
-  // cores semânticas — mesmas em ambos os modos
+  // cores semânticas — paleta reduzida
   ...C,
-  // accent overrides
+  // overrides por modo
   ...(d ? {
-    pink: "#ff2240",
-    blue: "#c8c8c8",
-    cyan: "#5cffff",
+    pink:   "#c8102e",   // vermelho STILL
+    blue:   "#9ca3af",   // cinza neutro
+    cyan:   "#6b7280",   // cinza escuro
+    muted:  "rgba(150,150,150,0.65)",
   } : {
-    // light: cores ligeiramente mais saturadas e escuras para contraste
     green:  "#16a34a",
     red:    "#dc2626",
     yellow: "#d97706",
     purple: "#7c3aed",
     pink:   "#c8102e",
-    blue:   "#2563eb",
-    cyan:   "#0891b2",
+    blue:   "#6b7280",
+    cyan:   "#4b5563",
   }),
-  // flag para uso nos componentes
   dark: d,
 });
 
@@ -177,8 +182,8 @@ function BoardCell({m, D, forceCategory=null}){
   const accent   = cat.accent;
   const rgb      = cat.rgb;
 
-  const timerCol  = run?"#22C55E":"#F59E0B";
-  const timerGlow = run?"rgba(34,197,94,0.6)":"rgba(245,158,11,0.45)";
+  const timerCol  = run?"#22C55E":paused?"#F59E0B":"#6b7280";
+  const timerGlow = run?"rgba(34,197,94,0.5)":"none";
 
   const recon  = m.recondicao||{};
   const rLabel = recon.prata?"PRATA":recon.bronze?"BRONZE":null;
@@ -194,11 +199,15 @@ function BoardCell({m, D, forceCategory=null}){
       ? `linear-gradient(135deg,rgba(34,197,94,0.1) 0%,rgba(${rgb},0.06) 60%,rgba(255,255,255,0.97) 100%)`
       : `linear-gradient(135deg,rgba(${rgb},0.08) 0%,rgba(255,255,255,0.97) 100%)`);
 
+  // glow apenas em estados críticos: RUN, PRIORITÁRIA, ATRASADA
+  const isCritical = run || catKey==="prio" || catKey==="express";
   const cardShadow = dark
     ? (run
-      ? `0 0 18px rgba(34,197,94,0.2),0 0 35px rgba(${rgb},0.2)`
-      : `0 0 20px rgba(${rgb},0.25)`)
-    : `0 2px 12px rgba(${rgb},0.15)`;
+      ? `0 0 14px rgba(34,197,94,0.18), 0 1px 4px rgba(0,0,0,0.6)`
+      : isCritical
+        ? `0 0 10px rgba(${rgb},0.18), 0 1px 4px rgba(0,0,0,0.6)`
+        : `0 1px 4px rgba(0,0,0,0.5)`)
+    : `0 1px 6px rgba(0,0,0,0.08)`;
 
   // Tudo o que não é essencial fica escondido quando o card é pequeno
   // Usamos uma estrutura de 2 secções: topo (sempre visível) e corpo (flex-grow)
@@ -261,7 +270,7 @@ function BoardCell({m, D, forceCategory=null}){
         <div style={{fontFamily:"'Orbitron',monospace",
           fontSize:"clamp(11px,1.1vw,16px)",fontWeight:900,flexShrink:0,
           color:timerCol,letterSpacing:"0.04em",
-          textShadow:`0 0 10px ${timerGlow}`}}>
+          textShadow:run?`0 0 8px rgba(34,197,94,0.5)`:"none"}}>
           {fmtHMS(elapsed)}
         </div>
       </div>
@@ -272,7 +281,7 @@ function BoardCell({m, D, forceCategory=null}){
           <div style={{fontFamily:"'Orbitron',monospace",
             fontSize:"clamp(11px,1.1vw,15px)",fontWeight:900,
             color:dark?"#f0f0f0":"#0d0e1a",letterSpacing:"0.06em",lineHeight:1.15,
-            textShadow:dark?`0 0 8px rgba(${rgb},0.35)`:"none",
+            textShadow:"none",
             whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",flex:1,minWidth:0}}>
             {m.serie||"—"}
           </div>
@@ -287,9 +296,9 @@ function BoardCell({m, D, forceCategory=null}){
             </span>
           )}
         </div>
-        <div style={{fontFamily:"monospace",fontSize:"10px",
-          color:dark?"rgba(150,150,150,0.7)":"rgba(30,30,60,0.6)",
-          marginTop:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
+        <div style={{fontFamily:"'Rajdhani',system-ui,sans-serif",fontSize:"11px",fontWeight:500,
+          color:dark?"rgba(140,140,140,0.75)":"rgba(30,30,60,0.55)",
+          marginTop:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",letterSpacing:"0.02em"}}>
           {m.modelo||"—"}
         </div>
         {/* MOTIVO PAUSA — só aparece quando paused */}
@@ -644,7 +653,7 @@ function RowItem({m, idx, D, forceCategory=null, showTimer=true, showDate=false}
         :`rgba(${rgb},${dark?0.06:0.04})`,
       border:`1px solid rgba(${rgb},${dark?0.25:0.3})`,
       borderLeft:`3px solid ${run?"#22C55E":accent}`,
-      boxShadow:`0 0 ${dark?12:6}px rgba(${rgb},${dark?0.15:0.08})`,
+      boxShadow:(run||catKey==="prio")?`0 0 8px rgba(${rgb},${dark?0.18:0.1})`:`0 1px 3px rgba(0,0,0,${dark?0.4:0.06})`,
       borderRadius:"4px",
       clipPath:"polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px))",
     }}>
@@ -656,19 +665,19 @@ function RowItem({m, idx, D, forceCategory=null, showTimer=true, showDate=false}
         <div style={{fontFamily:"'Orbitron',monospace",
           fontSize:"clamp(12px,1.05vw,14px)",fontWeight:900,
           color:dark?"#f0f0f0":"#0d0e1a",letterSpacing:"0.06em",
-          textShadow:dark?`0 0 8px rgba(${rgb},0.4)`:"none",
+          textShadow:"none",
           whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
           {m.serie||"—"}
         </div>
-        <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",
-          color:dark?"rgba(150,150,150,0.7)":"rgba(30,30,60,0.6)",
-          marginTop:"1px",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
+        <div style={{fontFamily:"'Rajdhani',system-ui,sans-serif",fontSize:"11px",fontWeight:500,
+          color:dark?"rgba(140,140,140,0.75)":"rgba(30,30,60,0.55)",
+          marginTop:"1px",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",letterSpacing:"0.02em"}}>
           {m.modelo||"—"}
         </div>
       </div>
       <div style={{display:"flex",gap:4,flexShrink:0,alignItems:"center"}}>
-        <HudTag color={accent} label={cat.label} glow={dark}/>
-        {rLabel&&<HudTag color={CAT.recon.accent} label={rLabel} glow={dark}/>}
+        <HudTag color={accent} label={cat.label} glow={dark&&(catKey==="prio"||catKey==="express")}/>
+        {rLabel&&<HudTag color={CAT.recon.accent} label={rLabel} glow={false}/>}
         {m.prioridade&&catKey!=="prio"&&<HudTag color={CAT.prio.accent} label="⚑" glow={dark}/>}
       </div>
       {showDate&&m.previsao_inicio&&(
@@ -691,7 +700,7 @@ function RowItem({m, idx, D, forceCategory=null, showTimer=true, showDate=false}
       ):showTimer?(
         <div style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(12px,1vw,14px)",
           fontWeight:900,color:timerCol,letterSpacing:"0.04em",flexShrink:0,
-          textShadow:run?`0 0 10px rgba(34,197,94,0.6)`:`0 0 8px rgba(245,158,11,0.4)`}}>
+          textShadow:run?`0 0 8px rgba(34,197,94,0.5)`:"none"}}>
           {fmtHMS(elapsed)}
         </div>
       ):null}
@@ -711,12 +720,12 @@ function SecLabel({label,D}){
   return(
     <div style={{display:"flex",alignItems:"center",gap:"8px",
       padding:"8px 0 4px",flexShrink:0}}>
-      <span style={{fontFamily:"'Orbitron',monospace",
-        fontSize:"clamp(10px,0.78vw,12px)",fontWeight:800,letterSpacing:"0.18em",
-        color:D.dark?D.muted:'rgba(30,30,60,0.5)'}}>
+      <span style={{fontFamily:"'Rajdhani',system-ui,sans-serif",
+        fontSize:"clamp(11px,0.82vw,13px)",fontWeight:700,letterSpacing:"0.12em",
+        color:D.dark?D.muted:'rgba(30,30,60,0.5)',textTransform:"uppercase"}}>
         {label}
       </span>
-      <div style={{flex:1,height:"1px",background:`linear-gradient(90deg,${D.muted}55,transparent)`}}/>
+      <div style={{flex:1,height:"1px",background:`linear-gradient(90deg,${D.muted}44,transparent)`}}/>
     </div>
   );
 }
@@ -1453,10 +1462,10 @@ export default function AoVivo(){
         padding:"10px clamp(14px,1.5vw,24px)",background:D.surface,
         borderBottom:`1px solid ${D.hudLine}`,flexShrink:0,flexWrap:"wrap",
         boxShadow:`0 0 20px ${D.hudGlow}, inset 0 -1px 0 ${D.hudLine}`}}>
-        {/* faixa neon na borda inferior */}
+        {/* faixa discreta na borda inferior */}
         <div style={{position:"absolute",bottom:-1,left:0,right:0,height:"1px",
-          background:`linear-gradient(90deg, transparent, ${D.pink}, ${D.blue}, ${D.cyan}, transparent)`,
-          opacity:0.7}}/>
+          background:`linear-gradient(90deg, transparent, ${D.pink}88, transparent)`,
+          opacity:0.6}}/>
 
         {/* Logo */}
         <div style={{display:"flex",alignItems:"center",gap:"12px",flexShrink:0,
@@ -1494,12 +1503,10 @@ export default function AoVivo(){
                 fontFamily:"'Orbitron',monospace",
                 fontSize:"clamp(9px,0.78vw,12px)",letterSpacing:"0.14em",fontWeight:active?900:600,
                 padding:"6px 14px",cursor:"pointer",border:"none",
-                background:active
-                  ? `linear-gradient(135deg, ${D.pink}, ${D.blue})`
-                  : `${D.sub}`,
+                background:active ? D.pink : D.sub,
                 color:active?"#fff":D.muted,
-                textShadow:active?`0 0 8px rgba(255,255,255,0.6)`:"none",
-                boxShadow:active?`0 0 14px ${D.pink}55, 0 0 28px ${D.blue}33`:"none",
+                textShadow:"none",
+                boxShadow:active?`0 2px 8px rgba(200,16,46,0.35)`:"none",
                 clipPath:"polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)",
                 transition:"all 0.2s",
               }}>
@@ -1605,11 +1612,12 @@ export default function AoVivo(){
                 letterSpacing:"0.04em",lineHeight:1}}>
                 {loading?"··":String(k.v).padStart(2,"0")}
               </div>
-              <div style={{fontFamily:"'Orbitron',monospace",
-                fontSize:"clamp(8px,0.7vw,11px)",fontWeight:700,
+              <div style={{fontFamily:"'Rajdhani',system-ui,sans-serif",
+                fontSize:"clamp(9px,0.72vw,11px)",fontWeight:600,
                 color:isActive?k.c:D.muted,
-                letterSpacing:"0.16em",textAlign:"center",
-                opacity:isActive?1:0.75}}>
+                letterSpacing:"0.08em",textAlign:"center",
+                textTransform:"uppercase",
+                opacity:isActive?1:0.7}}>
                 {k.l}
               </div>
             </div>
@@ -1712,10 +1720,10 @@ export default function AoVivo(){
         borderTop:`1px solid ${D.hudLine}`,
         display:"flex",justifyContent:"space-between",alignItems:"center",flexShrink:0,
         boxShadow:`inset 0 1px 0 ${D.hudLine}`}}>
-        {/* faixa neon na borda superior */}
+        {/* faixa discreta na borda superior */}
         <div style={{position:"absolute",top:-1,left:0,right:0,height:"1px",
-          background:`linear-gradient(90deg, transparent, ${D.cyan}, ${D.blue}, ${D.pink}, transparent)`,
-          opacity:0.6}}/>
+          background:`linear-gradient(90deg, transparent, ${D.pink}88, transparent)`,
+          opacity:0.5}}/>
 
         {/* Slide dots */}
         <div style={{display:"flex",gap:"5px",alignItems:"center"}}>

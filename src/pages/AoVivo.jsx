@@ -1219,7 +1219,7 @@ const SLIDES=[
   {id:"andamento",    label:"EM ANDAMENTO"},
   {id:"prioritarias", label:"PRIORITÁRIAS"},
   {id:"timeline",     label:"TIMELINE"},
-  {id:"fila_acp",     label:"FILA ACP"},
+  {id:"proximas",     label:"PRÓXIMAS"},
   {id:"nts",          label:"NTS"},
   {id:"recon",        label:"RECOND."},
   {id:"concluidas",   label:"CONCLUÍDAS"},
@@ -1274,6 +1274,18 @@ export default function AoVivo(){
   const andamento    = machines.filter(m=>(m.timer_status==="running"||m.timer_status==="paused")&&!m.estado?.startsWith("concluida")&&m.estado!=="concluida");
   const prioritarias = machines.filter(m=>m.prioridade===true&&!m.estado?.startsWith("concluida")&&m.estado!=="concluida");
   const filaACP      = machines.filter(m=>m.estado==="a-fazer"&&m.tipo!=="nova");
+  // PRÓXIMAS: tudo com previsao_inicio, que não esteja concluído
+  const proximas     = machines.filter(m=>{
+    if(!m.previsao_inicio) return false;
+    if(m.estado?.startsWith("concluida")||m.estado==="concluida") return false;
+    if(m.arquivada) return false;
+    return true;
+  }).sort((a,b)=>{
+    // prioritárias primeiro, depois por data crescente
+    if(a.prioridade&&!b.prioridade) return -1;
+    if(!a.prioridade&&b.prioridade) return 1;
+    return new Date(a.previsao_inicio)-new Date(b.previsao_inicio);
+  });
   const ntsAnd       = machines.filter(m=>m.tipo==="nova"&&m.estado?.startsWith("em-preparacao"));
   const ntsAF        = machines.filter(m=>m.tipo==="nova"&&m.estado==="a-fazer");
   const reconAnd     = machines.filter(m=>isRecon(m)&&m.estado?.startsWith("em-preparacao"));
@@ -1308,52 +1320,25 @@ export default function AoVivo(){
           </div>}
       </div>
     ),
-    fila_acp:(
+    proximas:(
       <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
-        <SlideHead title="FILA — ACP" icon={<ListOrdered size={16}/>} color={D.blue} D={D} count={filaACP.length}/>
-        {filaACP.length===0?<Empty label="Fila ACP vazia" D={D}/>:<CalendarFila items={filaACP} D={D} concluidas={totalCon}/>}
+        <SlideHead title="PRÓXIMAS" icon={<CalendarDays size={16}/>} color={D.blue} D={D} count={proximas.length}/>
+        {proximas.length===0
+          ?<Empty label="Nenhuma máquina com previsão marcada" D={D}/>
+          :<CalendarFila items={proximas} D={D} concluidas={totalCon}/>
+        }
       </div>
     ),
-    nts:(()=>{
-      // NTS a fazer: separar com/sem previsão
-      const ntsComPrev   = ntsAF.filter(m=>m.previsao_inicio);
-      const ntsSemPrev   = ntsAF.filter(m=>!m.previsao_inicio);
-      return(
-        <div style={{display:"flex",flexDirection:"column",height:"100%",gap:"8px",overflow:"hidden",flex:1}}>
-          <SlideHead title="NTS" icon={<ListOrdered size={16}/>} color={D.pink} D={D} count={ntsAnd.length+ntsAF.length}/>
-          {ntsAnd.length+ntsAF.length===0?<Empty label="Sem máquinas NTS" D={D}/>:
-            <>
-              {/* Em andamento */}
-              {ntsAnd.length>0&&(
-                <div style={{flexShrink:0}}>
-                  <SecLabel label="▶ EM ANDAMENTO" D={D}/>
-                  <div style={{display:"flex",flexDirection:"column",gap:"4px",marginTop:4}}>
-                    {ntsAnd.map((m,i)=><RowItem key={m.id} m={m} idx={i} D={D} forceCategory="nts" showDate={true}/>)}
-                  </div>
-                </div>
-              )}
-              {/* A fazer com previsão → CalendarFila */}
-              {ntsComPrev.length>0&&(
-                <div style={{flex:1,minHeight:0,display:"flex",flexDirection:"column"}}>
-                  <SecLabel label="📅 PREVISÃO DE ENTREGA — POR DIA" D={D}/>
-                  <div style={{flex:1,minHeight:0,marginTop:4}}>
-                    <CalendarFila items={ntsComPrev} D={D} concluidas={totalCon}/>
-                  </div>
-                </div>
-              )}
-              {/* A fazer sem previsão → lista compacta */}
-              {ntsSemPrev.length>0&&(
-                <div style={{flexShrink:0}}>
-                  <SecLabel label="⏳ SEM PREVISÃO" D={D}/>
-                  <div style={{display:"flex",flexDirection:"column",gap:"4px",marginTop:4}}>
-                    {ntsSemPrev.map((m,i)=><RowItem key={m.id} m={m} idx={i} D={D} forceCategory="nts" showTimer={false} showDate={false}/>)}
-                  </div>
-                </div>
-              )}
-            </>}
-        </div>
-      );
-    })(),
+    nts:(
+      <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
+        <SlideHead title="NTS" icon={<ListOrdered size={16}/>} color={D.pink} D={D} count={ntsAnd.length+ntsAF.length}/>
+        {ntsAnd.length+ntsAF.length===0?<Empty label="Sem máquinas NTS" D={D}/>:
+          <div style={{display:"flex",flexDirection:"column",gap:"4px"}}>
+            {ntsAnd.length>0&&<><SecLabel label="▶ EM ANDAMENTO" D={D}/>{ntsAnd.map((m,i)=><RowItem key={m.id} m={m} idx={i} D={D} forceCategory="nts" showDate={true}/>)}</>}
+            {ntsAF.length>0&&<><SecLabel label="⏳ A FAZER" D={D}/>{ntsAF.map((m,i)=><RowItem key={m.id} m={m} idx={i} D={D} forceCategory="nts" showTimer={false} showDate={true}/>)}</>}
+          </div>}
+      </div>
+    ),
     recon:(()=>{
       const timerPriority=s=>s==="running"?0:s==="paused"?1:2;
       const reconAll=[...reconAnd,...reconAF].sort((a,b)=>timerPriority(a.timer_status)-timerPriority(b.timer_status));
@@ -1522,7 +1507,7 @@ export default function AoVivo(){
     {l:"ANDAMENTO",   v:andamento.length,            c:D.blue  },
     {l:"PRIORITÁRIAS",v:prioritarias.length,         c:D.yellow},
     {l:"TIMELINE",    v:machines.filter(m=>(m.estado?.startsWith("em-preparacao")||m.estado==="a-fazer")&&m.previsao_inicio).length, c:D.pink},
-    {l:"FILA ACP",    v:filaACP.length,               c:D.muted },
+    {l:"PRÓXIMAS",    v:proximas.length,               c:D.muted },
     {l:"NTS",         v:ntsAnd.length+ntsAF.length,  c:D.pink  },
     {l:"RECON",       v:reconAnd.length+reconAF.length,c:D.purple},
     {l:"ESTA SEMANA", v:conSemana.length,             c:D.green },
@@ -1690,7 +1675,7 @@ export default function AoVivo(){
           const isActive = (i===0&&SLIDES[slide].id==="andamento") ||
                            (i===1&&SLIDES[slide].id==="prioritarias") ||
                            (i===2&&SLIDES[slide].id==="timeline") ||
-                           (i===3&&SLIDES[slide].id==="fila_acp") ||
+                           (i===3&&SLIDES[slide].id==="proximas") ||
                            (i===4&&SLIDES[slide].id==="nts") ||
                            (i===5&&SLIDES[slide].id==="recon") ||
                            (i===6&&SLIDES[slide].id==="concluidas");

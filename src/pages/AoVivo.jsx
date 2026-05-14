@@ -481,7 +481,7 @@ function CalendarFila({items, D, concluidas=[]}){
                   ?(()=>{
                     const dayKey=d.toISOString().slice(0,10);
                     const isPast=new Date(dayKey)<new Date(new Date().toISOString().slice(0,10));
-                    const conDia=concluidas.filter(m=>{const raw=m.dataConclusao||m.updated_date;if(!raw)return false;try{return new Date(raw).toISOString().slice(0,10)===dayKey;}catch{return false;}});
+                    const conDia=concluidas.filter(m=>{const raw=m.dataConclusao;if(!raw)return false;try{return new Date(raw).toISOString().slice(0,10)===dayKey;}catch{return false;}});
                     return isPast&&conDia.length>0
                       ?<div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",paddingTop:"8px",gap:2}}>
                           <div style={{fontFamily:"'Orbitron',monospace",fontSize:"13px",fontWeight:900,color:D.green,textShadow:`0 0 8px rgba(34,197,94,0.5)`}}>{conDia.length}</div>
@@ -1210,12 +1210,12 @@ export default function AoVivo(){
   const reconCon     = machines.filter(m=>{
     if(!isRecon(m))return false;
     if(!m.estado?.startsWith("concluida")&&m.estado!=="concluida")return false;
-    const raw=m.dataConclusao||m.updated_date;if(!raw)return false;
+    const raw=m.dataConclusao;if(!raw)return false;
     try{return new Date(raw)>=r30;}catch{return false;}
   });
   const conSemana=machines.filter(m=>{
     if(!m.estado?.startsWith("concluida")&&m.estado!=="concluida")return false;
-    const raw=m.dataConclusao||m.updated_date;if(!raw)return false;
+    const raw=m.dataConclusao;if(!raw)return false;
     try{return new Date(raw)>=monday;}catch{return false;}
   });
   const totalCon=machines.filter(m=>m.estado?.startsWith("concluida")||m.estado==="concluida");
@@ -1285,7 +1285,7 @@ export default function AoVivo(){
       </div>
     ),
     concluidas:(()=>{
-      const sorted=[...conSemana].sort((a,b)=>new Date(b.dataConclusao||b.updated_date)-new Date(a.dataConclusao||a.updated_date));
+      const sorted=[...conSemana].sort((a,b)=>new Date(b.dataConclusao||0)-new Date(a.dataConclusao||0));
       // mais rápido da semana (menor timer_accumulated_seconds com valor > 0)
       const comTimer=sorted.filter(m=>(m.timer_accumulated_seconds||0)>0);
       const maisRapidoId=comTimer.length>0?comTimer.reduce((min,m)=>m.timer_accumulated_seconds<min.timer_accumulated_seconds?m:min,comTimer[0]).id:null;
@@ -1311,7 +1311,7 @@ export default function AoVivo(){
                 const cat=CAT[getMachineCategory(m)]||CAT.concluida;
                 const accent=D.green;
                 const rgb="34,197,94";
-                const dt=m.dataConclusao||m.updated_date;
+                const dt=m.dataConclusao;
                 const dateStr=dt?new Date(dt).toLocaleDateString("pt-PT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"—";
                 const recon=m.recondicao||{};
                 const rLabel=recon.prata?"PRATA":recon.bronze?"BRONZE":null;
@@ -1417,7 +1417,7 @@ export default function AoVivo(){
   // concluídas hoje
   const todayStr2 = new Date().toISOString().slice(0,10);
   const conHoje = totalCon.filter(m=>{
-    const raw=m.dataConclusao||m.updated_date; if(!raw)return false;
+    const raw=m.dataConclusao; if(!raw)return false;
     try{return new Date(raw).toISOString().slice(0,10)===todayStr2;}catch{return false;}
   });
   const kpis=[

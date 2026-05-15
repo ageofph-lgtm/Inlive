@@ -209,7 +209,7 @@ function Clock({D}){
 //  REACTOR GAUGE
 // ─────────────────────────────────────────────────────────────────────────────
 
-function BoardCell({m, D, forceCategory=null}){
+function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
   const dark    = D.dark;
   const elapsed = useLiveTimer(m);
   const run     = m.timer_status==="running";
@@ -257,7 +257,7 @@ function BoardCell({m, D, forceCategory=null}){
     <div style={{
       position:"relative",
       display:"flex",flexDirection:"column",
-      padding:"10px 14px 10px",
+      padding:compact?"6px 8px 6px":"10px 14px 10px",
       background:dark?cardBg:"#FFFFFF",
       border:dark?`1px solid ${borderCol}`:`1px solid rgba(13,13,15,0.07)`,
       borderTop:`3px solid ${topBorder}`,
@@ -344,7 +344,7 @@ function BoardCell({m, D, forceCategory=null}){
         {/* TIMER — grande, à direita */}
         <div style={{
           fontFamily:"'Orbitron',monospace",
-          fontSize:"clamp(16px,2vw,32px)",fontWeight:900,flexShrink:0,
+          fontSize:`clamp(${Math.round(10*scale)}px,${2*scale}vw,${Math.round(32*scale)}px)`,fontWeight:900,flexShrink:0,
           color:timerCol,letterSpacing:"0.06em",
           fontVariantNumeric:"tabular-nums",
           textShadow:run&&dark?`0 0 16px rgba(34,197,94,0.7)`:paused&&dark?`0 0 12px rgba(245,158,11,0.5)`:"none"}}>
@@ -360,7 +360,7 @@ function BoardCell({m, D, forceCategory=null}){
         {/* NS — protagonista absoluto */}
         <div style={{
           fontFamily:"'Orbitron',monospace",
-          fontSize:"clamp(18px,2.4vw,38px)",fontWeight:900,
+          fontSize:`clamp(${Math.round(11*scale)}px,${2.4*scale}vw,${Math.round(38*scale)}px)`,fontWeight:900,
           color:dark?"#f5f5f5":"#0D0D0F",
           letterSpacing:"0.1em",lineHeight:1.1,
           textShadow:dark?`0 0 20px rgba(240,240,240,0.2), 0 0 40px rgba(${rgb},0.15)`:"none",
@@ -373,7 +373,7 @@ function BoardCell({m, D, forceCategory=null}){
         {/* MODELO */}
         <div style={{
           fontFamily:dark?"'Rajdhani',system-ui,sans-serif":"'Manrope',-apple-system,sans-serif",
-          fontSize:"clamp(13px,1.4vw,20px)",fontWeight:dark?700:600,
+          fontSize:`clamp(${Math.round(9*scale)}px,${1.4*scale}vw,${Math.round(20*scale)}px)`,fontWeight:dark?700:600,
           color:dark?"rgba(200,200,200,0.80)":"#555",
           letterSpacing:dark?"0.06em":"0.01em",
           whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
@@ -400,7 +400,7 @@ function BoardCell({m, D, forceCategory=null}){
         )}
 
         {/* TASK ACTIVA (quando running e sem pausa) */}
-        {!paused&&activeTask&&(
+        {!paused&&activeTask&&!compact&&(
           <div style={{
             marginTop:4,width:"100%",
             padding:"5px 10px",
@@ -417,7 +417,7 @@ function BoardCell({m, D, forceCategory=null}){
             </span>
             <span style={{
               fontFamily:"monospace",
-              fontSize:"clamp(10px,1vw,14px)",
+              fontSize:`clamp(${Math.round(8*scale)}px,${1*scale}vw,${Math.round(14*scale)}px)`,
               color:dark?"rgba(220,220,220,0.9)":"rgba(20,20,50,0.85)",
               fontWeight:600,
             }}>
@@ -428,7 +428,7 @@ function BoardCell({m, D, forceCategory=null}){
       </div>
 
       {/* ── BOTTOM: datas centradas ── */}
-      {(m.previsao_inicio||m.previsao_fim)&&(
+      {!compact&&(m.previsao_inicio||m.previsao_fim)&&(
         <div style={{
           zIndex:1,flexShrink:0,
           display:"flex",alignItems:"center",justifyContent:"center",
@@ -441,7 +441,7 @@ function BoardCell({m, D, forceCategory=null}){
                 fontSize:"clamp(9px,0.8vw,11px)",color:"#4D9FFF",opacity:0.7,fontWeight:700}}>▶</span>
               <span style={{
                 fontFamily:"'Orbitron',monospace",
-                fontSize:"clamp(12px,1.2vw,18px)",fontWeight:900,
+                fontSize:`clamp(${Math.round(9*scale)}px,${1.2*scale}vw,${Math.round(18*scale)}px)`,fontWeight:900,
                 color:"#4D9FFF",letterSpacing:"0.08em",
                 fontVariantNumeric:"tabular-nums"}}>
                 {fmtDate(m.previsao_inicio)}
@@ -457,7 +457,7 @@ function BoardCell({m, D, forceCategory=null}){
                 fontSize:"clamp(9px,0.8vw,11px)",color:"#22C55E",opacity:0.7,fontWeight:700}}>✓</span>
               <span style={{
                 fontFamily:"'Orbitron',monospace",
-                fontSize:"clamp(12px,1.2vw,18px)",fontWeight:900,
+                fontSize:`clamp(${Math.round(9*scale)}px,${1.2*scale}vw,${Math.round(18*scale)}px)`,fontWeight:900,
                 color:"#22C55E",letterSpacing:"0.08em",
                 fontVariantNumeric:"tabular-nums"}}>
                 {fmtDate(m.previsao_fim)}
@@ -482,21 +482,45 @@ function BigBoard({items, D, isRecon=false}){
   const n = items.length;
   if(n===0) return null;
 
-  // Colunas: 1→2col, 2→2col, 3-4→2col, 5-6→3col, 7+→auto
+  // Colunas adaptativas
   const cols = n===1?2:n<=4?2:n<=6?3:n<=9?4:5;
+  const rows = Math.ceil(n/cols);
+
+  // Escala de fonte: quanto mais cards, menor a fonte base
+  // n<=2→1.0, n<=4→0.85, n<=6→0.72, n<=9→0.60, n>9→0.50
+  const scale = n<=2?1.0:n<=4?0.85:n<=6?0.72:n<=9?0.60:0.50;
+
+  // Modo lista compacto para RECON com muitas máquinas (>8)
+  if(isRecon && n>8){
+    return(
+      <div style={{
+        display:"grid",
+        gridTemplateColumns:`repeat(${cols},1fr)`,
+        gridTemplateRows:`repeat(${rows}, 1fr)`,
+        gap:6,
+        flex:1,
+        minHeight:0,
+        overflow:"hidden",
+      }}>
+        {items.map(m=>(
+          <BoardCell key={m.id} m={m} D={D} isRecon={isRecon} scale={scale} compact={true}/>
+        ))}
+      </div>
+    );
+  }
 
   return(
     <div style={{
       display:"grid",
       gridTemplateColumns:`repeat(${cols},1fr)`,
-      gridTemplateRows:`repeat(${Math.ceil(n/cols)}, 1fr)`,
+      gridTemplateRows:`repeat(${rows}, 1fr)`,
       gap:8,
       flex:1,
       minHeight:0,
       overflow:"hidden",
     }}>
       {items.map(m=>(
-        <BoardCell key={m.id} m={m} D={D} isRecon={isRecon}/>
+        <BoardCell key={m.id} m={m} D={D} isRecon={isRecon} scale={scale}/>
       ))}
     </div>
   );

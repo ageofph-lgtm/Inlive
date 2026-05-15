@@ -223,7 +223,7 @@ function BoardCell({m, D, forceCategory=null}){
   const accent   = cat.accent;
   const rgb      = cat.rgb;
 
-  const timerCol  = run?(dark?"#FF2D78":"#E91E8C"):paused?"#F59E0B":"#6b7280";
+  const timerCol  = run?"#22C55E":paused?"#F59E0B":"#6b7280";
   const timerGlow = run?"rgba(34,197,94,0.5)":"none";
 
   const recon  = m.recondicao||{};
@@ -272,7 +272,7 @@ function BoardCell({m, D, forceCategory=null}){
           <div style={{
             position:"absolute",top:0,bottom:0,
             width:"55%",
-            background:"linear-gradient(105deg,transparent 0%,rgba(34,197,94,0.12) 40%,rgba(34,197,94,0.22) 50%,rgba(34,197,94,0.12) 60%,transparent 100%)",
+            background:dark?"linear-gradient(105deg,transparent 0%,rgba(255,45,120,0.10) 40%,rgba(255,45,120,0.22) 50%,rgba(255,45,120,0.10) 60%,transparent 100%)":"linear-gradient(105deg,transparent 0%,rgba(233,30,140,0.07) 40%,rgba(233,30,140,0.14) 50%,rgba(233,30,140,0.07) 60%,transparent 100%)",
             animation:"cardSweep 2.8s cubic-bezier(0.4,0,0.6,1) infinite",
             filter:"blur(2px)",
           }}/>
@@ -289,8 +289,8 @@ function BoardCell({m, D, forceCategory=null}){
         {/* estado dot + label */}
         <div style={{display:"flex",alignItems:"center",gap:4,minWidth:0,overflow:"hidden"}}>
           <span style={{width:6,height:6,borderRadius:"50%",flexShrink:0,
-            background:run?(dark?"#FF2D78":"#E91E8C"):paused?"#F59E0B":accent,
-            boxShadow:run?(dark?`0 0 8px #FF2D78,0 0 16px rgba(255,45,120,0.4)`:"0 0 0 3px rgba(233,30,140,0.2)"):paused?`0 0 5px rgba(245,158,11,0.5)`:`0 0 5px rgba(${rgb},0.5)`,
+            background:run?"#22C55E":paused?"#F59E0B":accent,
+            boxShadow:run?(dark?`0 0 6px #22C55E`:"0 0 0 3px rgba(34,197,94,0.18)"):paused?`0 0 5px rgba(245,158,11,0.5)`:`0 0 5px rgba(${rgb},0.5)`,
             animation:run?"blink 1.2s ease-in-out infinite":"none"}}/>
           <span style={{
             fontFamily:dark?"'Orbitron',monospace":"'Manrope',-apple-system,sans-serif",
@@ -298,9 +298,9 @@ function BoardCell({m, D, forceCategory=null}){
             letterSpacing:dark?"0.1em":"0.12em",flexShrink:0,
             padding:dark?"0":"2px 7px 2px 4px",
             borderRadius:dark?0:"999px",
-            background:dark?"transparent":run?"rgba(233,30,140,0.1)":paused?"rgba(217,119,6,0.1)":"rgba(142,142,147,0.1)",
-            border:dark?"none":run?"1px solid rgba(233,30,140,0.25)":paused?"1px solid rgba(217,119,6,0.2)":"1px solid rgba(142,142,147,0.15)",
-            color:run?(dark?"#FF2D78":"#E91E8C"):paused?"#F59E0B":accent}}>
+            background:dark?"transparent":run?"rgba(34,197,94,0.1)":paused?"rgba(217,119,6,0.1)":"rgba(142,142,147,0.1)",
+            border:dark?"none":run?"1px solid rgba(34,197,94,0.2)":paused?"1px solid rgba(217,119,6,0.2)":"1px solid rgba(142,142,147,0.15)",
+            color:run?"#22C55E":paused?"#F59E0B":accent}}>
             {run?"RUN":paused?"PAUSED":"IDLE"}
           </span>
           {/* categoria tag */}
@@ -375,7 +375,7 @@ function BoardCell({m, D, forceCategory=null}){
         </div>
         {/* MOTIVO PAUSA — só aparece quando paused */}
         {paused&&(()=>{
-          const motivo=(m.timer_status||"").startsWith("paused:")?(m.timer_status.replace("paused:","").replace(/-/g,"_")):null;
+          const motivo=getPausaMotivo(m);
           if(!motivo)return null;
           const labelMap={aguarda_pecas:"📦 PEÇAS",prioritaria:"🚨 PRIORITÁRIA",aguarda_decisao:"⏳ DECISÃO",outros:"💬 OUTROS"};
           const colorMap={aguarda_pecas:"#F59E0B",prioritaria:"#EF4444",aguarda_decisao:"#8B5CF6",outros:"#6B7280"};
@@ -1754,7 +1754,7 @@ export default function AoVivo(){
     try{return new Date(raw).toISOString().slice(0,10)===todayStr2;}catch{return false;}
   });
   const kpis=[
-    {l:"ANDAMENTO",   v:andamento.length,            c:dark?"#FF2D78":"#E91E8C"},
+    {l:"ANDAMENTO",   v:andamento.length,            c:D.green},
     {l:"STANDBY",     v:standby.length,              c:D.yellow},
     {l:"PRIORITÁRIAS",v:prioritarias.length,         c:D.yellow},
     {l:"TIMELINE",    v:machines.filter(m=>(m.estado?.startsWith("em-preparacao")||m.estado==="a-fazer")&&m.previsao_inicio).length, c:D.pink},

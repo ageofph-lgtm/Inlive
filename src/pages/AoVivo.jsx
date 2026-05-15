@@ -560,7 +560,7 @@ function ReconCell({m, D, scale=1}){
           zIndex:1,gap:2,padding:"4px 0",textAlign:"center",minHeight:0}}>
           <div style={{
             fontFamily:"'Orbitron',monospace",
-            fontSize:`clamp(${Math.round(8*scale)}px,${1.5*scale}vw,${Math.round(20*scale)}px)`,
+            fontSize:`clamp(${Math.round(11*scale)}px,${1.9*scale}vw,${Math.round(26*scale)}px)`,
             fontWeight:900,
             color:dark?"#f0f0f0":"#0D0D0F",
             letterSpacing:"0.06em",lineHeight:1.1,
@@ -568,8 +568,8 @@ function ReconCell({m, D, scale=1}){
           }}>{m.serie||"—"}</div>
           <div style={{
             fontFamily:"'Rajdhani',system-ui,sans-serif",
-            fontSize:`clamp(${Math.round(7*scale)}px,${0.9*scale}vw,${Math.round(13*scale)}px)`,
-            fontWeight:600,color:dark?"rgba(200,200,200,0.65)":"#666",
+            fontSize:`clamp(${Math.round(10*scale)}px,${1.2*scale}vw,${Math.round(17*scale)}px)`,
+            fontWeight:700,color:dark?"rgba(200,200,200,0.80)":"#555",
             whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",maxWidth:"100%",
           }}>{m.modelo||"—"}</div>
         </div>
@@ -629,11 +629,11 @@ function ReconCell({m, D, scale=1}){
         zIndex:1,gap:3,textAlign:"center",minHeight:0}}>
         <div style={{
           fontFamily:"'Orbitron',monospace",
-          fontSize:`clamp(${Math.round(8*scale)}px,${1.6*scale}vw,${Math.round(22*scale)}px)`,
+          fontSize:`clamp(${Math.round(11*scale)}px,${2.0*scale}vw,${Math.round(28*scale)}px)`,
           fontWeight:900,
-          color:dark?"rgba(220,200,255,0.90)":"#2D1B5E",
-          letterSpacing:"0.06em",lineHeight:1.1,
-          wordBreak:"break-all",   // quebra o NS se necessário
+          color:dark?"rgba(220,200,255,0.95)":"#2D1B5E",
+          letterSpacing:"0.05em",lineHeight:1.1,
+          wordBreak:"break-all",
           textAlign:"center",
           maxWidth:"100%",
         }}>
@@ -641,10 +641,10 @@ function ReconCell({m, D, scale=1}){
         </div>
         <div style={{
           fontFamily:"'Rajdhani',system-ui,sans-serif",
-          fontSize:`clamp(${Math.round(7*scale)}px,${1*scale}vw,${Math.round(13*scale)}px)`,
-          fontWeight:600,
-          color:dark?"rgba(180,160,220,0.60)":"#7B6FA0",
-          letterSpacing:"0.03em",
+          fontSize:`clamp(${Math.round(10*scale)}px,${1.3*scale}vw,${Math.round(18*scale)}px)`,
+          fontWeight:700,
+          color:dark?"rgba(200,180,240,0.75)":"#5B4A8A",
+          letterSpacing:"0.04em",
           whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
           maxWidth:"100%",
         }}>
@@ -1818,18 +1818,23 @@ export default function AoVivo(){
       const nA=reconActive.length, nW=reconWaiting.length, nC=reconCon.length;
       const total=nA+nW+nC;
 
-      // Colunas únicas para toda a grid (baseadas no total de activas+espera)
-      const allCards = nA+nW;
-      const cols = allCards<=4?4:allCards<=8?5:allCards<=12?6:allCards<=18?7:8;
-      const scale = allCards<=4?0.85:allCards<=8?0.72:allCards<=12?0.60:allCards<=18?0.52:0.44;
+      // Colunas: baseadas no maior grupo (próximas) para uniformidade
+      const colsA = nA<=2?3:nA<=4?4:nA<=6?5:6;
+      const colsW = nW<=4?4:nW<=8?5:nW<=12?6:nW<=18?7:8;
+      const colsC = nC<=4?4:nC<=8?5:nC<=12?6:nC<=18?7:8;
+
+      // Escala: próximas e concluídas quase iguais, activas levemente maior
+      const scaleW = nW<=6?0.80:nW<=10?0.70:nW<=15?0.60:0.52;
+      const scaleC = scaleW * 1.0;   // mesmo tamanho que próximas
+      const scaleA = scaleW * 1.25;  // levemente maior
 
       // Label centralizado grande
       const SectionLabel = ({emoji, text, count, color}) => (
         <div style={{
           display:"flex",alignItems:"center",justifyContent:"center",
-          gap:8,padding:"6px 0 4px",flexShrink:0,
+          gap:8,padding:"5px 0 4px",flexShrink:0,
         }}>
-          {emoji&&<span style={{fontSize:"14px"}}>{emoji}</span>}
+          {emoji&&<span style={{fontSize:"13px"}}>{emoji}</span>}
           <span style={{
             fontFamily:"'Orbitron',monospace",
             fontSize:"clamp(11px,1.1vw,15px)",fontWeight:800,
@@ -1837,102 +1842,122 @@ export default function AoVivo(){
           }}>{text}</span>
           <span style={{
             fontFamily:"'Orbitron',monospace",
-            fontSize:"clamp(11px,1.1vw,14px)",fontWeight:900,
-            color,opacity:0.6,
+            fontSize:"clamp(11px,1.0vw,14px)",fontWeight:900,
+            color,opacity:0.55,
           }}>· {count}</span>
         </div>
+      );
+
+      // Divider
+      const Divider = ({color}) => (
+        <div style={{height:"1px",flexShrink:0,
+          background:color||( dark?"rgba(167,139,250,0.15)":"rgba(124,58,237,0.1)"),
+          margin:"2px 6px"}}/>
       );
 
       return(
         <div style={{display:"flex",flexDirection:"column",height:"100%",gap:0,overflow:"hidden",flex:1}}>
           <SlideHead title="RECONDICIONAMENTO" icon={<Wrench size={16}/>} color={D.purple} D={D} count={nA+nW+nC}/>
           {total===0?<Empty label="Sem máquinas em recondicionamento" D={D}/>:(
-            <div style={{flex:1,display:"flex",flexDirection:"column",gap:6,minHeight:0,overflow:"hidden"}}>
+            <div style={{flex:1,display:"flex",flexDirection:"column",gap:4,minHeight:0,overflow:"hidden"}}>
 
-              {/* ── SECÇÃO 1: EM ANDAMENTO ── */}
+              {/* ── EM ANDAMENTO — levemente maior, centrado ── */}
               {nA>0&&(
                 <div style={{flexShrink:0}}>
                   <SectionLabel emoji="⚡" text="EM ANDAMENTO" count={nA}
                     color={dark?"rgba(34,197,94,0.9)":"#16a34a"}/>
                   <div style={{
                     display:"grid",
-                    gridTemplateColumns:`repeat(${cols},1fr)`,
+                    gridTemplateColumns:`repeat(${colsA},1fr)`,
+                    justifyContent:"center",
                     gap:6,
-                    /* activas: altura fixa um pouco maior */
-                    height:`clamp(110px,${nA<=2?"22":"18"}vh,200px)`,
+                    /* altura um pouco maior que as próximas */
+                    height:"clamp(100px,18vh,170px)",
                   }}>
-                    {reconActive.map(m=><ReconCell key={m.id} m={m} D={D} scale={scale}/>)}
+                    {reconActive.map(m=><ReconCell key={m.id} m={m} D={D} scale={scaleA}/>)}
                   </div>
                 </div>
               )}
 
-              {/* divisor */}
-              {nA>0&&nW>0&&(
-                <div style={{height:"1px",flexShrink:0,
-                  background:dark?"rgba(167,139,250,0.15)":"rgba(124,58,237,0.1)",margin:"0 4px"}}/>
-              )}
+              {nA>0&&(nW>0||nC>0)&&<Divider/>}
 
-              {/* ── SECÇÃO 2: PRÓXIMAS ── */}
+              {/* ── PRÓXIMAS — menores, flex 1 ── */}
               {nW>0&&(
-                <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0}}>
+                <div style={{flex:nC>0?1.2:1,display:"flex",flexDirection:"column",minHeight:0}}>
                   <SectionLabel emoji="⏳" text="PRÓXIMAS" count={nW}
                     color={dark?"rgba(167,139,250,0.85)":"#7c3aed"}/>
                   <div style={{
                     display:"grid",
-                    gridTemplateColumns:`repeat(${cols},1fr)`,
-                    gridTemplateRows:`repeat(${Math.ceil(nW/cols)},1fr)`,
+                    gridTemplateColumns:`repeat(${colsW},1fr)`,
+                    gridTemplateRows:`repeat(${Math.ceil(nW/colsW)},1fr)`,
                     gap:5,
                     flex:1,
                     minHeight:0,
                     overflow:"hidden",
                   }}>
-                    {reconWaiting.map(m=><ReconCell key={m.id} m={m} D={D} scale={scale}/>)}
+                    {reconWaiting.map(m=><ReconCell key={m.id} m={m} D={D} scale={scaleW}/>)}
                   </div>
                 </div>
               )}
 
-              {/* divisor */}
-              {nC>0&&(
-                <div style={{height:"1px",flexShrink:0,
-                  background:dark?"rgba(34,197,94,0.15)":"rgba(22,163,74,0.1)",margin:"0 4px"}}/>
-              )}
+              {nC>0&&<Divider color={dark?"rgba(34,197,94,0.15)":"rgba(22,163,74,0.1)"}/>}
 
-              {/* ── SECÇÃO 3: CONCLUÍDAS 30 DIAS — chips mini ── */}
+              {/* ── CONCLUÍDAS — quase do mesmo tamanho que próximas, grid de cards ── */}
               {nC>0&&(
-                <div style={{flexShrink:0}}>
+                <div style={{flex:nW>0?1:1.2,display:"flex",flexDirection:"column",minHeight:0}}>
                   <SectionLabel emoji="✓" text="CONCLUÍDAS — 30 DIAS" count={nC}
-                    color={dark?"rgba(34,197,94,0.75)":"#16a34a"}/>
+                    color={dark?"rgba(34,197,94,0.80)":"#16a34a"}/>
                   <div style={{
-                    display:"flex",flexWrap:"wrap",gap:4,
-                    maxHeight:"58px",overflowY:"auto",padding:"0 2px 2px",
+                    display:"grid",
+                    gridTemplateColumns:`repeat(${colsC},1fr)`,
+                    gridTemplateRows:`repeat(${Math.ceil(nC/colsC)},1fr)`,
+                    gap:5,
+                    flex:1,
+                    minHeight:0,
+                    overflow:"hidden",
                   }}>
                     {reconCon.map(m=>{
                       const rr=m.recondicao||{};
                       const rl=rr.prata?"PRATA":rr.bronze?"BRONZE":null;
+                      const rgb="167,139,250";
                       return(
                         <div key={m.id} style={{
-                          display:"flex",alignItems:"center",gap:5,
-                          padding:"3px 8px 3px 6px",flexShrink:0,
-                          background:dark?"rgba(34,197,94,0.06)":"rgba(34,197,94,0.05)",
-                          border:dark?"1px solid rgba(34,197,94,0.2)":"1px solid rgba(34,197,94,0.15)",
-                          borderLeft:"2px solid #22C55E",
-                          borderRadius:dark?0:"6px",
-                          clipPath:dark?"polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)":"none",
+                          position:"relative",
+                          display:"flex",flexDirection:"column",
+                          alignItems:"center",justifyContent:"center",
+                          padding:"6px 8px",gap:3,textAlign:"center",
+                          background:dark?"rgba(34,197,94,0.06)":"rgba(34,197,94,0.04)",
+                          border:dark?"1px solid rgba(34,197,94,0.22)":"1px solid rgba(34,197,94,0.15)",
+                          borderTop:"2px solid #22C55E",
+                          borderRadius:dark?0:"8px",
+                          clipPath:dark?"polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px))":"none",
+                          overflow:"hidden",height:"100%",boxSizing:"border-box",
                         }}>
-                          <div>
-                            <div style={{fontFamily:"'Orbitron',monospace",fontSize:"9px",fontWeight:800,
-                              color:dark?"#a7f3d0":"#065f46",letterSpacing:"0.05em",whiteSpace:"nowrap"}}>
-                              {m.serie||"—"}
-                            </div>
-                            <div style={{fontFamily:"monospace",fontSize:"7px",
-                              color:dark?"rgba(134,239,172,0.55)":"#6b7280",whiteSpace:"nowrap",marginTop:1}}>
-                              {m.modelo||"—"}
-                            </div>
-                          </div>
-                          {rl&&<span style={{fontFamily:"'Orbitron',monospace",fontSize:"6px",fontWeight:800,
+                          {/* ✓ badge */}
+                          <div style={{position:"absolute",top:4,right:6,
+                            fontFamily:"'Orbitron',monospace",fontSize:"7px",fontWeight:800,
+                            color:"#22C55E",opacity:0.5}}>✓</div>
+                          {rl&&<div style={{position:"absolute",top:4,left:6,
+                            fontFamily:"'Orbitron',monospace",fontSize:"6px",fontWeight:800,
                             padding:"1px 4px",color:"#9b5cf6",
-                            background:"rgba(155,92,246,0.15)",border:"1px solid rgba(155,92,246,0.35)",
-                            flexShrink:0}}>{rl}</span>}
+                            background:"rgba(155,92,246,0.15)",border:"1px solid rgba(155,92,246,0.35)"}}>
+                            {rl}
+                          </div>}
+                          <div style={{
+                            fontFamily:"'Orbitron',monospace",
+                            fontSize:`clamp(${Math.round(10*scaleC)}px,${1.8*scaleC}vw,${Math.round(24*scaleC)}px)`,
+                            fontWeight:900,
+                            color:dark?"#a7f3d0":"#065f46",
+                            letterSpacing:"0.05em",lineHeight:1.1,
+                            wordBreak:"break-all",textAlign:"center",maxWidth:"100%",
+                          }}>{m.serie||"—"}</div>
+                          <div style={{
+                            fontFamily:"'Rajdhani',system-ui,sans-serif",
+                            fontSize:`clamp(${Math.round(9*scaleC)}px,${1.1*scaleC}vw,${Math.round(15*scaleC)}px)`,
+                            fontWeight:700,
+                            color:dark?"rgba(134,239,172,0.65)":"#16a34a",
+                            whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",maxWidth:"100%",
+                          }}>{m.modelo||"—"}</div>
                         </div>
                       );
                     })}

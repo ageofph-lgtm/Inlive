@@ -208,7 +208,7 @@ function BoardCell({m, D, forceCategory=null}){
   const dark     = D.dark;
   const elapsed  = useLiveTimer(m);
   const run      = m.timer_status==="running";
-  const paused   = m.timer_status==="paused";
+  const paused   = m.timer_status?.startsWith("paused");
   const tasks    = m.tarefas||[];
   const done     = tasks.filter(t=>t.concluida).length;
   const pct      = tasks.length?Math.round(done/tasks.length*100):0;
@@ -369,17 +369,24 @@ function BoardCell({m, D, forceCategory=null}){
           {m.modelo||"—"}
         </div>
         {/* MOTIVO PAUSA — só aparece quando paused */}
-        {paused&&m.pausa_motivo&&(
-          <div style={{marginTop:3,display:"flex",alignItems:"center",gap:4}}>
-            <span style={{fontFamily:"'Orbitron',monospace",fontSize:"7px",fontWeight:800,
-              letterSpacing:"0.1em",padding:"2px 7px",
-              color:"#F59E0B",background:"rgba(245,158,11,0.12)",
-              border:"1px solid rgba(245,158,11,0.4)",
-              clipPath:"polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)"}}>
-              ⏸ {m.pausa_motivo.toUpperCase()}
-            </span>
-          </div>
-        )}
+        {paused&&(()=>{
+          const motivo=getPausaMotivo(m);
+          if(!motivo)return null;
+          const labelMap={aguarda_pecas:"📦 PEÇAS",prioritaria:"🚨 PRIORITÁRIA",aguarda_decisao:"⏳ DECISÃO",outros:"💬 OUTROS"};
+          const colorMap={aguarda_pecas:"#F59E0B",prioritaria:"#EF4444",aguarda_decisao:"#8B5CF6",outros:"#6B7280"};
+          const c=colorMap[motivo]||"#F59E0B";
+          return(
+            <div style={{marginTop:3,display:"flex",alignItems:"center",gap:4}}>
+              <span style={{fontFamily:"'Orbitron',monospace",fontSize:"7px",fontWeight:800,
+                letterSpacing:"0.1em",padding:"2px 7px",
+                color:c,background:`rgba(${c.replace("#","").match(/.{2}/g).map(h=>parseInt(h,16)).join(",")},0.12)`,
+                border:`1px solid rgba(${c.replace("#","").match(/.{2}/g).map(h=>parseInt(h,16)).join(",")},0.4)`,
+                clipPath:"polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)"}}>
+                {labelMap[motivo]||motivo.toUpperCase()}
+              </span>
+            </div>
+          );
+        })()}
         {/* DATAS DE PREVISÃO — linha compacta sempre visível */}
         {(m.previsao_inicio||m.previsao_fim)&&(
           <div style={{marginTop:3,display:"flex",alignItems:"center",gap:5,flexWrap:"wrap"}}>
@@ -1388,9 +1395,9 @@ export default function AoVivo(){
   const r30=new Date(Date.now()-30*24*3600*1000);
 
   // Em Andamento: só timers a CORRER (running)
-  const andamento    = machines.filter(m=>m.timer_status==="running"&&!m.estado?.startsWith("concluida")&&m.estado!=="concluida");
+  const andamento    = machines.filter(m=>m.timer_status==="running"&&!m.timer_status?.startsWith("paused")&&!m.estado?.startsWith("concluida")&&m.estado!=="concluida");
   // Standby: timers PAUSADOS (paused) — fora de concluídas
-  const standby      = machines.filter(m=>m.timer_status==="paused"&&!m.estado?.startsWith("concluida")&&m.estado!=="concluida");
+  const standby      = machines.filter(m=>m.timer_status?.startsWith("paused")&&!m.estado?.startsWith("concluida")&&m.estado!=="concluida");
 
   // Motivos de pausa — mesma ordem do Watcher
   const PAUSA_COLS=[
@@ -1455,7 +1462,7 @@ export default function AoVivo(){
                 gridTemplateColumns:"repeat(4,1fr)",
                 gap:dark?"10px":"12px",padding:"8px 0"}}>
                 {PAUSA_COLS.map(col=>{
-                  const items=standby.filter(m=>(m.pausa_motivo||"outros")===col.key);
+                  const items=standby.filter(m=>(getPausaMotivo(m)||"outros")===col.key);
                   const rgb=colFmt(col.color);
                   return(
                     <div key={col.key} style={{display:"flex",flexDirection:"column",gap:"8px",overflow:"hidden",minHeight:0}}>

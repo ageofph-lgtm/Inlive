@@ -256,12 +256,13 @@ function BoardCell({m, D, forceCategory=null}){
     <div style={{
       position:"relative",
       display:"flex",flexDirection:"column",
-      padding:"6px 8px 4px",
+      padding:"10px 12px 8px",
       background:dark?cardBg:"#FFFFFF",
       border:dark?`1px solid ${borderCol}`:`1px solid rgba(13,13,15,0.06)`,
       borderTop:`3px solid ${topBorder}`,
       boxShadow:dark?cardShadow:"0 1px 1px rgba(13,13,15,0.06), 0 2px 4px rgba(13,13,15,0.04)",
       overflow:"hidden",
+      height:"100%",
       borderRadius:dark?0:"12px",
       clipPath:dark?"polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px))":"none",
     }}>
@@ -334,10 +335,10 @@ function BoardCell({m, D, forceCategory=null}){
         {/* timer — sempre visível, tamanho adapta */}
         <div style={{
           fontFamily:dark?"'Orbitron',monospace":"'JetBrains Mono',ui-monospace,monospace",
-          fontSize:"clamp(11px,1.1vw,16px)",fontWeight:dark?900:600,flexShrink:0,
-          color:timerCol,letterSpacing:dark?"0.04em":"-0.02em",
+          fontSize:"clamp(14px,1.6vw,26px)",fontWeight:dark?900:700,flexShrink:0,
+          color:timerCol,letterSpacing:dark?"0.06em":"-0.02em",
           fontVariantNumeric:"tabular-nums",
-          textShadow:run&&dark?`0 0 8px rgba(34,197,94,0.5)`:"none"}}>
+          textShadow:run&&dark?`0 0 12px rgba(34,197,94,0.6)`:"none"}}>
           {fmtHMS(elapsed)}
         </div>
       </div>
@@ -347,10 +348,10 @@ function BoardCell({m, D, forceCategory=null}){
         <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"nowrap"}}>
           <div style={{
             fontFamily:dark?"'Orbitron',monospace":"'JetBrains Mono',ui-monospace,monospace",
-            fontSize:"clamp(11px,1.1vw,15px)",fontWeight:dark?900:600,
+            fontSize:"clamp(14px,1.5vw,22px)",fontWeight:dark?900:700,
             color:dark?"#f0f0f0":"#0D0D0F",
-            letterSpacing:dark?"0.06em":"-0.02em",lineHeight:1.15,
-            textShadow:"none",
+            letterSpacing:dark?"0.08em":"-0.01em",lineHeight:1.15,
+            textShadow:dark?"0 0 10px rgba(240,240,240,0.15)":"none",
             whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",flex:1,minWidth:0}}>
             {m.serie||"—"}
           </div>
@@ -367,10 +368,10 @@ function BoardCell({m, D, forceCategory=null}){
         </div>
         <div style={{
           fontFamily:dark?"'Rajdhani',system-ui,sans-serif":"'Manrope',-apple-system,sans-serif",
-          fontSize:"11px",fontWeight:500,
-          color:dark?"rgba(140,140,140,0.75)":"#5C5C61",
-          marginTop:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
-          letterSpacing:dark?"0.02em":"0.01em"}}>
+          fontSize:"clamp(12px,1.1vw,15px)",fontWeight:600,
+          color:dark?"rgba(180,180,180,0.85)":"#5C5C61",
+          marginTop:3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
+          letterSpacing:dark?"0.04em":"0.01em"}}>
           {m.modelo||"—"}
         </div>
         {/* MOTIVO PAUSA — só aparece quando paused */}
@@ -419,46 +420,62 @@ function BoardCell({m, D, forceCategory=null}){
         )}
       </div>
 
-      {/* ── CORPO: task + chips — flex-grow, desaparece quando não há espaço ── */}
-      {tasks.length>0&&(
-        <div style={{flex:1,minHeight:0,display:"flex",flexDirection:"column",gap:3,
-          marginTop:4,zIndex:1,overflow:"hidden"}}>
-          {/* primeira tarefa */}
-          <div style={{display:"flex",alignItems:"center",gap:5,flexShrink:0,
-            padding:"3px 6px",
-            background:dark?`rgba(${rgb},0.1)`:`rgba(${rgb},0.07)`,
-            borderLeft:`2px solid rgba(${rgb},0.6)`,overflow:"hidden"}}>
-            <span style={{fontFamily:"monospace",fontSize:"8px",color:accent,
-              letterSpacing:"0.15em",flexShrink:0,fontWeight:700}}>TASK</span>
-            <span style={{fontFamily:"monospace",fontSize:"9px",
-              color:dark?"rgba(210,210,210,0.85)":"rgba(20,20,50,0.85)",
-              whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
-              {tasks.filter(t=>!t.concluida)[0]?.texto || tasks[0]?.texto}
-            </span>
-          </div>
-          {/* chips */}
-          <div style={{display:"flex",flexWrap:"wrap",gap:3,overflow:"hidden"}}>
-            {tasks.map((t,i)=>(
-              <span key={i} style={{fontFamily:"monospace",
-                fontSize:"8px",padding:"1px 5px",
-                background:t.concluida?`rgba(34,197,94,0.12)`:`rgba(${rgb},0.08)`,
-                color:t.concluida?"#16a34a":accent,
-                border:`1px solid ${t.concluida?"rgba(34,197,94,0.35)":`rgba(${rgb},0.3)`}`,
-                textDecoration:t.concluida?"line-through":"none",
-                clipPath:"polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)",
-                fontWeight:600,letterSpacing:"0.03em",whiteSpace:"nowrap"}}>
-                {t.texto}
+      {/* ── CORPO: tasks + progresso — cresce para preencher o espaço ── */}
+      <div style={{flex:1,minHeight:0,display:"flex",flexDirection:"column",gap:4,
+        marginTop:8,zIndex:1,overflow:"hidden",justifyContent:"flex-start"}}>
+        {tasks.length>0&&(
+          <>
+            {/* Label TASK + task activa */}
+            <div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0,
+              padding:"5px 8px",
+              background:dark?`rgba(${rgb},0.12)`:`rgba(${rgb},0.07)`,
+              borderLeft:`3px solid rgba(${rgb},0.7)`,overflow:"hidden",borderRadius:dark?0:"6px"}}>
+              <span style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(7px,0.65vw,10px)",color:accent,
+                letterSpacing:"0.15em",flexShrink:0,fontWeight:800}}>TASK</span>
+              <span style={{fontFamily:"monospace",fontSize:"clamp(10px,0.9vw,13px)",
+                color:dark?"rgba(220,220,220,0.9)":"rgba(20,20,50,0.9)",
+                whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",fontWeight:600}}>
+                {tasks.filter(t=>!t.concluida)[0]?.texto || tasks[0]?.texto}
               </span>
-            ))}
-          </div>
-        </div>
-      )}
+            </div>
+            {/* chips de todas as tasks */}
+            <div style={{display:"flex",flexWrap:"wrap",gap:4,overflow:"hidden",flexShrink:0}}>
+              {tasks.map((t,i)=>(
+                <span key={i} style={{fontFamily:"monospace",
+                  fontSize:"clamp(9px,0.8vw,12px)",padding:"2px 7px",
+                  background:t.concluida?`rgba(34,197,94,0.12)`:`rgba(${rgb},0.08)`,
+                  color:t.concluida?"#16a34a":accent,
+                  border:`1px solid ${t.concluida?"rgba(34,197,94,0.35)":`rgba(${rgb},0.3)`}`,
+                  textDecoration:t.concluida?"line-through":"none",
+                  clipPath:dark?"polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)":"none",
+                  borderRadius:dark?0:"999px",
+                  fontWeight:600,letterSpacing:"0.03em",whiteSpace:"nowrap"}}>
+                  {t.texto}
+                </span>
+              ))}
+            </div>
+            {/* contagem + barra */}
+            <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0,marginTop:2}}>
+              <span style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(9px,0.8vw,12px)",
+                color:dark?"rgba(150,150,150,0.8)":"#8888AA",letterSpacing:"0.08em"}}>
+                {done}/{tasks.length} <span style={{opacity:0.6}}>TASKS</span>
+              </span>
+              <span style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(11px,1vw,15px)",
+                fontWeight:900,color:pct===100?"#22C55E":accent,letterSpacing:"0.04em"}}>
+                {pct}%
+              </span>
+            </div>
+          </>
+        )}
+      </div>
 
       {/* barra de progresso — sempre na base */}
-      {tasks.length>0&&pct>0&&(
-        <div style={{height:2,background:`rgba(0,0,0,0.1)`,overflow:"hidden",zIndex:1,marginTop:2,flexShrink:0}}>
+      {tasks.length>0&&(
+        <div style={{height:3,background:dark?"rgba(255,255,255,0.06)":"rgba(0,0,0,0.08)",
+          overflow:"hidden",zIndex:1,marginTop:4,flexShrink:0,borderRadius:2}}>
           <div style={{height:"100%",width:`${pct}%`,
-            background:`linear-gradient(90deg,#c8102e,${accent})`,transition:"width 0.5s"}}/>
+            background:pct===100?"#22C55E":`linear-gradient(90deg,rgba(${rgb},0.6),${accent})`,
+            transition:"width 0.5s",boxShadow:pct===100?`0 0 8px rgba(34,197,94,0.5)`:"none"}}/>
         </div>
       )}
     </div>
@@ -475,29 +492,21 @@ function BoardCell({m, D, forceCategory=null}){
 // ─────────────────────────────────────────────────────────────────────────────
 
 function BigBoard({items, D, isRecon=false}){
-  // No slide "Em Andamento" só chegam running (paused vão para STANDBY)
   const n = items.length;
   if(n===0) return null;
 
-  // Colunas adaptativas: nunca deixar um card ocupar a tela toda
-  // 1 item → 2 colunas (card ocupa 50%), 2 → 2, 3-4 → 2, 5-6 → 3, etc.
+  // Colunas: 1→2col, 2→2col, 3-4→2col, 5-6→3col, 7+→auto
   const cols = n===1?2:n<=4?2:n<=6?3:n<=9?4:5;
-  const rows = Math.ceil(n/cols);
-
-  // Altura máxima por card para evitar cards gigantes
-  // Calculamos em % da área disponível (aproximação segura via minmax)
-  const maxCardH = Math.min(260, Math.floor(80/rows)); // em vh aproximado
 
   return(
     <div style={{
       display:"grid",
       gridTemplateColumns:`repeat(${cols},1fr)`,
-      gridAutoRows:`minmax(120px, ${maxCardH}vh)`,
+      gridTemplateRows:`repeat(${Math.ceil(n/cols)}, 1fr)`,
       gap:8,
       flex:1,
       minHeight:0,
       overflow:"hidden",
-      alignContent:"start",
     }}>
       {items.map(m=>(
         <BoardCell key={m.id} m={m} D={D} isRecon={isRecon}/>

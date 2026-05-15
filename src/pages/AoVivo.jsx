@@ -1497,7 +1497,7 @@ export default function AoVivo(){
                     {/* Cards da coluna */}
                     <div style={{flex:1,overflow:"auto",display:"flex",flexDirection:"column",gap:"5px"}}>
                       {col.items.map(m=>{
-                        const {accent,rgb}=getCat(m,dark);
+                        const {accent,rgb}=CAT[getMachineCategory(m)]||CAT.andamento;
                         const acc=(m.timer_accumulated_seconds||0);
                         const showAcc=acc>=MIN_TIMER_SECONDS;
                         return(

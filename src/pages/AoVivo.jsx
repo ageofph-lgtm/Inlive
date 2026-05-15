@@ -1467,7 +1467,7 @@ export default function AoVivo(){
                 gridTemplateColumns:"repeat(4,1fr)",
                 gap:dark?"10px":"12px",padding:"8px 0"}}>
                 {PAUSA_COLS.map(col=>{
-                  const items=standby.filter(m=>((m.timer_status||"").replace("paused:","").replace(/-/g,"_")||"outros")===col.key);
+                  const items=standby.filter(m=>(getPausaMotivo(m)||"outros")===col.key);
                   const rgb=colFmt(col.color);
                   return(
                     <div key={col.key} style={{display:"flex",flexDirection:"column",gap:"8px",overflow:"hidden",minHeight:0}}>
@@ -2079,8 +2079,8 @@ export default function AoVivo(){
             style={{
               position:"relative",width:"100%",
               objectFit:"contain",objectPosition:"bottom right",
-              opacity:dark?0.82:0.12,
-              filter:dark?`drop-shadow(0 0 24px ${D.pink}cc) drop-shadow(0 0 8px ${D.pink}aa) drop-shadow(0 0 4px rgba(255,255,255,0.2))`:"none",
+              opacity:dark?0.82:0.28,
+              filter:dark?`drop-shadow(0 0 24px ${D.pink}cc) drop-shadow(0 0 8px ${D.pink}aa) drop-shadow(0 0 4px rgba(255,255,255,0.2))`:"drop-shadow(0 2px 8px rgba(0,0,0,0.18)) contrast(1.05)",
               display:"block",
             }}/>
         </div>

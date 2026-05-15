@@ -59,46 +59,67 @@ function getMachineCategory(m){
   if(m.estado?.startsWith("concluida")||m.estado==="concluida") return "concluida";
   return "andamento";
 }
-// STARK ARMOR PALETTE — aplicada apenas no modo dark (d=true)
+// PALETA DUAL: dark = Stark Armor | light = Iron Apple
 const DT = d => ({
-  bg:      d?"#0c0c0e":"#f4f5f7",           // dark: quase preto neutro | light: cinza frio
-  surface: d?"#111114":"#ffffff",
-  card:    d?"#18181c":"#ffffff",
-  cardB:   d?"#1e1e24":"#e8e9ef",
-  line:    d?"rgba(255,255,255,0.08)":"rgba(0,0,0,0.10)",
-  sub:     d?"rgba(255,255,255,0.04)":"rgba(0,0,0,0.04)",
-  text:    d?"#f0f0f0":"#111118",
-  muted:   d?"rgba(160,160,160,0.7)":"rgba(40,40,60,0.55)",
-  hudLine: d?"rgba(200,16,46,0.3)":"rgba(200,16,46,0.25)",
-  hudGlow: d?"rgba(200,16,46,0.08)":"rgba(200,16,46,0.05)",
-  scanBg:  d?"rgba(200,16,46,0.02)":"rgba(200,16,46,0.01)",
-  cardBg:  d?"rgba(255,255,255,0.01)":"rgba(255,255,255,0.85)",
-  rowBg:   d?"rgba(255,255,255,0.015)":"rgba(255,255,255,0.7)",
+  // ── Superfícies ──────────────────────────────────────────────────────────
+  bg:      d?"#0c0c0e":"#F2F2F4",
+  surface: d?"#111114":"#FFFFFF",
+  card:    d?"#18181c":"#FFFFFF",
+  cardB:   d?"#1e1e24":"#EAEAEC",
+  line:    d?"rgba(255,255,255,0.08)":"rgba(13,13,15,0.06)",
+  sub:     d?"rgba(255,255,255,0.04)":"rgba(13,13,15,0.03)",
+  text:    d?"#f0f0f0":"#0D0D0F",
+  muted:   d?"rgba(160,160,160,0.7)":"#8E8E93",
+  // ── HUD lines (apenas dark usa scan lines) ───────────────────────────────
+  hudLine: d?"rgba(200,16,46,0.3)":"rgba(200,16,46,0.10)",
+  hudGlow: d?"rgba(200,16,46,0.08)":"transparent",
+  scanBg:  d?"rgba(200,16,46,0.02)":"transparent",
+  cardBg:  d?"rgba(255,255,255,0.01)":"rgba(255,255,255,0.92)",
+  rowBg:   d?"rgba(255,255,255,0.015)":"rgba(255,255,255,0.80)",
   rowHov:  d?"rgba(255,255,255,0.03)":"rgba(200,16,46,0.04)",
   inputBg: d?"rgba(255,255,255,0.04)":"rgba(255,255,255,0.9)",
-  // cores semânticas — paleta reduzida
+  // ── Cores semânticas base ────────────────────────────────────────────────
   ...C,
-  // overrides por modo
+  // ── Overrides por modo ───────────────────────────────────────────────────
   ...(d ? {
-    pink:   "#c8102e",   // vermelho STILL
-    blue:   "#9ca3af",   // cinza neutro
-    cyan:   "#6b7280",   // cinza escuro
+    // Dark — Stark Armor (inalterado)
+    pink:   "#c8102e",
+    blue:   "#9ca3af",
+    cyan:   "#6b7280",
     muted:  "rgba(150,150,150,0.65)",
   } : {
-    green:  "#16a34a",
-    red:    "#dc2626",
-    yellow: "#d97706",
-    purple: "#7c3aed",
-    pink:   "#c8102e",
-    blue:   "#6b7280",
-    cyan:   "#4b5563",
+    // Light — Iron Apple palette
+    pink:   "#c8102e",   // iron-red
+    blue:   "#0A6EBF",   // arc-blue
+    green:  "#16A34A",   // status-run
+    yellow: "#B08D2E",   // iron-gold
+    red:    "#DC2626",   // status-blocked
+    purple: "#7C3AED",   // status-recond
+    cyan:   "#0A6EBF",   // arc-blue (alias)
+    muted:  "#8E8E93",
   }),
+  // ── Iron Apple extras (usados nos overrides de componente) ───────────────
+  ironRed:       d?"#c8102e":"#C8102E",
+  ironRedDeep:   d?"#8b0e22":"#8B0E22",
+  ironRedTint:   d?"rgba(200,16,46,0.12)":"#FBE9EC",
+  ironGold:      d?"#D4A857":"#B08D2E",
+  ironGoldBright:d?"#D4A857":"#D4A857",
+  ironGoldTint:  d?"rgba(212,168,87,0.12)":"#F8F1DD",
+  arcBlue:       d?"#4D9FFF":"#0A6EBF",
+  arcBlueTint:   d?"rgba(77,159,255,0.12)":"#E8F1FB",
+  shadowCard:    d?"0 1px 4px rgba(0,0,0,0.5)":"0 1px 2px rgba(13,13,15,0.04), 0 8px 24px -8px rgba(13,13,15,0.08)",
+  shadowPop:     d?"0 1px 3px rgba(0,0,0,0.4)":"0 1px 1px rgba(13,13,15,0.06), 0 2px 4px rgba(13,13,15,0.04)",
+  bgGradient:    d
+    ?"none"
+    :"radial-gradient(1200px 600px at 85% -10%, rgba(200,16,46,0.04), transparent 60%), radial-gradient(900px 500px at 10% 110%, rgba(176,141,46,0.04), transparent 60%)",
   dark: d,
 });
 
 // ── HUD primitives ────────────────────────────────────────────────────────────
 // Corner brackets [⌜ ⌝ ⌞ ⌟] — define um frame táctico em qualquer container
-function HudCorners({color, size=10, thickness=2, inset=-1, opacity=0.9}){
+function HudCorners({color, size=10, thickness=2, inset=-1, opacity=0.9, D=null}){
+  // Apenas renderiza no dark mode — no Iron Apple light os corners são suprimidos
+  if(D&&!D.dark) return null;
   const c = color, t = thickness, s = size, n = inset;
   const base = {position:"absolute", width:s, height:s, opacity, pointerEvents:"none"};
   return(
@@ -113,18 +134,25 @@ function HudCorners({color, size=10, thickness=2, inset=-1, opacity=0.9}){
 
 // Tag angular [ TEXTO ] — substitui pills com aspecto táctico
 function HudTag({color, label, dim=false, glow=false}){
+  // dark injectado via contexto global — usamos window.__aovivo_dark como fallback
+  const isDark = typeof document !== "undefined" && document.body.dataset.theme !== "light";
   return(
     <span style={{
-      fontFamily:"'Orbitron',monospace", fontSize:"clamp(8px,0.65vw,10px)",
-      fontWeight:800, letterSpacing:"0.12em",
+      fontFamily:isDark?"'Orbitron',monospace":"'Manrope',-apple-system,sans-serif",
+      fontSize:"clamp(8px,0.65vw,10px)",
+      fontWeight:800,
+      letterSpacing:isDark?"0.12em":"0.1em",
       padding:"2px 9px",
-      color, background:`${color}${dim?"10":"22"}`,
-      border:`1px solid ${color}${dim?"33":"88"}`,
-      clipPath:"polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%)",
+      color,
+      background:`${color}${dim?"10":"16"}`,
+      border:`1px solid ${color}${dim?"25":"44"}`,
+      clipPath:isDark?"polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%)":"none",
+      borderRadius:isDark?0:"999px",
       whiteSpace:"nowrap",
-      boxShadow: glow ? `0 0 10px ${color}99, 0 0 20px ${color}44, inset 0 0 8px ${color}22` : `0 0 4px ${color}44`,
-      animation: glow ? "hudPulse 1.8s ease-in-out infinite" : "none",
-      textShadow: glow ? `0 0 8px ${color}` : "none",
+      textTransform:"uppercase",
+      boxShadow: glow&&isDark ? `0 0 10px ${color}99, 0 0 20px ${color}44, inset 0 0 8px ${color}22` : "none",
+      animation: glow&&isDark ? "hudPulse 1.8s ease-in-out infinite" : "none",
+      textShadow: glow&&isDark ? `0 0 8px ${color}` : "none",
     }}>{label}</span>
   );
 }
@@ -147,13 +175,20 @@ function Clock({D}){
   return(
     <div style={{textAlign:"right",lineHeight:1.1,position:"relative",padding:"3px 10px 3px 12px",
       borderLeft:`1px solid ${D.line}`,borderRight:`1px solid ${D.line}`}}>
-      <div style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(18px,1.5vw,24px)",fontWeight:900,
-        color:D.text,letterSpacing:"0.08em",
+      <div style={{
+        fontFamily:D.dark?"'Orbitron',monospace":"'JetBrains Mono',ui-monospace,monospace",
+        fontSize:"clamp(18px,1.5vw,24px)",
+        fontWeight:D.dark?900:600,
+        color:D.text,
+        letterSpacing:D.dark?"0.08em":"-0.02em",
+        fontVariantNumeric:"tabular-nums",
         textShadow:D.dark?`0 0 12px ${D.cyan}66`:"none"}}>
         {n.toLocaleTimeString("pt-PT")}
       </div>
-      <div style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(9px,0.7vw,11px)",color:D.muted,
-        textTransform:"uppercase",letterSpacing:"0.18em",fontWeight:600,marginTop:"1px"}}>
+      <div style={{
+        fontFamily:D.dark?"'Orbitron',monospace":"'Manrope',-apple-system,sans-serif",
+        fontSize:"clamp(9px,0.7vw,11px)",color:D.muted,
+        textTransform:"uppercase",letterSpacing:"0.14em",fontWeight:600,marginTop:"1px"}}>
         {n.toLocaleDateString("pt-PT",{weekday:"short",day:"2-digit",month:"short"})}
       </div>
     </div>
@@ -216,12 +251,13 @@ function BoardCell({m, D, forceCategory=null}){
       position:"relative",
       display:"flex",flexDirection:"column",
       padding:"6px 8px 4px",
-      background:cardBg,
-      border:`1px solid ${borderCol}`,
+      background:dark?cardBg:"#FFFFFF",
+      border:dark?`1px solid ${borderCol}`:`1px solid rgba(13,13,15,0.06)`,
       borderTop:`3px solid ${topBorder}`,
-      boxShadow:cardShadow,
+      boxShadow:dark?cardShadow:"0 1px 1px rgba(13,13,15,0.06), 0 2px 4px rgba(13,13,15,0.04)",
       overflow:"hidden",
-      clipPath:"polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px))",
+      borderRadius:dark?0:"12px",
+      clipPath:dark?"polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px))":"none",
     }}>
       {/* scan sweep */}
       <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0,
@@ -236,19 +272,30 @@ function BoardCell({m, D, forceCategory=null}){
         <div style={{display:"flex",alignItems:"center",gap:4,minWidth:0,overflow:"hidden"}}>
           <span style={{width:6,height:6,borderRadius:"50%",flexShrink:0,
             background:run?"#22C55E":paused?"#F59E0B":accent,
-            boxShadow:run?`0 0 6px #22C55E`:paused?`0 0 5px rgba(245,158,11,0.5)`:`0 0 5px rgba(${rgb},0.5)`,
+            boxShadow:run?(dark?`0 0 6px #22C55E`:"0 0 0 3px rgba(22,163,74,0.18)"):paused?`0 0 5px rgba(245,158,11,0.5)`:`0 0 5px rgba(${rgb},0.5)`,
             animation:run?"blink 1.2s ease-in-out infinite":"none"}}/>
-          <span style={{fontFamily:"'Orbitron',monospace",fontSize:"9px",
-            fontWeight:700,letterSpacing:"0.1em",flexShrink:0,
+          <span style={{
+            fontFamily:dark?"'Orbitron',monospace":"'Manrope',-apple-system,sans-serif",
+            fontSize:"9px",fontWeight:700,
+            letterSpacing:dark?"0.1em":"0.12em",flexShrink:0,
+            padding:dark?"0":"2px 7px 2px 4px",
+            borderRadius:dark?0:"999px",
+            background:dark?"transparent":run?"rgba(22,163,74,0.1)":paused?"rgba(217,119,6,0.1)":"rgba(142,142,147,0.1)",
+            border:dark?"none":run?"1px solid rgba(22,163,74,0.2)":paused?"1px solid rgba(217,119,6,0.2)":"1px solid rgba(142,142,147,0.15)",
             color:run?"#22C55E":paused?"#F59E0B":accent}}>
             {run?"RUN":paused?"PAUSED":"IDLE"}
           </span>
           {/* categoria tag */}
           <span style={{
-            fontFamily:"'Orbitron',monospace",fontSize:"8px",fontWeight:700,letterSpacing:"0.08em",
-            padding:"1px 5px",color:accent,
-            background:`rgba(${rgb},0.15)`,border:`1px solid rgba(${rgb},0.4)`,
-            clipPath:"polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)",
+            fontFamily:dark?"'Orbitron',monospace":"'Manrope',-apple-system,sans-serif",
+            fontSize:"8px",fontWeight:700,
+            letterSpacing:dark?"0.08em":"0.1em",
+            padding:"2px 7px",color:accent,
+            background:`rgba(${rgb},0.12)`,
+            border:`1px solid rgba(${rgb},${dark?0.4:0.2})`,
+            clipPath:dark?"polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)":"none",
+            borderRadius:dark?0:"999px",
+            textTransform:"uppercase",
             whiteSpace:"nowrap",flexShrink:0,overflow:"hidden",maxWidth:"90px",textOverflow:"ellipsis"
           }}>{cat.label}</span>
           {rLabel&&<span style={{
@@ -267,10 +314,12 @@ function BoardCell({m, D, forceCategory=null}){
           }}>⚑</span>}
         </div>
         {/* timer — sempre visível, tamanho adapta */}
-        <div style={{fontFamily:"'Orbitron',monospace",
-          fontSize:"clamp(11px,1.1vw,16px)",fontWeight:900,flexShrink:0,
-          color:timerCol,letterSpacing:"0.04em",
-          textShadow:run?`0 0 8px rgba(34,197,94,0.5)`:"none"}}>
+        <div style={{
+          fontFamily:dark?"'Orbitron',monospace":"'JetBrains Mono',ui-monospace,monospace",
+          fontSize:"clamp(11px,1.1vw,16px)",fontWeight:dark?900:600,flexShrink:0,
+          color:timerCol,letterSpacing:dark?"0.04em":"-0.02em",
+          fontVariantNumeric:"tabular-nums",
+          textShadow:run&&dark?`0 0 8px rgba(34,197,94,0.5)`:"none"}}>
           {fmtHMS(elapsed)}
         </div>
       </div>
@@ -278,9 +327,11 @@ function BoardCell({m, D, forceCategory=null}){
       {/* ── LINHA 2: série + modelo + baia ── sempre visível */}
       <div style={{zIndex:1,flexShrink:0,marginTop:3}}>
         <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"nowrap"}}>
-          <div style={{fontFamily:"'Orbitron',monospace",
-            fontSize:"clamp(11px,1.1vw,15px)",fontWeight:900,
-            color:dark?"#f0f0f0":"#0d0e1a",letterSpacing:"0.06em",lineHeight:1.15,
+          <div style={{
+            fontFamily:dark?"'Orbitron',monospace":"'JetBrains Mono',ui-monospace,monospace",
+            fontSize:"clamp(11px,1.1vw,15px)",fontWeight:dark?900:600,
+            color:dark?"#f0f0f0":"#0D0D0F",
+            letterSpacing:dark?"0.06em":"-0.02em",lineHeight:1.15,
             textShadow:"none",
             whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",flex:1,minWidth:0}}>
             {m.serie||"—"}
@@ -296,9 +347,12 @@ function BoardCell({m, D, forceCategory=null}){
             </span>
           )}
         </div>
-        <div style={{fontFamily:"'Rajdhani',system-ui,sans-serif",fontSize:"11px",fontWeight:500,
-          color:dark?"rgba(140,140,140,0.75)":"rgba(30,30,60,0.55)",
-          marginTop:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",letterSpacing:"0.02em"}}>
+        <div style={{
+          fontFamily:dark?"'Rajdhani',system-ui,sans-serif":"'Manrope',-apple-system,sans-serif",
+          fontSize:"11px",fontWeight:500,
+          color:dark?"rgba(140,140,140,0.75)":"#5C5C61",
+          marginTop:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
+          letterSpacing:dark?"0.02em":"0.01em"}}>
           {m.modelo||"—"}
         </div>
         {/* MOTIVO PAUSA — só aparece quando paused */}
@@ -485,13 +539,18 @@ function CalendarFila({items, D, concluidas=[]}){
         {days.map(d=>{
           const key=d.toISOString().slice(0,10), isToday=key===todayStr, ms=byDay[key]||[];
           return(
-            <div key={key} style={{background:D.card,border:`1.5px solid ${isToday?D.blue+"66":D.line}`,
-              borderRadius:"10px",overflow:"hidden"}}>
+            <div key={key} style={{
+              background:D.dark?D.card:"#FFFFFF",
+              border:D.dark?`1.5px solid ${isToday?D.blue+"66":D.line}`:`1px solid ${isToday?"rgba(200,16,46,0.2)":"rgba(13,13,15,0.06)"}`,
+              borderRadius:D.dark?"10px":"12px",
+              overflow:"hidden",
+              boxShadow:D.dark?"none":"0 1px 2px rgba(13,13,15,0.04), 0 4px 12px -4px rgba(13,13,15,0.06)"}}>
               {/* Header dia */}
-              <div style={{padding:"7px 10px",background:isToday?`rgba(200,16,46,0.12)`:D.sub+"33",
-                borderBottom:`1px solid ${isToday?"rgba(200,16,46,0.4)":D.line}`,
+              <div style={{padding:"7px 10px",
+                background:isToday?(D.dark?`rgba(200,16,46,0.12)`:"rgba(200,16,46,0.06)"):(D.dark?D.sub+"33":"rgba(13,13,15,0.03)"),
+                borderBottom:`1px solid ${isToday?(D.dark?"rgba(200,16,46,0.4)":"rgba(200,16,46,0.2)"):(D.dark?D.line:"rgba(13,13,15,0.06)")}`,
                 display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-                <span style={{fontFamily:"'Orbitron',monospace",fontSize:"10px",fontWeight:900,
+                <span style={{fontFamily:D.dark?"'Orbitron',monospace":"'JetBrains Mono',monospace",fontSize:"10px",fontWeight:900,
                   color:isToday?"#c8102e":D.muted,letterSpacing:"0.1em",textTransform:"uppercase"}}>
                   {d.toLocaleDateString("pt-PT",{weekday:"short"})}
                 </span>
@@ -515,14 +574,20 @@ function CalendarFila({items, D, concluidas=[]}){
                       :<div style={{fontFamily:"monospace",fontSize:"9px",color:D.sub,textAlign:"center",paddingTop:"8px"}}>—</div>;
                   })()
                   :ms.map((m,i)=>(
-                    <div key={i} style={{padding:"6px 8px",background:D.cardB,
+                    <div key={i} style={{padding:"6px 8px",
+                      background:D.dark?D.cardB:"rgba(255,255,255,0.7)",
+                      border:D.dark?"none":"1px solid rgba(13,13,15,0.06)",
                       borderLeft:`3px solid ${m.prioridade?D.yellow:D.blue}`,
-                      borderRadius:"5px",overflow:"hidden"}}>
+                      borderRadius:"5px",overflow:"hidden",
+                      boxShadow:D.dark?"none":"0 1px 2px rgba(13,13,15,0.04)"}}>
                       {/* NS grande */}
-                      <div style={{fontFamily:"'Orbitron',monospace",fontSize:"11px",fontWeight:900,
-                        color:D.blue,letterSpacing:"0.05em",
+                      <div style={{
+                        fontFamily:D.dark?"'Orbitron',monospace":"'JetBrains Mono',ui-monospace,monospace",
+                        fontSize:"11px",fontWeight:D.dark?900:600,
+                        color:D.dark?D.blue:"#0D0D0F",
+                        letterSpacing:D.dark?"0.05em":"-0.01em",
                         whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
-                        textShadow:`0 0 8px ${D.blue}44`}}>
+                        textShadow:D.dark?`0 0 8px ${D.blue}44`:"none"}}>
                         {m.serie||"—"}
                       </div>
                       {/* Modelo */}
@@ -534,8 +599,12 @@ function CalendarFila({items, D, concluidas=[]}){
                       {m.previsao_fim&&(
                         <div style={{display:"flex",alignItems:"center",gap:3,marginTop:"3px"}}>
                           <span style={{fontFamily:"monospace",fontSize:"7px",color:"#22C55E",opacity:0.8}}>✓</span>
-                          <span style={{fontFamily:"'Orbitron',monospace",fontSize:"8px",fontWeight:700,
-                            color:"#22C55E",letterSpacing:"0.06em"}}>
+                          <span style={{
+                            fontFamily:D.dark?"'Orbitron',monospace":"'JetBrains Mono',monospace",
+                            fontSize:"8px",fontWeight:D.dark?700:600,
+                            color:"#16A34A",
+                            letterSpacing:D.dark?"0.06em":"0.02em",
+                            fontVariantNumeric:"tabular-nums"}}>
                             {new Date(m.previsao_fim+"T12:00:00").toLocaleDateString("pt-PT",{day:"2-digit",month:"2-digit"})}
                           </span>
                         </div>
@@ -681,32 +750,35 @@ function RowItem({m, idx, D, forceCategory=null, showTimer=true, showDate=false}
       position:"relative",overflow:"hidden",
       display:"flex",alignItems:"center",gap:12,
       padding:"8px 12px",
-      background:isCon
-        ?`rgba(34,197,94,${dark?0.07:0.05})`
-        :run
-        ?`linear-gradient(90deg,rgba(34,197,94,${dark?0.08:0.06}),rgba(${rgb},${dark?0.06:0.04}))`
-        :`rgba(${rgb},${dark?0.06:0.04})`,
-      border:`1px solid rgba(${rgb},${dark?0.25:0.3})`,
+      background:dark
+        ?(isCon?`rgba(34,197,94,0.07)`:run?`linear-gradient(90deg,rgba(34,197,94,0.08),rgba(${rgb},0.06))`:`rgba(${rgb},0.06)`)
+        :"#FFFFFF",
+      border:dark?`1px solid rgba(${rgb},0.25)`:`1px solid rgba(13,13,15,0.06)`,
       borderLeft:`3px solid ${run?"#22C55E":accent}`,
-      boxShadow:(run||catKey==="prio")?`0 0 8px rgba(${rgb},${dark?0.18:0.1})`:`0 1px 3px rgba(0,0,0,${dark?0.4:0.06})`,
-      borderRadius:"4px",
-      clipPath:"polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px))",
+      boxShadow:dark?((run||catKey==="prio")?`0 0 8px rgba(${rgb},0.18)`:`0 1px 3px rgba(0,0,0,0.4)`):"0 1px 1px rgba(13,13,15,0.05), 0 2px 4px rgba(13,13,15,0.04)",
+      borderRadius:dark?"4px":"10px",
+      clipPath:dark?"polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px))":"none",
     }}>
       <span style={{fontFamily:"'Orbitron',monospace",fontSize:"9px",fontWeight:700,
         color:`rgba(${rgb},${dark?0.5:0.6})`,flexShrink:0,width:"16px",textAlign:"right"}}>
         {String(idx+1).padStart(2,"0")}
       </span>
       <div style={{flex:1,minWidth:0}}>
-        <div style={{fontFamily:"'Orbitron',monospace",
-          fontSize:"clamp(12px,1.05vw,14px)",fontWeight:900,
-          color:dark?"#f0f0f0":"#0d0e1a",letterSpacing:"0.06em",
+        <div style={{
+          fontFamily:dark?"'Orbitron',monospace":"'JetBrains Mono',ui-monospace,monospace",
+          fontSize:"clamp(12px,1.05vw,14px)",fontWeight:dark?900:600,
+          color:dark?"#f0f0f0":"#0D0D0F",
+          letterSpacing:dark?"0.06em":"-0.015em",
           textShadow:"none",
           whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
           {m.serie||"—"}
         </div>
-        <div style={{fontFamily:"'Rajdhani',system-ui,sans-serif",fontSize:"11px",fontWeight:500,
-          color:dark?"rgba(140,140,140,0.75)":"rgba(30,30,60,0.55)",
-          marginTop:"1px",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",letterSpacing:"0.02em"}}>
+        <div style={{
+          fontFamily:dark?"'Rajdhani',system-ui,sans-serif":"'Manrope',-apple-system,sans-serif",
+          fontSize:"11px",fontWeight:500,
+          color:dark?"rgba(140,140,140,0.75)":"#8E8E93",
+          marginTop:"1px",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
+          letterSpacing:dark?"0.02em":"0.01em"}}>
           {m.modelo||"—"}
         </div>
         {tasks.length>0&&(
@@ -791,12 +863,16 @@ function SecLabel({label,D}){
   return(
     <div style={{display:"flex",alignItems:"center",gap:"8px",
       padding:"8px 0 4px",flexShrink:0}}>
-      <span style={{fontFamily:"'Rajdhani',system-ui,sans-serif",
-        fontSize:"clamp(11px,0.82vw,13px)",fontWeight:700,letterSpacing:"0.12em",
-        color:D.dark?D.muted:'rgba(30,30,60,0.5)',textTransform:"uppercase"}}>
+      <div style={{width:D.dark?"2px":"2px",height:"12px",borderRadius:"2px",flexShrink:0,
+        background:D.dark?`linear-gradient(180deg,${D.pink},${D.muted})`:"#C8102E",opacity:D.dark?1:0.6}}/>
+      <span style={{
+        fontFamily:D.dark?"'Rajdhani',system-ui,sans-serif":"'Manrope',-apple-system,sans-serif",
+        fontSize:"clamp(11px,0.82vw,13px)",fontWeight:700,
+        letterSpacing:D.dark?"0.12em":"0.14em",
+        color:D.dark?D.muted:"#8E8E93",textTransform:"uppercase"}}>
         {label}
       </span>
-      <div style={{flex:1,height:"1px",background:`linear-gradient(90deg,${D.muted}44,transparent)`}}/>
+      <div style={{flex:1,height:"1px",background:D.dark?`linear-gradient(90deg,${D.muted}44,transparent)`:"rgba(13,13,15,0.07)"}}/>
     </div>
   );
 }
@@ -805,43 +881,54 @@ function SecLabel({label,D}){
 //  SLIDE HEADER
 // ─────────────────────────────────────────────────────────────────────────────
 function SlideHead({title,icon,color,pulse,count,D}){
+  const dark = D.dark;
   const iconSize = "clamp(18px,1.6vw,26px)";
   return(
     <div style={{position:"relative",display:"flex",alignItems:"center",gap:"14px",
       flexShrink:0,marginBottom:"14px",
-      padding:"6px 12px 6px 14px",
-      background:`linear-gradient(90deg, ${color}14 0%, transparent 80%)`,
-      borderLeft:`3px solid ${color}`,
-      clipPath:"polygon(0 0, calc(100% - 14px) 0, 100% 100%, 0 100%)",
+      padding:dark?"6px 12px 6px 14px":"4px 0 10px 0",
+      background:dark?`linear-gradient(90deg, ${color}14 0%, transparent 80%)`:"transparent",
+      borderLeft:dark?`3px solid ${color}`:"none",
+      borderBottom:dark?"none":`1px solid rgba(13,13,15,0.07)`,
+      clipPath:dark?"polygon(0 0, calc(100% - 14px) 0, 100% 100%, 0 100%)":"none",
     }}>
-      {/* bracket esquerdo */}
-      <span style={{position:"absolute",left:0,top:0,bottom:0,width:"3px",background:color,
-        boxShadow:`0 0 12px ${color}cc`}}/>
+      {/* bracket esquerdo — dark only */}
+      {dark&&<span style={{position:"absolute",left:0,top:0,bottom:0,width:"3px",background:color,
+        boxShadow:`0 0 12px ${color}cc`}}/>}
 
-      <div style={{color,filter:`drop-shadow(0 0 8px ${color})`,display:"flex",alignItems:"center"}}>
+      <div style={{color,filter:dark?`drop-shadow(0 0 8px ${color})`:"none",display:"flex",alignItems:"center"}}>
         {React.cloneElement(icon,{size:undefined,style:{width:iconSize,height:iconSize}})}
       </div>
 
-      <span style={{fontFamily:"'Orbitron',monospace",
-        fontSize:"clamp(18px,1.7vw,28px)",fontWeight:900,
-        letterSpacing:"0.18em",
-        color:"#e8e8e8",
-        textShadow:`0 0 14px rgba(210,210,210,0.6), 0 0 4px ${color}aa`,
+      <span style={{
+        fontFamily:dark?"'Orbitron',monospace":"'Bricolage Grotesque',-apple-system,sans-serif",
+        fontSize:"clamp(18px,1.7vw,28px)",fontWeight:dark?900:700,
+        letterSpacing:dark?"0.18em":"-0.03em",
+        color:dark?"#e8e8e8":"#0D0D0F",
+        textShadow:dark?`0 0 14px rgba(210,210,210,0.6), 0 0 4px ${color}aa`:"none",
         textTransform:"uppercase"}}>
         {title}
       </span>
 
       {count!==undefined&&(
         <div style={{display:"flex",alignItems:"baseline",gap:"6px",
-          padding:"3px 12px",
-          background:`${color}1a`,border:`1px solid ${color}55`,
-          clipPath:"polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)"}}>
-          <span style={{fontFamily:"'Orbitron',monospace",
-            fontSize:"clamp(9px,0.75vw,11px)",fontWeight:700,letterSpacing:"0.18em",
-            color:`${color}cc`}}>×</span>
-          <span style={{fontFamily:"'Orbitron',monospace",
-            fontSize:"clamp(20px,1.9vw,30px)",fontWeight:900,color,
-            textShadow:`0 0 12px ${color}88`,letterSpacing:"0.04em",lineHeight:1}}>
+          padding:dark?"3px 12px":"3px 10px",
+          background:dark?`${color}1a`:"rgba(13,13,15,0.06)",
+          border:dark?`1px solid ${color}55`:`1px solid rgba(13,13,15,0.10)`,
+          clipPath:dark?"polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)":"none",
+          borderRadius:dark?0:"8px"}}>
+          <span style={{
+            fontFamily:dark?"'Orbitron',monospace":"'JetBrains Mono',monospace",
+            fontSize:"clamp(9px,0.75vw,11px)",fontWeight:700,
+            letterSpacing:dark?"0.18em":"0.02em",
+            color:dark?`${color}cc`:"#5C5C61"}}>×</span>
+          <span style={{
+            fontFamily:dark?"'Orbitron',monospace":"'Bricolage Grotesque',sans-serif",
+            fontSize:"clamp(20px,1.9vw,30px)",fontWeight:dark?900:700,
+            color:dark?color:"#0D0D0F",
+            textShadow:dark?`0 0 12px ${color}88`:"none",
+            letterSpacing:dark?"0.04em":"-0.04em",lineHeight:1,
+            fontVariantNumeric:"tabular-nums"}}>
             {String(count).padStart(2,"0")}
           </span>
         </div>
@@ -849,21 +936,24 @@ function SlideHead({title,icon,color,pulse,count,D}){
 
       {pulse&&(
         <div style={{width:"10px",height:"10px",background:color,
-          boxShadow:`0 0 12px ${color}, 0 0 24px ${color}88`,
-          clipPath:"polygon(50% 0, 100% 50%, 50% 100%, 0 50%)",
+          boxShadow:dark?`0 0 12px ${color}, 0 0 24px ${color}88`:"none",
+          borderRadius:dark?0:"50%",
+          clipPath:dark?"polygon(50% 0, 100% 50%, 50% 100%, 0 50%)":"none",
           animation:"blink 1s ease-in-out infinite"}}/>
       )}
 
       <div style={{flex:1,height:"1px",
-        background:`linear-gradient(90deg,${color}66,${color}11,transparent)`}}/>
+        background:dark?`linear-gradient(90deg,${color}66,${color}11,transparent)`:"rgba(13,13,15,0.07)"}}/>
 
-      {/* tick marks na barra */}
-      <div style={{display:"flex",gap:"4px",alignItems:"center"}}>
-        {[0,1,2,3].map(i=>(
-          <div key={i} style={{width:"2px",height:i%2===0?"10px":"6px",
-            background:`${color}${i===0?"":i===1?"aa":i===2?"77":"44"}`}}/>
-        ))}
-      </div>
+      {/* tick marks — dark only */}
+      {dark&&(
+        <div style={{display:"flex",gap:"4px",alignItems:"center"}}>
+          {[0,1,2,3].map(i=>(
+            <div key={i} style={{width:"2px",height:i%2===0?"10px":"6px",
+              background:`${color}${i===0?"":i===1?"aa":i===2?"77":"44"}`}}/>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -872,11 +962,17 @@ function Empty({label,D}){
   return(
     <div style={{position:"relative",display:"flex",alignItems:"center",justifyContent:"center",flex:1,
       flexDirection:"column",gap:"10px",
-      color:D.dark?D.muted:'rgba(30,30,60,0.45)',fontFamily:"'Orbitron',monospace",
-      fontSize:"clamp(13px,1.1vw,17px)",fontWeight:600,letterSpacing:"0.22em",
+      color:D.dark?D.muted:"#8E8E93",
+      fontFamily:D.dark?"'Orbitron',monospace":"'Manrope',-apple-system,sans-serif",
+      fontSize:"clamp(13px,1.1vw,17px)",fontWeight:600,
+      letterSpacing:D.dark?"0.22em":"0.05em",
       textTransform:"uppercase"}}>
-      <div style={{position:"relative",padding:"24px 40px",border:`1px dashed ${D.muted}55`}}>
-        <HudCorners color={D.muted} size={14} thickness={2} inset={-2} opacity={0.5}/>
+      <div style={{position:"relative",padding:"24px 40px",
+        border:D.dark?`1px dashed ${D.muted}55`:"1px solid rgba(13,13,15,0.08)",
+        borderRadius:D.dark?0:"14px",
+        background:D.dark?"transparent":"rgba(255,255,255,0.6)",
+        boxShadow:D.dark?"none":"0 2px 8px rgba(13,13,15,0.04)"}}>
+        {D.dark&&<HudCorners color={D.muted} size={14} thickness={2} inset={-2} opacity={0.5} D={D}/>}
         {label}
       </div>
     </div>
@@ -924,24 +1020,46 @@ function GanttChart({ machines, D }) {
 
   const BAR_H = 32, GAP = 6;
 
+  const isDarkMode = D.dark;
   const barBg = b => {
-    if (b.overrun)            return "linear-gradient(90deg,#c0c0c0,#c8102e)";
-    if (b.isActive && b.run)  return "linear-gradient(90deg,#c8102e,#ff2240,#e0e0e0)";
-    if (b.isActive)           return "linear-gradient(90deg,rgba(200,16,46,0.85),rgba(210,210,210,0.7))";
-    if (b.isPrio)             return "linear-gradient(90deg,rgba(210,210,210,0.6),rgba(200,16,46,0.4))";
-    return "rgba(210,210,210,0.18)";
+    if (isDarkMode) {
+      if (b.overrun)            return "linear-gradient(90deg,#c0c0c0,#c8102e)";
+      if (b.isActive && b.run)  return "linear-gradient(90deg,#c8102e,#ff2240,#e0e0e0)";
+      if (b.isActive)           return "linear-gradient(90deg,rgba(200,16,46,0.85),rgba(210,210,210,0.7))";
+      if (b.isPrio)             return "linear-gradient(90deg,rgba(210,210,210,0.6),rgba(200,16,46,0.4))";
+      return "rgba(210,210,210,0.18)";
+    } else {
+      if (b.overrun)            return "linear-gradient(90deg,#B08D2E,#C8102E)";
+      if (b.isActive && b.run)  return "linear-gradient(90deg,#C8102E,#ff2240)";
+      if (b.isActive)           return "linear-gradient(90deg,#C8102E,rgba(200,16,46,0.75))";
+      if (b.isPrio)             return "linear-gradient(90deg,#B08D2E,rgba(176,141,46,0.6))";
+      return "rgba(13,13,15,0.08)";
+    }
   };
   const barBorder = b => {
-    if (b.overrun)    return "1.5px solid rgba(220,220,220,0.9)";
-    if (b.isActive)   return "1.5px solid rgba(210,210,210,0.7)";
-    if (b.isPrio)     return "1.5px dashed rgba(210,210,210,0.6)";
-    return "1px solid rgba(210,210,210,0.25)";
+    if (isDarkMode) {
+      if (b.overrun)    return "1.5px solid rgba(220,220,220,0.9)";
+      if (b.isActive)   return "1.5px solid rgba(210,210,210,0.7)";
+      if (b.isPrio)     return "1.5px dashed rgba(210,210,210,0.6)";
+      return "1px solid rgba(210,210,210,0.25)";
+    } else {
+      if (b.overrun)    return "1.5px solid rgba(200,16,46,0.7)";
+      if (b.isActive)   return "1.5px solid rgba(200,16,46,0.5)";
+      if (b.isPrio)     return "1.5px dashed rgba(176,141,46,0.6)";
+      return "1px solid rgba(13,13,15,0.12)";
+    }
   };
   const barShadow = b => {
-    if (b.overrun)           return "0 2px 12px rgba(210,210,210,0.4)";
-    if (b.isActive && b.run) return "0 2px 16px rgba(200,16,46,0.5),0 0 8px rgba(210,210,210,0.25)";
-    if (b.isActive)          return "0 2px 8px rgba(200,16,46,0.3)";
-    return "none";
+    if (isDarkMode) {
+      if (b.overrun)           return "0 2px 12px rgba(210,210,210,0.4)";
+      if (b.isActive && b.run) return "0 2px 16px rgba(200,16,46,0.5),0 0 8px rgba(210,210,210,0.25)";
+      if (b.isActive)          return "0 2px 8px rgba(200,16,46,0.3)";
+      return "none";
+    } else {
+      if (b.isActive && b.run) return "0 1px 6px rgba(200,16,46,0.3)";
+      if (b.isActive)          return "0 1px 4px rgba(200,16,46,0.2)";
+      return "0 1px 2px rgba(13,13,15,0.06)";
+    }
   };
 
   if (blocks.length === 0) {
@@ -964,7 +1082,7 @@ function GanttChart({ machines, D }) {
       <div style={{
         position:"relative",height:"36px",flexShrink:0,
         borderBottom:`1px solid rgba(210,210,210,0.2)`,
-        background:D.dark?"rgba(14,5,9,0.97)":"rgba(245,246,250,0.98)",
+        background:D.dark?"rgba(14,5,9,0.97)":"rgba(255,255,255,0.95)",
         zIndex:5,
       }}>
         {ruleDays.map((d,i) => {
@@ -984,10 +1102,11 @@ function GanttChart({ machines, D }) {
                 textAlign:"center",
                 fontFamily:"'Orbitron',monospace",
                 fontSize: isToday ? "11px" : "9px",
-                fontWeight: isToday ? 900 : 600,
-                color: isToday ? "#e8e8e8" : isWE ? "rgba(210,210,210,0.4)" : "rgba(180,180,180,0.6)",
-                letterSpacing:"0.04em",
-                textShadow: isToday ? "0 0 10px rgba(220,220,220,0.8)" : "none",
+                fontFamily: D.dark?"'Orbitron',monospace":"'JetBrains Mono',ui-monospace,monospace",
+                fontWeight: isToday ? (D.dark?900:700) : 600,
+                color: isToday ? (D.dark?"#e8e8e8":"#C8102E") : isWE ? (D.dark?"rgba(210,210,210,0.4)":"#B8B8BD") : (D.dark?"rgba(180,180,180,0.6)":"#8E8E93"),
+                letterSpacing: D.dark?"0.04em":"0.01em",
+                textShadow: isToday&&D.dark ? "0 0 10px rgba(220,220,220,0.8)" : "none",
                 whiteSpace:"nowrap",
                 lineHeight:1.2,
               }}>
@@ -1000,7 +1119,8 @@ function GanttChart({ machines, D }) {
                 <div style={{
                   position:"absolute",bottom:0,left:"50%",transform:"translateX(-50%)",
                   width:"100%",height:"3px",
-                  background:"linear-gradient(90deg,transparent,#ff2240,#e0e0e0,transparent)",
+                  background:D.dark?"linear-gradient(90deg,transparent,#ff2240,#e0e0e0,transparent)":"#C8102E",
+                opacity:D.dark?1:0.6,
                 }}/>
               )}
             </div>
@@ -1010,8 +1130,8 @@ function GanttChart({ machines, D }) {
         {nowPct>=0 && nowPct<=100 && (
           <div style={{
             position:"absolute",top:0,bottom:0,left:nowPct+"%",
-            width:"2px",background:"linear-gradient(180deg,#ff2240,#d0d0d0)",
-            boxShadow:"0 0 12px rgba(255,34,64,0.8),0 0 20px rgba(210,210,210,0.25)",
+            width:"2px",background:D.dark?"linear-gradient(180deg,#ff2240,#d0d0d0)":"#C8102E",
+            boxShadow:D.dark?"0 0 12px rgba(255,34,64,0.8),0 0 20px rgba(210,210,210,0.25)":"0 0 4px rgba(200,16,46,0.4)",
             zIndex:10,pointerEvents:"none",
           }}/>
         )}
@@ -1037,8 +1157,13 @@ function GanttChart({ machines, D }) {
                   boxShadow:overload?`0 0 6px rgba(239,68,68,0.4)`:isToday?`0 0 4px ${D.blue}55`:"none",
                   position:"relative",overflow:"hidden"}}>
                   {count>0&&!isWE&&<div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center"}}>
-                    <span style={{fontFamily:"'Orbitron',monospace",fontSize:"7px",fontWeight:900,
-                      color:overload?"#FCA5A5":warn?"#FCD34D":D.muted,letterSpacing:"0.05em"}}>{count}</span>
+                    <span style={{
+                      fontFamily:D.dark?"'Orbitron',monospace":"'JetBrains Mono',monospace",
+                      fontSize:"7px",fontWeight:D.dark?900:600,
+                      color:overload?"#FCA5A5":warn?"#FCD34D":(D.dark?D.muted:"#8E8E93"),
+                      letterSpacing:D.dark?"0.05em":"0.02em"}}>
+                      {count}
+                    </span>
                   </div>}
                 </div>
               </div>
@@ -1071,8 +1196,11 @@ function GanttChart({ machines, D }) {
           {/* Linha HOJE */}
           {nowPct>=0&&nowPct<=100&&(
             <div style={{position:"absolute",top:0,bottom:0,left:nowPct+"%",
-              width:"2px",background:"linear-gradient(180deg,#ff2240,#d0d0d0)",
-              boxShadow:"0 0 10px rgba(255,34,64,0.6)",zIndex:5}}/>
+              width:"2px",
+              background:D.dark?"linear-gradient(180deg,#ff2240,#d0d0d0)":"#C8102E",
+              boxShadow:D.dark?"0 0 10px rgba(255,34,64,0.6)":"0 0 4px rgba(200,16,46,0.3)",
+              opacity:D.dark?1:0.7,
+              zIndex:5}}/>
           )}
         </div>
 
@@ -1113,9 +1241,13 @@ function GanttChart({ machines, D }) {
                 {!isThin&&b.run&&<span style={{flexShrink:0,width:6,height:6,borderRadius:"50%",
                   background:"#22C55E",boxShadow:"0 0 8px #22C55E",
                   animation:"blink 1s ease-in-out infinite"}}/>}
-                {!isThin&&<span style={{fontFamily:"'Orbitron',monospace",fontSize:"11px",fontWeight:900,
-                  color:"#fff",letterSpacing:"0.06em",whiteSpace:"nowrap",flexShrink:0,
-                  textShadow:"0 1px 5px rgba(0,0,0,0.9)"}}>
+                {!isThin&&<span style={{
+                  fontFamily:D.dark?"'Orbitron',monospace":"'JetBrains Mono',ui-monospace,monospace",
+                  fontSize:"11px",fontWeight:D.dark?900:600,
+                  color:"#fff",letterSpacing:D.dark?"0.06em":"-0.01em",
+                  whiteSpace:"nowrap",flexShrink:0,
+                  textShadow:"0 1px 5px rgba(0,0,0,0.7)",
+                  fontVariantNumeric:"tabular-nums"}}>
                   {b.m.serie||"—"}
                 </span>}
                 {!isThin&&width>12&&<span style={{fontFamily:"monospace",fontSize:"8px",
@@ -1150,9 +1282,14 @@ function GanttChart({ machines, D }) {
                     {b.run&&<span style={{width:5,height:5,borderRadius:"50%",flexShrink:0,
                       background:"#22C55E",boxShadow:"0 0 6px #22C55E",
                       animation:"blink 1s ease-in-out infinite"}}/>}
-                    <span style={{fontFamily:"'Orbitron',monospace",fontSize:"10px",fontWeight:900,
-                      color:"#e8e8e8",letterSpacing:"0.05em",whiteSpace:"nowrap",
-                      textShadow:"0 0 8px rgba(0,0,0,0.9), 0 0 14px rgba(0,0,0,0.8)"}}>
+                    <span style={{
+                      fontFamily:D.dark?"'Orbitron',monospace":"'JetBrains Mono',ui-monospace,monospace",
+                      fontSize:"10px",fontWeight:D.dark?900:600,
+                      color:D.dark?"#e8e8e8":"#0D0D0F",
+                      letterSpacing:D.dark?"0.05em":"-0.01em",
+                      whiteSpace:"nowrap",
+                      textShadow:D.dark?"0 0 8px rgba(0,0,0,0.9), 0 0 14px rgba(0,0,0,0.8)":"none",
+                      fontVariantNumeric:"tabular-nums"}}>
                       {b.m.serie||"—"}
                     </span>
                     {b.isPrio&&<span style={{fontSize:"8px",color:"#F59E0B",fontWeight:700}}>⚑</span>}
@@ -1517,8 +1654,8 @@ export default function AoVivo(){
   ];
 
   return(
-    <div style={{width:"100vw",height:"100vh",background:D.bg,color:D.text,
-      display:"flex",flexDirection:"column",fontFamily:"'Rajdhani',system-ui,sans-serif",
+    <div style={{width:"100vw",height:"100vh",background:D.dark?D.bg:`radial-gradient(1200px 600px at 85% -10%, rgba(200,16,46,0.04), transparent 60%), radial-gradient(900px 500px at 10% 110%, rgba(176,141,46,0.04), transparent 60%), #F2F2F4`,color:D.text,
+      display:"flex",flexDirection:"column",fontFamily:D.dark?"'Rajdhani',system-ui,sans-serif":"'Manrope',-apple-system,sans-serif",
       overflow:"hidden",position:"fixed",top:0,left:0}}>
       {/* ARMOR BACKGROUND — scanlines + hex grid + vignette */}
       {dark&&<div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:0,
@@ -1527,7 +1664,7 @@ export default function AoVivo(){
         backgroundImage:`linear-gradient(60deg,transparent 49%,rgba(210,210,210,0.015) 49%,rgba(210,210,210,0.015) 51%,transparent 51%),linear-gradient(-60deg,transparent 49%,rgba(210,210,210,0.015) 49%,rgba(210,210,210,0.015) 51%,transparent 51%)`,
         backgroundSize:"40px 70px"}}/>}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&family=Bricolage+Grotesque:opsz,wght@12..96,300;400;500;600;700;800&display=swap');
         @keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
         @keyframes hudScan{0%{background-position:200% 0}100%{background-position:-200% 0}}
         @keyframes hudPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.08);opacity:0.7}}
@@ -1542,34 +1679,48 @@ export default function AoVivo(){
 
       {/* ── TOPBAR ── */}
       <div style={{position:"relative",display:"flex",alignItems:"center",gap:"14px",
-        padding:"10px clamp(14px,1.5vw,24px)",background:D.surface,
-        borderBottom:`1px solid ${D.hudLine}`,flexShrink:0,flexWrap:"wrap",
-        boxShadow:`0 0 20px ${D.hudGlow}, inset 0 -1px 0 ${D.hudLine}`}}>
+        padding:"10px clamp(14px,1.5vw,24px)",
+        background:D.dark?D.surface:"rgba(255,255,255,0.82)",
+        backdropFilter:D.dark?"none":"saturate(180%) blur(20px)",
+        WebkitBackdropFilter:D.dark?"none":"saturate(180%) blur(20px)",
+        borderBottom:`1px solid ${D.dark?D.hudLine:"rgba(13,13,15,0.07)"}`,
+        flexShrink:0,flexWrap:"wrap",
+        boxShadow:D.dark?`0 0 20px ${D.hudGlow}, inset 0 -1px 0 ${D.hudLine}`:"0 1px 2px rgba(13,13,15,0.04), 0 8px 24px -8px rgba(13,13,15,0.06)"}}>
         {/* faixa discreta na borda inferior */}
         <div style={{position:"absolute",bottom:-1,left:0,right:0,height:"1px",
-          background:`linear-gradient(90deg, transparent, ${D.pink}88, transparent)`,
-          opacity:0.6}}/>
+          background:D.dark?`linear-gradient(90deg, transparent, ${D.pink}88, transparent)`:`linear-gradient(90deg, transparent, rgba(200,16,46,0.3), transparent)`,
+          opacity:D.dark?0.6:0.4}}/>
 
         {/* Logo */}
         <div style={{display:"flex",alignItems:"center",gap:"12px",flexShrink:0,
           paddingRight:"14px",borderRight:`1px solid ${D.line}`}}>
           <div style={{position:"relative",padding:"3px"}}>
-            <HudCorners color={D.pink} size={8} thickness={1.5} inset={-1} opacity={0.9}/>
+            <HudCorners color={D.pink} size={8} thickness={1.5} inset={-1} opacity={0.9} D={D}/>
             <img src="https://media.base44.com/images/public/6a045759b56878764b71db11/b4686dedd_Gemini_Generated_Image_6i6wgc6i6wgc6i6w1.png"
               alt="" style={{width:"clamp(34px,2.7vw,42px)",height:"clamp(34px,2.7vw,42px)",
-              objectFit:"contain",filter:`drop-shadow(0 0 8px ${D.pink}aa)`,display:"block"}}/>
+              objectFit:"contain",filter:D.dark?`drop-shadow(0 0 8px ${D.pink}aa)`:"none",display:"block"}}/>
           </div>
           <div>
-            <div style={{fontFamily:"'Orbitron',monospace",
-              fontSize:"clamp(13px,1.1vw,17px)",fontWeight:900,
-              letterSpacing:"0.22em",color:D.pink,
-              textShadow:`0 0 12px ${D.pink}77`,lineHeight:1}}>
+            <div style={{
+              fontFamily:D.dark?"'Orbitron',monospace":"'Bricolage Grotesque',-apple-system,sans-serif",
+              fontSize:"clamp(13px,1.1vw,17px)",fontWeight:D.dark?900:700,
+              letterSpacing:D.dark?"0.22em":"-0.02em",
+              color:D.dark?D.pink:"#0D0D0F",
+              textShadow:D.dark?`0 0 12px ${D.pink}77`:"none",
+              lineHeight:1}}>
               WATCHER
             </div>
             <div style={{display:"flex",alignItems:"center",gap:"6px",marginTop:"3px"}}>
-              <span style={{fontFamily:"'Orbitron',monospace",
+              <span style={{
+                fontFamily:D.dark?"'Orbitron',monospace":"'Manrope',-apple-system,sans-serif",
                 fontSize:"clamp(9px,0.7vw,11px)",fontWeight:700,
-                letterSpacing:"0.2em",color:D.cyan}}>AO VIVO</span>
+                letterSpacing:D.dark?"0.2em":"0.12em",
+                color:D.dark?D.cyan:"#16A34A",
+                padding:D.dark?"0":"2px 8px",
+                background:D.dark?"transparent":"rgba(22,163,74,0.1)",
+                border:D.dark?"none":"1px solid rgba(22,163,74,0.2)",
+                borderRadius:D.dark?0:"999px",
+                textTransform:"uppercase"}}>AO VIVO</span>
               <span style={{fontFamily:"monospace",fontSize:"clamp(8px,0.6vw,10px)",
                 color:D.muted,letterSpacing:"0.1em"}}>· SYNC 30s</span>
             </div>
@@ -1583,14 +1734,20 @@ export default function AoVivo(){
             return(
               <button key={s.id} onClick={()=>goTo(i)} style={{
                 position:"relative",
-                fontFamily:"'Orbitron',monospace",
-                fontSize:"clamp(9px,0.78vw,12px)",letterSpacing:"0.14em",fontWeight:active?900:600,
-                padding:"6px 14px",cursor:"pointer",border:"none",
-                background:active ? D.pink : D.sub,
-                color:active?"#fff":D.muted,
+                fontFamily:D.dark?"'Orbitron',monospace":"'Manrope',-apple-system,sans-serif",
+                fontSize:"clamp(9px,0.78vw,12px)",
+                letterSpacing:D.dark?"0.14em":"-0.005em",
+                fontWeight:active?700:600,
+                padding:D.dark?"6px 14px":"8px 15px",
+                cursor:"pointer",border:"none",
+                background:active
+                  ? (D.dark?D.pink:"#0D0D0F")
+                  : (D.dark?D.sub:"transparent"),
+                color:active?"#fff":D.dark?D.muted:"#5C5C61",
                 textShadow:"none",
-                boxShadow:active?`0 2px 8px rgba(200,16,46,0.35)`:"none",
-                clipPath:"polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)",
+                boxShadow:active&&D.dark?`0 2px 8px rgba(200,16,46,0.35)`:active?"0 1px 2px rgba(13,13,15,0.2), 0 4px 8px -2px rgba(13,13,15,0.12)":"none",
+                clipPath:D.dark?"polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)":"none",
+                borderRadius:D.dark?0:"999px",
                 transition:"all 0.2s",
               }}>
                 <span style={{opacity:active?1:0.55,marginRight:"6px",fontSize:"0.85em"}}>
@@ -1608,17 +1765,24 @@ export default function AoVivo(){
 
           <div style={{display:"flex",gap:"2px"}}>
             <button onClick={prev} title="Anterior" style={{
-              background:D.sub,border:`1px solid ${D.line}`,
+              background:D.dark?D.sub:"rgba(255,255,255,0.9)",
+              border:`1px solid ${D.dark?D.line:"rgba(13,13,15,0.08)"}`,
               padding:"6px 8px",cursor:"pointer",color:D.text,display:"flex",
-              clipPath:"polygon(4px 0, 100% 0, 100% 100%, 0 100%, 0 4px)"}}>
+              borderRadius:D.dark?0:"10px",
+              boxShadow:D.dark?"none":"0 1px 2px rgba(13,13,15,0.06)",
+              clipPath:D.dark?"polygon(4px 0, 100% 0, 100% 100%, 0 100%, 0 4px)":"none"}}>
               <ChevronLeft size={14}/>
             </button>
             <button onClick={()=>sPaused(p=>!p)} title={paused?"Retomar":"Pausar"} style={{
-              background:paused?`${D.yellow}26`:D.sub,
-              border:`1px solid ${paused?D.yellow:D.line}`,
+              background:paused
+                ?(dark?`${D.yellow}26`:"rgba(217,119,6,0.08)")
+                :(dark?D.sub:"rgba(255,255,255,0.9)"),
+              border:`1px solid ${paused?D.yellow:(dark?D.line:"rgba(13,13,15,0.08)")}`,
               padding:"6px 12px",cursor:"pointer",
               color:paused?D.yellow:D.text,
-              display:"flex",alignItems:"center",gap:"5px"}}>
+              display:"flex",alignItems:"center",gap:"5px",
+              borderRadius:dark?0:"10px",
+              boxShadow:dark?"none":"0 1px 2px rgba(13,13,15,0.06)"}}>
               {paused?<Play size={12}/>:<Pause size={12}/>}
               <span style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(9px,0.7vw,11px)",
                 fontWeight:700,letterSpacing:"0.12em"}}>
@@ -1635,32 +1799,42 @@ export default function AoVivo(){
 
           <button onClick={()=>{sDark(d=>!d);localStorage.setItem("theme",dark?"light":"dark");}}
             title="Tema" style={{
-            background:D.sub,border:`1px solid ${D.line}`,
-            padding:"6px 8px",cursor:"pointer",color:D.text,display:"flex"}}>
+            background:dark?D.sub:"rgba(255,255,255,0.9)",
+            border:`1px solid ${dark?D.line:"rgba(13,13,15,0.08)"}`,
+            padding:"6px 8px",cursor:"pointer",color:D.text,display:"flex",
+            borderRadius:dark?0:"10px",
+            boxShadow:dark?"none":"0 1px 2px rgba(13,13,15,0.06)"}}>
             {dark?<Sun size={13}/>:<Moon size={13}/>}
           </button>
 
           {/* LIVE indicator táctico */}
           <div style={{display:"flex",alignItems:"center",gap:"6px",
             padding:"4px 10px",
-            background:`${D.green}1a`,border:`1px solid ${D.green}55`,
-            clipPath:"polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)"}}>
+            background:dark?`${D.green}1a`:"rgba(22,163,74,0.08)",
+            border:dark?`1px solid ${D.green}55`:"1px solid rgba(22,163,74,0.18)",
+            borderRadius:dark?0:"999px",
+            clipPath:dark?"polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)":"none"}}>
             <div style={{width:"7px",height:"7px",background:D.green,
-              boxShadow:`0 0 8px ${D.green}, 0 0 16px ${D.green}77`,
+              boxShadow:dark?`0 0 8px ${D.green}, 0 0 16px ${D.green}77`:"0 0 0 3px rgba(22,163,74,0.18)",
               clipPath:"polygon(50% 0, 100% 50%, 50% 100%, 0 50%)",
               animation:"blink 1.2s ease-in-out infinite"}}/>
-            <span style={{fontFamily:"'Orbitron',monospace",
+            <span style={{
+              fontFamily:dark?"'Orbitron',monospace":"'Manrope',-apple-system,sans-serif",
               fontSize:"clamp(9px,0.7vw,11px)",fontWeight:800,
-              color:D.green,letterSpacing:"0.18em"}}>LIVE</span>
+              color:D.green,
+              letterSpacing:dark?"0.18em":"0.12em",
+              textTransform:"uppercase"}}>LIVE</span>
           </div>
         </div>
       </div>
 
       {/* PROGRESS BAR */}
-      <div style={{position:"relative",height:"3px",background:"rgba(210,210,210,0.08)",flexShrink:0,overflow:"hidden"}}>
+      <div style={{position:"relative",height:dark?"3px":"2px",background:dark?"rgba(210,210,210,0.08)":"rgba(13,13,15,0.06)",flexShrink:0,overflow:"hidden"}}>
         <div style={{height:"100%",width:`${prog*100}%`,
-          background:`linear-gradient(90deg,#c8102e,#ff2240,#c0c0c0,#e8e8e8)`,
-          boxShadow:`0 0 10px rgba(255,34,64,0.7), 0 0 20px rgba(210,210,210,0.25)`,
+          background:dark
+            ?`linear-gradient(90deg,#c8102e,#ff2240,#c0c0c0,#e8e8e8)`
+            :`linear-gradient(90deg,#C8102E,#B08D2E)`,
+          boxShadow:dark?`0 0 10px rgba(255,34,64,0.7), 0 0 20px rgba(210,210,210,0.25)`:"none",
           transition:"width 0.1s linear"}}/>
         {/* riscas tácticas */}
         <div style={{position:"absolute",inset:0,pointerEvents:"none",
@@ -1668,9 +1842,10 @@ export default function AoVivo(){
       </div>
 
       {/* KPI BAR */}
-      <div style={{display:"flex",gap:"1px",
-        background:`linear-gradient(180deg, ${D.scanBg}, transparent)`,
-        borderBottom:`1px solid ${D.line}`,flexShrink:0}}>
+      <div style={{display:"flex",gap:D.dark?"1px":"0",
+        background:D.dark?`linear-gradient(180deg, ${D.scanBg}, transparent)`:"rgba(255,255,255,0.6)",
+        borderBottom:`1px solid ${D.dark?D.line:"rgba(13,13,15,0.06)"}`,
+        flexShrink:0}}>
         {kpis.map((k,i)=>{
           const isActive = (i===0&&SLIDES[slide].id==="andamento") ||
                            (i===1&&SLIDES[slide].id==="prioritarias") ||
@@ -1681,7 +1856,9 @@ export default function AoVivo(){
                            (i===6&&SLIDES[slide].id==="concluidas");
           return(
             <div key={k.l} style={{position:"relative",flex:1,
-              background:isActive?`linear-gradient(180deg, ${k.c}14, ${D.surface})`:D.surface,
+              background:isActive
+                ?(dark?`linear-gradient(180deg, ${k.c}14, ${D.surface})`:`rgba(${k.c.replace("#","").match(/.{2}/g).map(h=>parseInt(h,16)).join(",")},0.04)`)
+                :(dark?D.surface:"#FFFFFF"),
               padding:"clamp(7px,0.8vw,11px) clamp(6px,0.8vw,10px)",
               display:"flex",flexDirection:"column",alignItems:"center",gap:"3px",
               borderTop:isActive?`2px solid ${k.c}`:`2px solid transparent`,
@@ -1689,16 +1866,20 @@ export default function AoVivo(){
               {/* tick lateral */}
               <div style={{position:"absolute",top:"50%",left:0,transform:"translateY(-50%)",
                 width:"2px",height:"60%",background:k.c,opacity:0.25}}/>
-              <div style={{fontFamily:"'Orbitron',monospace",
-                fontSize:"clamp(20px,1.95vw,32px)",fontWeight:900,color:k.c,
-                textShadow:isActive?`0 0 14px ${k.c}aa`:`0 0 8px ${k.c}44`,
-                letterSpacing:"0.04em",lineHeight:1}}>
+              <div style={{
+                fontFamily:D.dark?"'Orbitron',monospace":"'Bricolage Grotesque',-apple-system,sans-serif",
+                fontSize:"clamp(20px,1.95vw,32px)",fontWeight:700,
+                color:isActive?k.c:(D.dark?k.c:"#0D0D0F"),
+                textShadow:D.dark?(isActive?`0 0 14px ${k.c}aa`:`0 0 8px ${k.c}44`):"none",
+                letterSpacing:D.dark?"0.04em":"-0.04em",lineHeight:1,
+                fontVariantNumeric:"tabular-nums"}}>
                 {loading?"··":String(k.v).padStart(2,"0")}
               </div>
-              <div style={{fontFamily:"'Rajdhani',system-ui,sans-serif",
-                fontSize:"clamp(9px,0.72vw,11px)",fontWeight:600,
+              <div style={{
+                fontFamily:D.dark?"'Rajdhani',system-ui,sans-serif":"'Manrope',-apple-system,sans-serif",
+                fontSize:"clamp(9px,0.72vw,11px)",fontWeight:D.dark?600:700,
                 color:isActive?k.c:D.muted,
-                letterSpacing:"0.08em",textAlign:"center",
+                letterSpacing:D.dark?"0.08em":"0.14em",textAlign:"center",
                 textTransform:"uppercase",
                 opacity:isActive?1:0.7}}>
                 {k.l}
@@ -1729,9 +1910,12 @@ export default function AoVivo(){
         <div style={{position:"absolute",top:"clamp(8px,0.9vw,14px)",right:"clamp(18px,1.8vw,28px)",
           zIndex:2,display:"flex",alignItems:"baseline",gap:"4px",
           fontFamily:"'Orbitron',monospace",pointerEvents:"none"}}>
-          <span style={{fontSize:"clamp(26px,2.4vw,38px)",fontWeight:900,
-            color:D.pink,textShadow:`0 0 14px ${D.pink}66`,
-            letterSpacing:"0.04em",lineHeight:1}}>
+          <span style={{
+            fontSize:"clamp(26px,2.4vw,38px)",fontWeight:900,
+            fontFamily:D.dark?"'Orbitron',monospace":"'Bricolage Grotesque',sans-serif",
+            color:D.dark?D.pink:"#C8102E",
+            textShadow:D.dark?`0 0 14px ${D.pink}66`:"none",
+            letterSpacing:D.dark?"0.04em":"-0.02em",lineHeight:1}}>
             {String(slide+1).padStart(2,"0")}
           </span>
           <span style={{fontSize:"clamp(11px,0.9vw,14px)",fontWeight:700,
@@ -1740,7 +1924,7 @@ export default function AoVivo(){
           </span>
         </div>
 
-        {/* Jordan mascote — com reticle táctico */}
+        {/* Jordan mascote */}
         <div style={{
           position:"absolute",bottom:0,right:0,
           width:"clamp(180px,22%,260px)",
@@ -1749,35 +1933,38 @@ export default function AoVivo(){
           zIndex:0,
           display:"flex",alignItems:"flex-end",justifyContent:"flex-end",
         }}>
-          {/* Reticle de targeting */}
-          <div style={{position:"absolute",inset:"6%",pointerEvents:"none",opacity:0.35}}>
-            <HudCorners color={D.pink} size={18} thickness={2} inset={0} opacity={0.85}/>
-            {/* Cruz central no reticle */}
-            <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",
-              width:"10px",height:"10px"}}>
-              <div style={{position:"absolute",top:0,bottom:0,left:"50%",width:"1px",
-                background:D.pink,boxShadow:`0 0 6px ${D.pink}`}}/>
-              <div style={{position:"absolute",left:0,right:0,top:"50%",height:"1px",
-                background:D.pink,boxShadow:`0 0 6px ${D.pink}`}}/>
+          {/* Reticle de targeting — dark only */}
+          {dark&&(
+            <div style={{position:"absolute",inset:"6%",pointerEvents:"none",opacity:0.35}}>
+              <HudCorners color={D.pink} size={18} thickness={2} inset={0} opacity={0.85} D={D}/>
+              <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",
+                width:"10px",height:"10px"}}>
+                <div style={{position:"absolute",top:0,bottom:0,left:"50%",width:"1px",
+                  background:D.pink,boxShadow:`0 0 6px ${D.pink}`}}/>
+                <div style={{position:"absolute",left:0,right:0,top:"50%",height:"1px",
+                  background:D.pink,boxShadow:`0 0 6px ${D.pink}`}}/>
+              </div>
             </div>
-          </div>
-          {/* Neon glow */}
-          <div style={{
-            position:"absolute",bottom:0,right:0,
-            width:"100%",height:"100%",
-            backgroundImage:`url(${JORDAN_URL})`,
-            backgroundSize:"contain",backgroundRepeat:"no-repeat",
-            backgroundPosition:"bottom right",
-            filter:"blur(22px) brightness(1.2) saturate(3) hue-rotate(-10deg)",
-            opacity:0.5,
-          }}/>
+          )}
+          {/* Neon glow — dark only */}
+          {dark&&(
+            <div style={{
+              position:"absolute",bottom:0,right:0,
+              width:"100%",height:"100%",
+              backgroundImage:`url(${JORDAN_URL})`,
+              backgroundSize:"contain",backgroundRepeat:"no-repeat",
+              backgroundPosition:"bottom right",
+              filter:"blur(22px) brightness(1.2) saturate(3) hue-rotate(-10deg)",
+              opacity:0.5,
+            }}/>
+          )}
           {/* Imagem principal */}
           <img src={JORDAN_URL} alt=""
             style={{
               position:"relative",width:"100%",
               objectFit:"contain",objectPosition:"bottom right",
-              opacity:0.82,
-              filter:`drop-shadow(0 0 24px ${D.pink}cc) drop-shadow(0 0 8px ${D.pink}aa) drop-shadow(0 0 4px rgba(255,255,255,0.2))`,
+              opacity:dark?0.82:0.12,
+              filter:dark?`drop-shadow(0 0 24px ${D.pink}cc) drop-shadow(0 0 8px ${D.pink}aa) drop-shadow(0 0 4px rgba(255,255,255,0.2))`:"none",
               display:"block",
             }}/>
         </div>
@@ -1785,11 +1972,17 @@ export default function AoVivo(){
         {loading
           ?<div style={{display:"flex",alignItems:"center",justifyContent:"center",flex:1,
             position:"relative",zIndex:1,flexDirection:"column",gap:"14px"}}>
-            <div style={{position:"relative",padding:"30px 60px"}}>
-              <HudCorners color={D.pink} size={16} thickness={2} inset={0} opacity={0.9}/>
-              <span style={{fontFamily:"'Orbitron',monospace",
-                fontSize:"clamp(14px,1.1vw,18px)",fontWeight:800,
-                color:D.pink,letterSpacing:"0.32em",textShadow:`0 0 10px ${D.pink}77`,
+            <div style={{position:"relative",padding:"30px 60px",
+              background:dark?"transparent":"rgba(255,255,255,0.8)",
+              borderRadius:dark?0:"16px",
+              border:dark?"none":"1px solid rgba(13,13,15,0.07)",
+              boxShadow:dark?"none":"0 8px 32px -8px rgba(13,13,15,0.08)"}}>
+              {dark&&<HudCorners color={D.pink} size={16} thickness={2} inset={0} opacity={0.9} D={D}/>}
+              <span style={{
+                fontFamily:dark?"'Orbitron',monospace":"'Bricolage Grotesque',sans-serif",
+                fontSize:"clamp(14px,1.1vw,18px)",fontWeight:dark?800:700,
+                color:D.pink,letterSpacing:dark?"0.32em":"0.05em",
+                textShadow:dark?`0 0 10px ${D.pink}77`:"none",
                 animation:"blink 1s ease-in-out infinite"}}>
                 A CARREGAR...
               </span>

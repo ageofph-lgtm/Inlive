@@ -1355,6 +1355,7 @@ function GanttChart({ machines, D }) {
 // ── SLIDES list ───────────────────────────────────────────────────────────────
 const SLIDES=[
   {id:"andamento",    label:"EM ANDAMENTO"},
+  {id:"standby",      label:"STANDBY"},
   {id:"prioritarias", label:"PRIORITÁRIAS"},
   {id:"timeline",     label:"TIMELINE"},
   {id:"proximas",     label:"PRÓXIMAS"},
@@ -1409,7 +1410,18 @@ export default function AoVivo(){
   const isRecon=m=>{const r=m.recondicao||{};return r.bronze===true||r.prata===true;};
   const r30=new Date(Date.now()-30*24*3600*1000);
 
-  const andamento    = machines.filter(m=>(m.timer_status==="running"||m.timer_status==="paused")&&!m.estado?.startsWith("concluida")&&m.estado!=="concluida");
+  // Em Andamento: só timers a CORRER (running)
+  const andamento    = machines.filter(m=>m.timer_status==="running"&&!m.estado?.startsWith("concluida")&&m.estado!=="concluida");
+  // Standby: timers PAUSADOS (paused) — fora de concluídas
+  const standby      = machines.filter(m=>m.timer_status==="paused"&&!m.estado?.startsWith("concluida")&&m.estado!=="concluida");
+
+  // Motivos de pausa — mesma ordem do Watcher
+  const PAUSA_COLS=[
+    { key:"aguarda_pecas",   label:"Aguarda Peças",          color:"#F59E0B", emoji:"📦" },
+    { key:"prioritaria",     label:"Pausa para Prioritária", color:"#EF4444", emoji:"🚨" },
+    { key:"aguarda_decisao", label:"Aguarda Decisão",        color:"#8B5CF6", emoji:"⏳" },
+    { key:"outros",          label:"Outros",                 color:"#6B7280", emoji:"💬" },
+  ];
   const prioritarias = machines.filter(m=>m.prioridade===true&&!m.estado?.startsWith("concluida")&&m.estado!=="concluida");
   const filaACP      = machines.filter(m=>m.estado==="a-fazer"&&m.tipo!=="nova");
   // PRÓXIMAS: tudo com previsao_inicio, que não esteja concluído
@@ -1447,6 +1459,111 @@ export default function AoVivo(){
       <div style={{display:"flex",flexDirection:"column",height:"100%",overflow:"hidden",flex:1}}>
         <SlideHead title="EM ANDAMENTO" icon={<Activity size={16}/>} color={D.blue} D={D} count={andamento.length}/>
         {andamento.length===0?<Empty label="Nenhuma máquina em produção" D={D}/>:<BigBoard items={andamento} D={D}/>}
+      </div>
+    ),
+    standby:(
+      <div style={{display:"flex",flexDirection:"column",height:"100%",overflow:"hidden",flex:1}}>
+        <SlideHead title="STANDBY" icon={<Pause size={16}/>} color={D.yellow} D={D} count={standby.length}/>
+        {standby.length===0
+          ?<Empty label="Sem máquinas em pausa" D={D}/>
+          :(()=>{
+            // Agrupar por motivo
+            const grupos=PAUSA_COLS.map(col=>({
+              ...col,
+              items:standby.filter(m=>(m.pausa_motivo||"outros")===col.key),
+            })).filter(g=>g.items.length>0);
+            // Colunas com items (máx 4 colunas, distribuídas igualmente)
+            return(
+              <div style={{flex:1,overflow:"hidden",display:"grid",
+                gridTemplateColumns:`repeat(${Math.min(grupos.length,4)},1fr)`,
+                gap:dark?"8px":"10px",padding:"10px 0"}}>
+                {grupos.map(col=>(
+                  <div key={col.key} style={{display:"flex",flexDirection:"column",gap:"6px",overflow:"hidden",minHeight:0}}>
+                    {/* Header da coluna */}
+                    <div style={{display:"flex",alignItems:"center",gap:"8px",
+                      padding:"7px 12px",flexShrink:0,
+                      background:dark?`rgba(${col.color==="F59E0B"?"245,158,11":col.color==="EF4444"?"239,68,68":col.color==="8B5CF6"?"139,92,246":"107,114,128"},0.08)`:
+                        `rgba(${col.color.replace("#","").match(/.{2}/g).map(h=>parseInt(h,16)).join(",")},0.06)`,
+                      border:`1px solid ${col.color}33`,
+                      borderRadius:dark?"6px":"10px"}}>
+                      <span style={{fontSize:"14px"}}>{col.emoji}</span>
+                      <span style={{fontFamily:dark?"'Orbitron',monospace":"'Manrope',sans-serif",
+                        fontSize:"10px",fontWeight:700,
+                        color:col.color,letterSpacing:dark?"0.1em":"0.05em",
+                        textTransform:"uppercase"}}>{col.label}</span>
+                      <span style={{marginLeft:"auto",fontFamily:"'Orbitron',monospace",
+                        fontSize:"14px",fontWeight:900,color:col.color}}>{col.items.length}</span>
+                    </div>
+                    {/* Cards da coluna */}
+                    <div style={{flex:1,overflow:"auto",display:"flex",flexDirection:"column",gap:"5px"}}>
+                      {col.items.map(m=>{
+                        const {accent,rgb}=getCat(m,dark);
+                        const acc=(m.timer_accumulated_seconds||0);
+                        const showAcc=acc>=MIN_TIMER_SECONDS;
+                        return(
+                          <div key={m.id} style={{
+                            padding:"10px 12px",
+                            background:dark?`rgba(${rgb},0.06)`:"rgba(255,255,255,0.7)",
+                            border:dark?`1px solid ${col.color}22`:`1px solid rgba(13,13,15,0.07)`,
+                            borderLeft:`3px solid ${col.color}`,
+                            borderRadius:dark?"6px":"10px",
+                            boxShadow:dark?"none":"0 1px 3px rgba(13,13,15,0.05)",
+                            display:"flex",flexDirection:"column",gap:"5px",
+                            flexShrink:0,
+                          }}>
+                            {/* NS + Modelo */}
+                            <div style={{display:"flex",alignItems:"baseline",gap:"8px",overflow:"hidden"}}>
+                              <span style={{
+                                fontFamily:dark?"'Orbitron',monospace":"'JetBrains Mono',monospace",
+                                fontSize:"14px",fontWeight:dark?900:700,
+                                color:dark?accent:"#0D0D0F",letterSpacing:dark?"0.05em":"-0.01em",
+                                whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
+                                textShadow:dark?`0 0 10px ${accent}55`:"none",
+                                fontVariantNumeric:"tabular-nums"}}>
+                                {m.serie||"—"}
+                              </span>
+                              <span style={{fontFamily:"monospace",fontSize:"9px",
+                                color:D.muted,whiteSpace:"nowrap",overflow:"hidden",
+                                textOverflow:"ellipsis",flexShrink:1}}>
+                                {m.modelo}
+                              </span>
+                            </div>
+                            {/* Técnico + Baia */}
+                            <div style={{display:"flex",alignItems:"center",gap:"6px",flexWrap:"wrap"}}>
+                              {m.tecnico&&(
+                                <span style={{fontFamily:"monospace",fontSize:"9px",
+                                  color:D.muted,letterSpacing:"0.04em",textTransform:"uppercase"}}>
+                                  👤 {m.tecnico}
+                                </span>
+                              )}
+                              {/* Timer acumulado */}
+                              {showAcc&&(
+                                <span style={{display:"flex",alignItems:"center",gap:"3px",
+                                  fontFamily:"'Orbitron',monospace",fontSize:"9px",fontWeight:700,
+                                  color:col.color,letterSpacing:"0.04em"}}>
+                                  ⏱ {(()=>{const s=Math.round(acc);const h=Math.floor(s/3600);const mm=Math.floor((s%3600)/60);return h>0?`${h}h${String(mm).padStart(2,"0")}m`:`${mm}min`;})()}
+                                </span>
+                              )}
+                            </div>
+                            {/* Prio badge */}
+                            {m.prioridade&&(
+                              <span style={{alignSelf:"flex-start",fontFamily:"monospace",
+                                fontSize:"7px",fontWeight:700,padding:"1px 5px",
+                                borderRadius:"4px",background:"rgba(245,158,11,0.15)",
+                                color:"#F59E0B",border:"1px solid rgba(245,158,11,0.3)"}}>
+                                ⚑ PRIORITÁRIA
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            );
+          })()
+        }
       </div>
     ),
     prioritarias:(
@@ -1643,6 +1760,7 @@ export default function AoVivo(){
   });
   const kpis=[
     {l:"ANDAMENTO",   v:andamento.length,            c:D.blue  },
+    {l:"STANDBY",     v:standby.length,              c:D.yellow},
     {l:"PRIORITÁRIAS",v:prioritarias.length,         c:D.yellow},
     {l:"TIMELINE",    v:machines.filter(m=>(m.estado?.startsWith("em-preparacao")||m.estado==="a-fazer")&&m.previsao_inicio).length, c:D.pink},
     {l:"PRÓXIMAS",    v:proximas.length,               c:D.muted },
@@ -1849,12 +1967,13 @@ export default function AoVivo(){
         flexShrink:0}}>
         {kpis.map((k,i)=>{
           const isActive = (i===0&&SLIDES[slide].id==="andamento") ||
-                           (i===1&&SLIDES[slide].id==="prioritarias") ||
-                           (i===2&&SLIDES[slide].id==="timeline") ||
-                           (i===3&&SLIDES[slide].id==="proximas") ||
-                           (i===4&&SLIDES[slide].id==="nts") ||
-                           (i===5&&SLIDES[slide].id==="recon") ||
-                           (i===6&&SLIDES[slide].id==="concluidas");
+                           (i===1&&SLIDES[slide].id==="standby") ||
+                           (i===2&&SLIDES[slide].id==="prioritarias") ||
+                           (i===3&&SLIDES[slide].id==="timeline") ||
+                           (i===4&&SLIDES[slide].id==="proximas") ||
+                           (i===5&&SLIDES[slide].id==="nts") ||
+                           (i===6&&SLIDES[slide].id==="recon") ||
+                           (i===7&&SLIDES[slide].id==="concluidas");
           return(
             <div key={k.l} style={{position:"relative",flex:1,
               background:isActive

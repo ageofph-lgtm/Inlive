@@ -370,7 +370,7 @@ function BoardCell({m, D, forceCategory=null}){
         </div>
         {/* MOTIVO PAUSA — só aparece quando paused */}
         {paused&&(()=>{
-          const motivo=getPausaMotivo(m);
+          const motivo=(m.timer_status||"").startsWith("paused:")?(m.timer_status.replace("paused:","").replace(/-/g,"_")):null;
           if(!motivo)return null;
           const labelMap={aguarda_pecas:"📦 PEÇAS",prioritaria:"🚨 PRIORITÁRIA",aguarda_decisao:"⏳ DECISÃO",outros:"💬 OUTROS"};
           const colorMap={aguarda_pecas:"#F59E0B",prioritaria:"#EF4444",aguarda_decisao:"#8B5CF6",outros:"#6B7280"};
@@ -1462,7 +1462,7 @@ export default function AoVivo(){
                 gridTemplateColumns:"repeat(4,1fr)",
                 gap:dark?"10px":"12px",padding:"8px 0"}}>
                 {PAUSA_COLS.map(col=>{
-                  const items=standby.filter(m=>(getPausaMotivo(m)||"outros")===col.key);
+                  const items=standby.filter(m=>((m.timer_status||"").replace("paused:","").replace(/-/g,"_")||"outros")===col.key);
                   const rgb=colFmt(col.color);
                   return(
                     <div key={col.key} style={{display:"flex",flexDirection:"column",gap:"8px",overflow:"hidden",minHeight:0}}>

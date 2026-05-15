@@ -1813,90 +1813,98 @@ export default function AoVivo(){
       </div>
     ),
     recon:(()=>{
-      // Separar: activas (run/paused), a iniciar (idle/a-fazer), concluídas
-      const reconActive = reconAnd.filter(m=>m.timer_status==="running"||m.timer_status?.startsWith("paused"));
-      const reconIdle   = reconAnd.filter(m=>!m.timer_status||m.timer_status==="idle"||(!m.timer_status?.startsWith("paused")&&m.timer_status!=="running"));
-      const reconQueue  = reconAF; // a-fazer
-      const reconWaiting= [...reconIdle,...reconQueue];
-      const nActive=reconActive.length, nWait=reconWaiting.length, nCon=reconCon.length;
-      const total=nActive+nWait+nCon;
+      const reconActive  = reconAnd.filter(m=>m.timer_status==="running"||m.timer_status?.startsWith("paused"));
+      const reconWaiting = [...reconAnd.filter(m=>!m.timer_status||m.timer_status==="idle"||(!m.timer_status?.startsWith("paused")&&m.timer_status!=="running")),...reconAF];
+      const nA=reconActive.length, nW=reconWaiting.length, nC=reconCon.length;
+      const total=nA+nW+nC;
 
-      // Escala para a faixa de activas
-      const scaleA = nActive<=2?1.0:nActive<=4?0.85:nActive<=6?0.72:0.60;
-      // Colunas para faixa de activas
-      const colsA = nActive===1?2:nActive<=4?2:nActive<=6?3:nActive<=9?4:5;
-      // Colunas para faixa de espera
-      const colsW = nWait<=5?5:nWait<=8?6:nWait<=12?7:8;
-      // Escala para faixa de espera
-      const scaleW = nWait<=8?0.80:nWait<=14?0.65:0.52;
+      // Colunas únicas para toda a grid (baseadas no total de activas+espera)
+      const allCards = nA+nW;
+      const cols = allCards<=4?4:allCards<=8?5:allCards<=12?6:allCards<=18?7:8;
+      const scale = allCards<=4?0.85:allCards<=8?0.72:allCards<=12?0.60:allCards<=18?0.52:0.44;
+
+      // Label centralizado grande
+      const SectionLabel = ({emoji, text, count, color}) => (
+        <div style={{
+          display:"flex",alignItems:"center",justifyContent:"center",
+          gap:8,padding:"6px 0 4px",flexShrink:0,
+        }}>
+          {emoji&&<span style={{fontSize:"14px"}}>{emoji}</span>}
+          <span style={{
+            fontFamily:"'Orbitron',monospace",
+            fontSize:"clamp(11px,1.1vw,15px)",fontWeight:800,
+            letterSpacing:"0.18em",color,textTransform:"uppercase",
+          }}>{text}</span>
+          <span style={{
+            fontFamily:"'Orbitron',monospace",
+            fontSize:"clamp(11px,1.1vw,14px)",fontWeight:900,
+            color,opacity:0.6,
+          }}>· {count}</span>
+        </div>
+      );
 
       return(
-        <div style={{display:"flex",flexDirection:"column",height:"100%",gap:6,overflow:"hidden",flex:1}}>
-          <SlideHead title="RECONDICIONAMENTO" icon={<Wrench size={16}/>} color={D.purple} D={D} count={nActive+nWait+nCon}/>
-          {total===0?<Empty label="Sem máquinas em recondicionamento" D={D}/>:
-            <>
-              {/* ── FAIXA 1: Em andamento (run/paused) ── */}
-              {nActive>0&&(
+        <div style={{display:"flex",flexDirection:"column",height:"100%",gap:0,overflow:"hidden",flex:1}}>
+          <SlideHead title="RECONDICIONAMENTO" icon={<Wrench size={16}/>} color={D.purple} D={D} count={nA+nW+nC}/>
+          {total===0?<Empty label="Sem máquinas em recondicionamento" D={D}/>:(
+            <div style={{flex:1,display:"flex",flexDirection:"column",gap:6,minHeight:0,overflow:"hidden"}}>
+
+              {/* ── SECÇÃO 1: EM ANDAMENTO ── */}
+              {nA>0&&(
                 <div style={{flexShrink:0}}>
-                  <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
-                    <span style={{width:5,height:5,borderRadius:"50%",background:"#22C55E",
-                      animation:"blink 1.2s ease-in-out infinite",
-                      boxShadow:"0 0 6px #22C55E"}}/>
-                    <span style={{fontFamily:"'Orbitron',monospace",fontSize:"8px",fontWeight:700,
-                      letterSpacing:"0.15em",color:dark?"rgba(34,197,94,0.8)":"#16a34a"}}>
-                      EM PROGRESSO · {nActive}
-                    </span>
-                  </div>
+                  <SectionLabel emoji="⚡" text="EM ANDAMENTO" count={nA}
+                    color={dark?"rgba(34,197,94,0.9)":"#16a34a"}/>
                   <div style={{
                     display:"grid",
-                    gridTemplateColumns:`repeat(${colsA},1fr)`,
+                    gridTemplateColumns:`repeat(${cols},1fr)`,
                     gap:6,
-                    height:`${Math.min(180, Math.max(100, nActive<=2?160:130))}px`,
+                    /* activas: altura fixa um pouco maior */
+                    height:`clamp(110px,${nA<=2?"22":"18"}vh,200px)`,
                   }}>
-                    {reconActive.map(m=>(
-                      <ReconCell key={m.id} m={m} D={D} scale={scaleA}/>
-                    ))}
+                    {reconActive.map(m=><ReconCell key={m.id} m={m} D={D} scale={scale}/>)}
                   </div>
                 </div>
               )}
 
-              {/* ── FAIXA 2: A iniciar (idle + a-fazer) ── */}
-              {nWait>0&&(
+              {/* divisor */}
+              {nA>0&&nW>0&&(
+                <div style={{height:"1px",flexShrink:0,
+                  background:dark?"rgba(167,139,250,0.15)":"rgba(124,58,237,0.1)",margin:"0 4px"}}/>
+              )}
+
+              {/* ── SECÇÃO 2: PRÓXIMAS ── */}
+              {nW>0&&(
                 <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0}}>
-                  <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4,flexShrink:0}}>
-                    <span style={{fontFamily:"'Orbitron',monospace",fontSize:"8px",fontWeight:700,
-                      letterSpacing:"0.15em",color:dark?"rgba(167,139,250,0.7)":"#7c3aed"}}>
-                      ⏳ A INICIAR · {nWait}
-                    </span>
-                  </div>
+                  <SectionLabel emoji="⏳" text="PRÓXIMAS" count={nW}
+                    color={dark?"rgba(167,139,250,0.85)":"#7c3aed"}/>
                   <div style={{
                     display:"grid",
-                    gridTemplateColumns:`repeat(${colsW},1fr)`,
-                    gridTemplateRows:`repeat(${Math.ceil(nWait/colsW)},1fr)`,
+                    gridTemplateColumns:`repeat(${cols},1fr)`,
+                    gridTemplateRows:`repeat(${Math.ceil(nW/cols)},1fr)`,
                     gap:5,
                     flex:1,
                     minHeight:0,
                     overflow:"hidden",
                   }}>
-                    {reconWaiting.map(m=>(
-                      <ReconCell key={m.id} m={m} D={D} scale={scaleW}/>
-                    ))}
+                    {reconWaiting.map(m=><ReconCell key={m.id} m={m} D={D} scale={scale}/>)}
                   </div>
                 </div>
               )}
 
-              {/* ── FAIXA 3: Concluídas (últimos 30 dias) — cards mini só NS+modelo ── */}
-              {nCon>0&&(
-                <div style={{flexShrink:0,borderTop:dark?"1px solid rgba(34,197,94,0.15)":"1px solid rgba(0,0,0,0.05)",paddingTop:5}}>
-                  <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
-                    <span style={{fontFamily:"'Orbitron',monospace",fontSize:"8px",fontWeight:700,
-                      letterSpacing:"0.15em",color:dark?"rgba(34,197,94,0.7)":"#16a34a"}}>
-                      ✓ CONCLUÍDAS (30 DIAS) · {nCon}
-                    </span>
-                  </div>
+              {/* divisor */}
+              {nC>0&&(
+                <div style={{height:"1px",flexShrink:0,
+                  background:dark?"rgba(34,197,94,0.15)":"rgba(22,163,74,0.1)",margin:"0 4px"}}/>
+              )}
+
+              {/* ── SECÇÃO 3: CONCLUÍDAS 30 DIAS — chips mini ── */}
+              {nC>0&&(
+                <div style={{flexShrink:0}}>
+                  <SectionLabel emoji="✓" text="CONCLUÍDAS — 30 DIAS" count={nC}
+                    color={dark?"rgba(34,197,94,0.75)":"#16a34a"}/>
                   <div style={{
                     display:"flex",flexWrap:"wrap",gap:4,
-                    overflowY:"auto",maxHeight:"72px",
+                    maxHeight:"58px",overflowY:"auto",padding:"0 2px 2px",
                   }}>
                     {reconCon.map(m=>{
                       const rr=m.recondicao||{};
@@ -1904,39 +1912,35 @@ export default function AoVivo(){
                       return(
                         <div key={m.id} style={{
                           display:"flex",alignItems:"center",gap:5,
-                          padding:"3px 8px 3px 6px",
+                          padding:"3px 8px 3px 6px",flexShrink:0,
                           background:dark?"rgba(34,197,94,0.06)":"rgba(34,197,94,0.05)",
                           border:dark?"1px solid rgba(34,197,94,0.2)":"1px solid rgba(34,197,94,0.15)",
                           borderLeft:"2px solid #22C55E",
                           borderRadius:dark?0:"6px",
                           clipPath:dark?"polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)":"none",
-                          flexShrink:0,
                         }}>
                           <div>
                             <div style={{fontFamily:"'Orbitron',monospace",fontSize:"9px",fontWeight:800,
-                              color:dark?"#a7f3d0":"#065f46",letterSpacing:"0.05em",
-                              whiteSpace:"nowrap"}}>
+                              color:dark?"#a7f3d0":"#065f46",letterSpacing:"0.05em",whiteSpace:"nowrap"}}>
                               {m.serie||"—"}
                             </div>
                             <div style={{fontFamily:"monospace",fontSize:"7px",
-                              color:dark?"rgba(134,239,172,0.55)":"#6b7280",
-                              whiteSpace:"nowrap",marginTop:1}}>
+                              color:dark?"rgba(134,239,172,0.55)":"#6b7280",whiteSpace:"nowrap",marginTop:1}}>
                               {m.modelo||"—"}
                             </div>
                           </div>
                           {rl&&<span style={{fontFamily:"'Orbitron',monospace",fontSize:"6px",fontWeight:800,
                             padding:"1px 4px",color:"#9b5cf6",
-                            background:"rgba(155,92,246,0.15)",
-                            border:"1px solid rgba(155,92,246,0.35)",flexShrink:0}}>
-                            {rl}
-                          </span>}
+                            background:"rgba(155,92,246,0.15)",border:"1px solid rgba(155,92,246,0.35)",
+                            flexShrink:0}}>{rl}</span>}
                         </div>
                       );
                     })}
                   </div>
                 </div>
               )}
-            </>}
+            </div>
+          )}
         </div>
       );
     })(),

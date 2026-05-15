@@ -478,6 +478,142 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
 //  REACTOR GAUGE
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ─────────────────────────────────────────────────────────────────────────────
+//  RECON CELL — card minimalista para máquinas IDLE no slide Recon
+//  Card activo/pausado → BoardCell normal
+//  Card IDLE → só NS + modelo + datas, sem timer, sem badges
+// ─────────────────────────────────────────────────────────────────────────────
+function ReconCell({m, D, scale=1}){
+  const dark   = D.dark;
+  const run    = m.timer_status==="running";
+  const paused = m.timer_status?.startsWith("paused");
+  const idle   = !run && !paused;
+
+  // Cards activos/pausados → BoardCell normal
+  if(!idle) return <BoardCell m={m} D={D} scale={scale}/>;
+
+  // IDLE — card minimalista
+  const recon   = m.recondicao||{};
+  const rLabel  = recon.prata?"PRATA":recon.bronze?"BRONZE":null;
+  const accent  = "#9b5cf6"; // roxo recon
+  const rgb     = "155,92,246";
+  const fmtDate = d => d ? new Date(d+"T12:00:00").toLocaleDateString("pt-PT",{day:"2-digit",month:"2-digit"}) : null;
+
+  return(
+    <div style={{
+      position:"relative",
+      display:"flex",flexDirection:"column",
+      padding:"8px 10px",
+      background:dark?"rgba(155,92,246,0.06)":"#FFFFFF",
+      border:`1px solid rgba(${rgb},0.25)`,
+      borderTop:`2px solid rgba(${rgb},0.5)`,
+      overflow:"hidden",
+      height:"100%",
+      boxSizing:"border-box",
+      clipPath:dark?"polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px))":"none",
+      borderRadius:dark?0:"10px",
+    }}>
+      {/* fundo subtil */}
+      <div style={{position:"absolute",inset:0,pointerEvents:"none",
+        background:`linear-gradient(135deg,rgba(${rgb},${dark?0.04:0.02}),transparent 60%)`}}/>
+
+      {/* topo: badge RECON/PRATA */}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",
+        zIndex:1,flexShrink:0,marginBottom:4}}>
+        <span style={{
+          fontFamily:"'Orbitron',monospace",fontSize:"7px",fontWeight:800,
+          letterSpacing:"0.12em",padding:"2px 7px",
+          color:accent,background:`rgba(${rgb},0.12)`,
+          border:`1px solid rgba(${rgb},0.35)`,
+          clipPath:dark?"polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)":"none",
+          borderRadius:dark?0:"999px",
+        }}>RECON</span>
+        {rLabel&&<span style={{
+          fontFamily:"'Orbitron',monospace",fontSize:"7px",fontWeight:800,
+          letterSpacing:"0.1em",padding:"2px 6px",
+          color:"#9b5cf6",background:"rgba(155,92,246,0.15)",
+          border:"1px solid rgba(155,92,246,0.4)",
+          clipPath:dark?"polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)":"none",
+          borderRadius:dark?0:"999px",
+        }}>{rLabel}</span>}
+      </div>
+
+      {/* NS — central, sem corte, sem ellipsis, ajusta tamanho */}
+      <div style={{flex:1,display:"flex",flexDirection:"column",
+        alignItems:"center",justifyContent:"center",
+        zIndex:1,gap:3,textAlign:"center",minHeight:0}}>
+        <div style={{
+          fontFamily:"'Orbitron',monospace",
+          fontSize:`clamp(${Math.round(8*scale)}px,${1.6*scale}vw,${Math.round(22*scale)}px)`,
+          fontWeight:900,
+          color:dark?"rgba(220,200,255,0.90)":"#2D1B5E",
+          letterSpacing:"0.06em",lineHeight:1.1,
+          wordBreak:"break-all",   // quebra o NS se necessário
+          textAlign:"center",
+          maxWidth:"100%",
+        }}>
+          {m.serie||"—"}
+        </div>
+        <div style={{
+          fontFamily:"'Rajdhani',system-ui,sans-serif",
+          fontSize:`clamp(${Math.round(7*scale)}px,${1*scale}vw,${Math.round(13*scale)}px)`,
+          fontWeight:600,
+          color:dark?"rgba(180,160,220,0.60)":"#7B6FA0",
+          letterSpacing:"0.03em",
+          whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
+          maxWidth:"100%",
+        }}>
+          {m.modelo||"—"}
+        </div>
+      </div>
+
+      {/* bottom: datas */}
+      {(m.previsao_inicio||m.previsao_fim)&&(
+        <div style={{
+          zIndex:1,flexShrink:0,
+          display:"flex",alignItems:"center",justifyContent:"center",
+          gap:8,paddingTop:5,
+          borderTop:`1px solid rgba(${rgb},0.12)`,
+        }}>
+          {m.previsao_inicio&&(
+            <div style={{display:"flex",alignItems:"center",gap:3}}>
+              <span style={{fontFamily:"'Orbitron',monospace",fontSize:"8px",
+                color:"#4D9FFF",opacity:0.7,fontWeight:700}}>▶</span>
+              <span style={{fontFamily:"'Orbitron',monospace",
+                fontSize:`clamp(${Math.round(8*scale)}px,${0.9*scale}vw,${Math.round(13*scale)}px)`,
+                fontWeight:800,color:"#4D9FFF",letterSpacing:"0.05em",
+                fontVariantNumeric:"tabular-nums"}}>
+                {fmtDate(m.previsao_inicio)}
+              </span>
+            </div>
+          )}
+          {m.previsao_inicio&&m.previsao_fim&&(
+            <span style={{color:dark?"rgba(255,255,255,0.12)":"rgba(0,0,0,0.1)",fontSize:"12px"}}>·</span>
+          )}
+          {m.previsao_fim&&(
+            <div style={{display:"flex",alignItems:"center",gap:3}}>
+              <span style={{fontFamily:"'Orbitron',monospace",fontSize:"8px",
+                color:"#22C55E",opacity:0.7,fontWeight:700}}>✓</span>
+              <span style={{fontFamily:"'Orbitron',monospace",
+                fontSize:`clamp(${Math.round(8*scale)}px,${0.9*scale}vw,${Math.round(13*scale)}px)`,
+                fontWeight:800,color:"#22C55E",letterSpacing:"0.05em",
+                fontVariantNumeric:"tabular-nums"}}>
+                {fmtDate(m.previsao_fim)}
+              </span>
+            </div>
+          )}
+          {!m.previsao_inicio&&!m.previsao_fim&&(
+            <span style={{fontFamily:"'Orbitron',monospace",fontSize:"7px",
+              color:dark?"rgba(155,92,246,0.35)":"rgba(155,92,246,0.3)",letterSpacing:"0.1em"}}>
+              — SEM DATA —
+            </span>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function BigBoard({items, D, isRecon=false}){
   const n = items.length;
   if(n===0) return null;
@@ -486,41 +622,23 @@ function BigBoard({items, D, isRecon=false}){
   const cols = n===1?2:n<=4?2:n<=6?3:n<=9?4:5;
   const rows = Math.ceil(n/cols);
 
-  // Escala de fonte: quanto mais cards, menor a fonte base
-  // n<=2→1.0, n<=4→0.85, n<=6→0.72, n<=9→0.60, n>9→0.50
-  const scale = n<=2?1.0:n<=4?0.85:n<=6?0.72:n<=9?0.60:0.50;
-
-  // Modo lista compacto para RECON com muitas máquinas (>8)
-  if(isRecon && n>8){
-    return(
-      <div style={{
-        display:"grid",
-        gridTemplateColumns:`repeat(${cols},1fr)`,
-        gridTemplateRows:`repeat(${rows}, 1fr)`,
-        gap:6,
-        flex:1,
-        minHeight:0,
-        overflow:"hidden",
-      }}>
-        {items.map(m=>(
-          <BoardCell key={m.id} m={m} D={D} isRecon={isRecon} scale={scale} compact={true}/>
-        ))}
-      </div>
-    );
-  }
+  // Escala de fonte proporcional ao nº de itens
+  const scale = n<=2?1.0:n<=4?0.88:n<=6?0.75:n<=9?0.62:n<=16?0.52:0.44;
 
   return(
     <div style={{
       display:"grid",
       gridTemplateColumns:`repeat(${cols},1fr)`,
       gridTemplateRows:`repeat(${rows}, 1fr)`,
-      gap:8,
+      gap:isRecon?6:8,
       flex:1,
       minHeight:0,
       overflow:"hidden",
     }}>
       {items.map(m=>(
-        <BoardCell key={m.id} m={m} D={D} isRecon={isRecon} scale={scale}/>
+        isRecon
+          ? <ReconCell key={m.id} m={m} D={D} scale={scale}/>
+          : <BoardCell key={m.id} m={m} D={D} scale={scale}/>
       ))}
     </div>
   );

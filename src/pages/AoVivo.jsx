@@ -23,6 +23,11 @@ async function callBridge(p) {
 const pad2 = n => String(n).padStart(2,"0");
 function fmtHMS(s){ if(!s&&s!==0)return"00:00:00"; return`${pad2(Math.floor(s/3600))}:${pad2(Math.floor((s%3600)/60))}:${pad2(s%60)}`; }
 function fmtDate(v){ if(!v)return"—"; return new Date(v).toLocaleDateString("pt-PT",{day:"2-digit",month:"short"}); }
+// Extrai motivo de pausa: "paused:aguarda_pecas" → "aguarda_pecas"; "paused" → "outros"
+const getPausaMotivo = (mx) => {
+  if (!mx?.timer_status?.startsWith("paused")) return null;
+  return mx.timer_status.split(":")[1] || "outros";
+};
 function getMondayUTC(){ const n=new Date(),d=n.getUTCDay(),b=d===0?6:d-1,m=new Date(n); m.setUTCDate(n.getUTCDate()-b); m.setUTCHours(0,0,0,0); return m; }
 function getFridayUTC(){ const f=new Date(getMondayUTC()); f.setUTCDate(f.getUTCDate()+4); f.setUTCHours(23,59,59,999); return f; }
 
@@ -218,7 +223,7 @@ function BoardCell({m, D, forceCategory=null}){
   const accent   = cat.accent;
   const rgb      = cat.rgb;
 
-  const timerCol  = run?"#22C55E":paused?"#F59E0B":"#6b7280";
+  const timerCol  = run?(dark?"#FF2D78":"#E91E8C"):paused?"#F59E0B":"#6b7280";
   const timerGlow = run?"rgba(34,197,94,0.5)":"none";
 
   const recon  = m.recondicao||{};
@@ -284,8 +289,8 @@ function BoardCell({m, D, forceCategory=null}){
         {/* estado dot + label */}
         <div style={{display:"flex",alignItems:"center",gap:4,minWidth:0,overflow:"hidden"}}>
           <span style={{width:6,height:6,borderRadius:"50%",flexShrink:0,
-            background:run?"#22C55E":paused?"#F59E0B":accent,
-            boxShadow:run?(dark?`0 0 6px #22C55E`:"0 0 0 3px rgba(22,163,74,0.18)"):paused?`0 0 5px rgba(245,158,11,0.5)`:`0 0 5px rgba(${rgb},0.5)`,
+            background:run?(dark?"#FF2D78":"#E91E8C"):paused?"#F59E0B":accent,
+            boxShadow:run?(dark?`0 0 8px #FF2D78,0 0 16px rgba(255,45,120,0.4)`:"0 0 0 3px rgba(233,30,140,0.2)"):paused?`0 0 5px rgba(245,158,11,0.5)`:`0 0 5px rgba(${rgb},0.5)`,
             animation:run?"blink 1.2s ease-in-out infinite":"none"}}/>
           <span style={{
             fontFamily:dark?"'Orbitron',monospace":"'Manrope',-apple-system,sans-serif",
@@ -293,9 +298,9 @@ function BoardCell({m, D, forceCategory=null}){
             letterSpacing:dark?"0.1em":"0.12em",flexShrink:0,
             padding:dark?"0":"2px 7px 2px 4px",
             borderRadius:dark?0:"999px",
-            background:dark?"transparent":run?"rgba(22,163,74,0.1)":paused?"rgba(217,119,6,0.1)":"rgba(142,142,147,0.1)",
-            border:dark?"none":run?"1px solid rgba(22,163,74,0.2)":paused?"1px solid rgba(217,119,6,0.2)":"1px solid rgba(142,142,147,0.15)",
-            color:run?"#22C55E":paused?"#F59E0B":accent}}>
+            background:dark?"transparent":run?"rgba(233,30,140,0.1)":paused?"rgba(217,119,6,0.1)":"rgba(142,142,147,0.1)",
+            border:dark?"none":run?"1px solid rgba(233,30,140,0.25)":paused?"1px solid rgba(217,119,6,0.2)":"1px solid rgba(142,142,147,0.15)",
+            color:run?(dark?"#FF2D78":"#E91E8C"):paused?"#F59E0B":accent}}>
             {run?"RUN":paused?"PAUSED":"IDLE"}
           </span>
           {/* categoria tag */}
@@ -1749,7 +1754,7 @@ export default function AoVivo(){
     try{return new Date(raw).toISOString().slice(0,10)===todayStr2;}catch{return false;}
   });
   const kpis=[
-    {l:"ANDAMENTO",   v:andamento.length,            c:D.blue  },
+    {l:"ANDAMENTO",   v:andamento.length,            c:dark?"#FF2D78":"#E91E8C"},
     {l:"STANDBY",     v:standby.length,              c:D.yellow},
     {l:"PRIORITÁRIAS",v:prioritarias.length,         c:D.yellow},
     {l:"TIMELINE",    v:machines.filter(m=>(m.estado?.startsWith("em-preparacao")||m.estado==="a-fazer")&&m.previsao_inicio).length, c:D.pink},

@@ -2079,7 +2079,7 @@ export default function AoVivo(){
             style={{
               position:"relative",width:"100%",
               objectFit:"contain",objectPosition:"bottom right",
-              opacity:dark?0.82:0.28,
+              opacity:dark?0.82:0.45,
               filter:dark?`drop-shadow(0 0 24px ${D.pink}cc) drop-shadow(0 0 8px ${D.pink}aa) drop-shadow(0 0 4px rgba(255,255,255,0.2))`:"drop-shadow(0 2px 8px rgba(0,0,0,0.18)) contrast(1.05)",
               display:"block",
             }}/>

@@ -210,278 +210,265 @@ function Clock({D}){
 // ─────────────────────────────────────────────────────────────────────────────
 
 function BoardCell({m, D, forceCategory=null}){
-  const dark     = D.dark;
-  const elapsed  = useLiveTimer(m);
-  const run      = m.timer_status==="running";
-  const paused   = m.timer_status?.startsWith("paused");
-  const tasks    = m.tarefas||[];
-  const done     = tasks.filter(t=>t.concluida).length;
-  const pct      = tasks.length?Math.round(done/tasks.length*100):0;
+  const dark    = D.dark;
+  const elapsed = useLiveTimer(m);
+  const run     = m.timer_status==="running";
+  const paused  = m.timer_status?.startsWith("paused");
+  const tasks   = m.tarefas||[];
+  const activeTask = tasks.find(t=>!t.concluida) || tasks[0];
 
-  const catKey   = forceCategory || getMachineCategory(m);
-  const cat      = CAT[catKey] || CAT.andamento;
-  const accent   = cat.accent;
-  const rgb      = cat.rgb;
+  const catKey  = forceCategory || getMachineCategory(m);
+  const cat     = CAT[catKey] || CAT.andamento;
+  const accent  = cat.accent;
+  const rgb     = cat.rgb;
 
   const timerCol  = run?"#22C55E":paused?"#F59E0B":"#6b7280";
-  const timerGlow = run?"rgba(34,197,94,0.5)":"none";
-
-  const recon  = m.recondicao||{};
-  const rLabel = recon.prata?"PRATA":recon.bronze?"BRONZE":null;
-
+  const recon     = m.recondicao||{};
+  const rLabel    = recon.prata?"PRATA":recon.bronze?"BRONZE":null;
   const topBorder = run?"#22C55E":accent;
-  const borderCol = run?"rgba(34,197,94,0.5)":`rgba(${rgb},${dark?0.35:0.5})`;
+  const borderCol = run?"rgba(34,197,94,0.55)":`rgba(${rgb},${dark?0.4:0.5})`;
 
   const cardBg = dark
-    ? (run
-      ? `linear-gradient(135deg,rgba(34,197,94,0.1) 0%,rgba(${rgb},0.06) 60%,rgba(10,4,8,0.98) 100%)`
-      : `linear-gradient(135deg,rgba(${rgb},0.12) 0%,rgba(8,4,6,0.98) 100%)`)
-    : (run
-      ? `linear-gradient(135deg,rgba(34,197,94,0.1) 0%,rgba(${rgb},0.06) 60%,rgba(255,255,255,0.97) 100%)`
-      : `linear-gradient(135deg,rgba(${rgb},0.08) 0%,rgba(255,255,255,0.97) 100%)`);
+    ?(run
+      ?`linear-gradient(160deg,rgba(34,197,94,0.08) 0%,rgba(${rgb},0.05) 50%,rgba(8,4,6,0.99) 100%)`
+      :`linear-gradient(160deg,rgba(${rgb},0.10) 0%,rgba(8,4,6,0.99) 100%)`)
+    :(run
+      ?`linear-gradient(160deg,rgba(34,197,94,0.07) 0%,rgba(${rgb},0.04) 50%,rgba(255,255,255,0.98) 100%)`
+      :`linear-gradient(160deg,rgba(${rgb},0.06) 0%,rgba(255,255,255,0.98) 100%)`);
 
-  // glow apenas em estados críticos: RUN, PRIORITÁRIA, ATRASADA
-  const isCritical = run || catKey==="prio" || catKey==="express";
+  const isCritical = run||catKey==="prio"||catKey==="express";
   const cardShadow = dark
-    ? (run
-      ? `0 0 14px rgba(34,197,94,0.18), 0 1px 4px rgba(0,0,0,0.6)`
-      : isCritical
-        ? `0 0 10px rgba(${rgb},0.18), 0 1px 4px rgba(0,0,0,0.6)`
-        : `0 1px 4px rgba(0,0,0,0.5)`)
-    : `0 1px 6px rgba(0,0,0,0.08)`;
+    ?(run
+      ?`0 0 20px rgba(34,197,94,0.2), 0 2px 8px rgba(0,0,0,0.7)`
+      :isCritical
+        ?`0 0 14px rgba(${rgb},0.2), 0 2px 6px rgba(0,0,0,0.6)`
+        :`0 2px 6px rgba(0,0,0,0.5)`)
+    :`0 2px 10px rgba(0,0,0,0.08)`;
 
-  // Tudo o que não é essencial fica escondido quando o card é pequeno
-  // Usamos uma estrutura de 2 secções: topo (sempre visível) e corpo (flex-grow)
+  // motivo pausa
+  const motivo = paused ? getPausaMotivo(m) : null;
+  const motivoLabel = {aguarda_pecas:"📦 PEÇAS",prioritaria:"🚨 PRIORITÁRIA",aguarda_decisao:"⏳ DECISÃO",outros:"💬 OUTROS"};
+  const motivoColor = {aguarda_pecas:"#F59E0B",prioritaria:"#EF4444",aguarda_decisao:"#8B5CF6",outros:"#6B7280"};
+  const mColor = motivo ? (motivoColor[motivo]||"#F59E0B") : null;
+
+  const fmtDate = d => d ? new Date(d+"T12:00:00").toLocaleDateString("pt-PT",{day:"2-digit",month:"2-digit"}) : null;
+
   return(
     <div style={{
       position:"relative",
       display:"flex",flexDirection:"column",
-      padding:"10px 12px 8px",
+      padding:"10px 14px 10px",
       background:dark?cardBg:"#FFFFFF",
-      border:dark?`1px solid ${borderCol}`:`1px solid rgba(13,13,15,0.06)`,
+      border:dark?`1px solid ${borderCol}`:`1px solid rgba(13,13,15,0.07)`,
       borderTop:`3px solid ${topBorder}`,
-      boxShadow:dark?cardShadow:"0 1px 1px rgba(13,13,15,0.06), 0 2px 4px rgba(13,13,15,0.04)",
+      boxShadow:cardShadow,
       overflow:"hidden",
       height:"100%",
-      borderRadius:dark?0:"12px",
-      clipPath:dark?"polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px))":"none",
+      borderRadius:dark?0:"14px",
+      clipPath:dark?"polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))":"none",
+      boxSizing:"border-box",
     }}>
-      {/* sweep de luz animado (só quando running) */}
+      {/* sweep animado */}
       {run&&(
         <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0,overflow:"hidden"}}>
-          {/* linha de varredura diagonal */}
           <div style={{
-            position:"absolute",top:0,bottom:0,
-            width:"55%",
-            background:dark?"linear-gradient(105deg,transparent 0%,rgba(255,45,120,0.10) 40%,rgba(255,45,120,0.22) 50%,rgba(255,45,120,0.10) 60%,transparent 100%)":"linear-gradient(105deg,transparent 0%,rgba(233,30,140,0.07) 40%,rgba(233,30,140,0.14) 50%,rgba(233,30,140,0.07) 60%,transparent 100%)",
+            position:"absolute",top:0,bottom:0,width:"60%",
+            background:dark
+              ?"linear-gradient(105deg,transparent 0%,rgba(255,45,120,0.08) 40%,rgba(255,45,120,0.20) 50%,rgba(255,45,120,0.08) 60%,transparent 100%)"
+              :"linear-gradient(105deg,transparent 0%,rgba(233,30,140,0.05) 40%,rgba(233,30,140,0.12) 50%,rgba(233,30,140,0.05) 60%,transparent 100%)",
             animation:"cardSweep 2.8s cubic-bezier(0.4,0,0.6,1) infinite",
-            filter:"blur(2px)",
+            filter:"blur(3px)",
           }}/>
         </div>
       )}
-      {/* fundo estático (só quando não running) */}
       {!run&&(
         <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0,
-          background:`linear-gradient(135deg,rgba(${rgb},${dark?0.04:0.02}),transparent 60%)`}}/>
+          background:`linear-gradient(135deg,rgba(${rgb},${dark?0.05:0.02}),transparent 55%)`}}/>
       )}
 
-      {/* ── LINHA 1: estado + timer ── sempre visível */}
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:4,zIndex:1,flexShrink:0}}>
-        {/* estado dot + label */}
-        <div style={{display:"flex",alignItems:"center",gap:4,minWidth:0,overflow:"hidden"}}>
-          <span style={{width:6,height:6,borderRadius:"50%",flexShrink:0,
+      {/* ── TOPO: badges esq + timer dir ── */}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:6,zIndex:1,flexShrink:0}}>
+        {/* badges */}
+        <div style={{display:"flex",alignItems:"center",gap:4,flexWrap:"nowrap",minWidth:0,overflow:"hidden"}}>
+          {/* dot estado */}
+          <span style={{width:7,height:7,borderRadius:"50%",flexShrink:0,
             background:run?"#22C55E":paused?"#F59E0B":accent,
-            boxShadow:run?(dark?`0 0 6px #22C55E`:"0 0 0 3px rgba(34,197,94,0.18)"):paused?`0 0 5px rgba(245,158,11,0.5)`:`0 0 5px rgba(${rgb},0.5)`,
+            boxShadow:run?`0 0 8px #22C55E`:paused?`0 0 6px rgba(245,158,11,0.6)`:`0 0 6px rgba(${rgb},0.6)`,
             animation:run?"blink 1.2s ease-in-out infinite":"none"}}/>
+          {/* RUN/PAUSED */}
           <span style={{
-            fontFamily:dark?"'Orbitron',monospace":"'Manrope',-apple-system,sans-serif",
-            fontSize:"9px",fontWeight:700,
-            letterSpacing:dark?"0.1em":"0.12em",flexShrink:0,
-            padding:dark?"0":"2px 7px 2px 4px",
+            fontFamily:"'Orbitron',monospace",fontSize:"8px",fontWeight:800,
+            letterSpacing:"0.12em",flexShrink:0,
+            padding:"2px 7px",
+            background:run?"rgba(34,197,94,0.12)":paused?"rgba(245,158,11,0.12)":`rgba(${rgb},0.12)`,
+            border:`1px solid ${run?"rgba(34,197,94,0.4)":paused?"rgba(245,158,11,0.4)":`rgba(${rgb},0.4)`}`,
+            clipPath:dark?"polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)":"none",
             borderRadius:dark?0:"999px",
-            background:dark?"transparent":run?"rgba(34,197,94,0.1)":paused?"rgba(217,119,6,0.1)":"rgba(142,142,147,0.1)",
-            border:dark?"none":run?"1px solid rgba(34,197,94,0.2)":paused?"1px solid rgba(217,119,6,0.2)":"1px solid rgba(142,142,147,0.15)",
             color:run?"#22C55E":paused?"#F59E0B":accent}}>
             {run?"RUN":paused?"PAUSED":"IDLE"}
           </span>
-          {/* categoria tag */}
+          {/* categoria */}
           <span style={{
-            fontFamily:dark?"'Orbitron',monospace":"'Manrope',-apple-system,sans-serif",
-            fontSize:"8px",fontWeight:700,
-            letterSpacing:dark?"0.08em":"0.1em",
-            padding:"2px 7px",color:accent,
-            background:`rgba(${rgb},0.12)`,
-            border:`1px solid rgba(${rgb},${dark?0.4:0.2})`,
+            fontFamily:"'Orbitron',monospace",fontSize:"8px",fontWeight:700,
+            letterSpacing:"0.08em",padding:"2px 7px",
+            color:accent,background:`rgba(${rgb},0.12)`,
+            border:`1px solid rgba(${rgb},0.4)`,
             clipPath:dark?"polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)":"none",
             borderRadius:dark?0:"999px",
-            textTransform:"uppercase",
-            whiteSpace:"nowrap",flexShrink:0,overflow:"hidden",maxWidth:"90px",textOverflow:"ellipsis"
+            textTransform:"uppercase",whiteSpace:"nowrap",flexShrink:0,
+            overflow:"hidden",maxWidth:"100px",textOverflow:"ellipsis"
           }}>{cat.label}</span>
           {rLabel&&<span style={{
             fontFamily:"'Orbitron',monospace",fontSize:"8px",fontWeight:700,letterSpacing:"0.08em",
-            padding:"1px 5px",color:CAT.recon.accent,
-            background:`rgba(155,92,246,0.15)`,border:`1px solid rgba(155,92,246,0.4)`,
-            clipPath:"polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)",
-            whiteSpace:"nowrap",flexShrink:0
+            padding:"2px 6px",color:CAT.recon.accent,
+            background:"rgba(155,92,246,0.15)",border:"1px solid rgba(155,92,246,0.4)",
+            clipPath:dark?"polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)":"none",
+            borderRadius:dark?0:"999px",flexShrink:0
           }}>{rLabel}</span>}
           {m.prioridade&&catKey!=="prio"&&<span style={{
             fontFamily:"'Orbitron',monospace",fontSize:"8px",fontWeight:700,
-            padding:"1px 5px",color:CAT.prio.accent,
-            background:`rgba(239,68,68,0.15)`,border:`1px solid rgba(239,68,68,0.4)`,
-            clipPath:"polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)",
-            whiteSpace:"nowrap",flexShrink:0
-          }}>⚑</span>}
+            padding:"2px 6px",color:CAT.prio.accent,
+            background:"rgba(239,68,68,0.15)",border:"1px solid rgba(239,68,68,0.4)",
+            clipPath:dark?"polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)":"none",
+            borderRadius:dark?0:"999px",flexShrink:0
+          }}>⚑ PRIO</span>}
+          {m.baia&&<span style={{
+            fontFamily:"'Orbitron',monospace",fontSize:"8px",fontWeight:800,
+            letterSpacing:"0.1em",padding:"2px 6px",flexShrink:0,
+            color:"#4D9FFF",background:"rgba(77,159,255,0.12)",
+            border:"1px solid rgba(77,159,255,0.4)",
+            clipPath:dark?"polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)":"none",
+            borderRadius:dark?0:"999px"
+          }}>{m.baia}</span>}
         </div>
-        {/* timer — sempre visível, tamanho adapta */}
+        {/* TIMER — grande, à direita */}
         <div style={{
-          fontFamily:dark?"'Orbitron',monospace":"'JetBrains Mono',ui-monospace,monospace",
-          fontSize:"clamp(14px,1.6vw,26px)",fontWeight:dark?900:700,flexShrink:0,
-          color:timerCol,letterSpacing:dark?"0.06em":"-0.02em",
+          fontFamily:"'Orbitron',monospace",
+          fontSize:"clamp(16px,2vw,32px)",fontWeight:900,flexShrink:0,
+          color:timerCol,letterSpacing:"0.06em",
           fontVariantNumeric:"tabular-nums",
-          textShadow:run&&dark?`0 0 12px rgba(34,197,94,0.6)`:"none"}}>
+          textShadow:run&&dark?`0 0 16px rgba(34,197,94,0.7)`:paused&&dark?`0 0 12px rgba(245,158,11,0.5)`:"none"}}>
           {fmtHMS(elapsed)}
         </div>
       </div>
 
-      {/* ── LINHA 2: série + modelo + baia ── sempre visível */}
-      <div style={{zIndex:1,flexShrink:0,marginTop:3}}>
-        <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"nowrap"}}>
-          <div style={{
-            fontFamily:dark?"'Orbitron',monospace":"'JetBrains Mono',ui-monospace,monospace",
-            fontSize:"clamp(14px,1.5vw,22px)",fontWeight:dark?900:700,
-            color:dark?"#f0f0f0":"#0D0D0F",
-            letterSpacing:dark?"0.08em":"-0.01em",lineHeight:1.15,
-            textShadow:dark?"0 0 10px rgba(240,240,240,0.15)":"none",
-            whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",flex:1,minWidth:0}}>
-            {m.serie||"—"}
-          </div>
-          {/* BAIA */}
-          {m.baia&&(
-            <span style={{fontFamily:"'Orbitron',monospace",fontSize:"8px",fontWeight:800,
-              letterSpacing:"0.12em",padding:"2px 6px",flexShrink:0,
-              color:"#4D9FFF",background:"rgba(77,159,255,0.12)",
-              border:"1px solid rgba(77,159,255,0.4)",
-              clipPath:"polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)"}}>
-              {m.baia}
-            </span>
-          )}
+      {/* ── CENTRO: NS + Modelo centrados, flex:1 ── */}
+      <div style={{flex:1,display:"flex",flexDirection:"column",
+        alignItems:"center",justifyContent:"center",
+        zIndex:1,gap:4,padding:"8px 0",textAlign:"center",minHeight:0}}>
+
+        {/* NS — protagonista absoluto */}
+        <div style={{
+          fontFamily:"'Orbitron',monospace",
+          fontSize:"clamp(18px,2.4vw,38px)",fontWeight:900,
+          color:dark?"#f5f5f5":"#0D0D0F",
+          letterSpacing:"0.1em",lineHeight:1.1,
+          textShadow:dark?`0 0 20px rgba(240,240,240,0.2), 0 0 40px rgba(${rgb},0.15)`:"none",
+          whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
+          maxWidth:"100%",
+        }}>
+          {m.serie||"—"}
         </div>
+
+        {/* MODELO */}
         <div style={{
           fontFamily:dark?"'Rajdhani',system-ui,sans-serif":"'Manrope',-apple-system,sans-serif",
-          fontSize:"clamp(12px,1.1vw,15px)",fontWeight:600,
-          color:dark?"rgba(180,180,180,0.85)":"#5C5C61",
-          marginTop:3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
-          letterSpacing:dark?"0.04em":"0.01em"}}>
+          fontSize:"clamp(13px,1.4vw,20px)",fontWeight:dark?700:600,
+          color:dark?"rgba(200,200,200,0.80)":"#555",
+          letterSpacing:dark?"0.06em":"0.01em",
+          whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
+          maxWidth:"100%",
+        }}>
           {m.modelo||"—"}
         </div>
-        {/* MOTIVO PAUSA — só aparece quando paused */}
-        {paused&&(()=>{
-          const motivo=getPausaMotivo(m);
-          if(!motivo)return null;
-          const labelMap={aguarda_pecas:"📦 PEÇAS",prioritaria:"🚨 PRIORITÁRIA",aguarda_decisao:"⏳ DECISÃO",outros:"💬 OUTROS"};
-          const colorMap={aguarda_pecas:"#F59E0B",prioritaria:"#EF4444",aguarda_decisao:"#8B5CF6",outros:"#6B7280"};
-          const c=colorMap[motivo]||"#F59E0B";
-          return(
-            <div style={{marginTop:3,display:"flex",alignItems:"center",gap:4}}>
-              <span style={{fontFamily:"'Orbitron',monospace",fontSize:"7px",fontWeight:800,
-                letterSpacing:"0.1em",padding:"2px 7px",
-                color:c,background:`rgba(${c.replace("#","").match(/.{2}/g).map(h=>parseInt(h,16)).join(",")},0.12)`,
-                border:`1px solid rgba(${c.replace("#","").match(/.{2}/g).map(h=>parseInt(h,16)).join(",")},0.4)`,
-                clipPath:"polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)"}}>
-                {labelMap[motivo]||motivo.toUpperCase()}
-              </span>
-            </div>
-          );
-        })()}
-        {/* DATAS DE PREVISÃO — linha compacta sempre visível */}
-        {(m.previsao_inicio||m.previsao_fim)&&(
-          <div style={{marginTop:3,display:"flex",alignItems:"center",gap:5,flexWrap:"wrap"}}>
-            {m.previsao_inicio&&(
-              <span style={{fontFamily:"'Orbitron',monospace",fontSize:"7px",fontWeight:700,
-                letterSpacing:"0.08em",padding:"2px 6px",
-                color:"#4D9FFF",background:"rgba(77,159,255,0.10)",
-                border:"1px solid rgba(77,159,255,0.35)",
-                clipPath:"polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)",
-                whiteSpace:"nowrap"}}>
-                ▶ {new Date(m.previsao_inicio+"T12:00:00").toLocaleDateString("pt-PT",{day:"2-digit",month:"2-digit"})}
-              </span>
-            )}
-            {m.previsao_fim&&(
-              <span style={{fontFamily:"'Orbitron',monospace",fontSize:"7px",fontWeight:700,
-                letterSpacing:"0.08em",padding:"2px 6px",
-                color:"#22C55E",background:"rgba(34,197,94,0.10)",
-                border:"1px solid rgba(34,197,94,0.35)",
-                clipPath:"polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)",
-                whiteSpace:"nowrap"}}>
-                ✓ {new Date(m.previsao_fim+"T12:00:00").toLocaleDateString("pt-PT",{day:"2-digit",month:"2-digit"})}
-              </span>
-            )}
+
+        {/* MOTIVO PAUSA (quando paused) */}
+        {motivo&&mColor&&(
+          <div style={{marginTop:4}}>
+            <span style={{
+              fontFamily:"'Orbitron',monospace",fontSize:"clamp(9px,0.85vw,12px)",fontWeight:800,
+              letterSpacing:"0.12em",padding:"4px 12px",
+              color:mColor,
+              background:`rgba(${mColor.replace("#","").match(/.{2}/g).map(h=>parseInt(h,16)).join(",")},0.14)`,
+              border:`1px solid rgba(${mColor.replace("#","").match(/.{2}/g).map(h=>parseInt(h,16)).join(",")},0.45)`,
+              clipPath:dark?"polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%)":"none",
+              borderRadius:dark?0:"999px",
+            }}>
+              {motivoLabel[motivo]||motivo.toUpperCase()}
+            </span>
+          </div>
+        )}
+
+        {/* TASK ACTIVA (quando running e sem pausa) */}
+        {!paused&&activeTask&&(
+          <div style={{
+            marginTop:4,width:"100%",
+            padding:"5px 10px",
+            background:dark?`rgba(${rgb},0.10)`:`rgba(${rgb},0.06)`,
+            borderLeft:`3px solid rgba(${rgb},0.7)`,
+            borderRadius:dark?0:"6px",
+            textAlign:"left",
+          }}>
+            <span style={{
+              fontFamily:"'Orbitron',monospace",
+              fontSize:"clamp(7px,0.65vw,9px)",
+              color:accent,letterSpacing:"0.15em",fontWeight:800,marginRight:6}}>
+              TASK
+            </span>
+            <span style={{
+              fontFamily:"monospace",
+              fontSize:"clamp(10px,1vw,14px)",
+              color:dark?"rgba(220,220,220,0.9)":"rgba(20,20,50,0.85)",
+              fontWeight:600,
+            }}>
+              {activeTask.texto}
+            </span>
           </div>
         )}
       </div>
 
-      {/* ── CORPO: tasks + progresso — cresce para preencher o espaço ── */}
-      <div style={{flex:1,minHeight:0,display:"flex",flexDirection:"column",gap:4,
-        marginTop:8,zIndex:1,overflow:"hidden",justifyContent:"flex-start"}}>
-        {tasks.length>0&&(
-          <>
-            {/* Label TASK + task activa */}
-            <div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0,
-              padding:"5px 8px",
-              background:dark?`rgba(${rgb},0.12)`:`rgba(${rgb},0.07)`,
-              borderLeft:`3px solid rgba(${rgb},0.7)`,overflow:"hidden",borderRadius:dark?0:"6px"}}>
-              <span style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(7px,0.65vw,10px)",color:accent,
-                letterSpacing:"0.15em",flexShrink:0,fontWeight:800}}>TASK</span>
-              <span style={{fontFamily:"monospace",fontSize:"clamp(10px,0.9vw,13px)",
-                color:dark?"rgba(220,220,220,0.9)":"rgba(20,20,50,0.9)",
-                whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",fontWeight:600}}>
-                {tasks.filter(t=>!t.concluida)[0]?.texto || tasks[0]?.texto}
+      {/* ── BOTTOM: datas centradas ── */}
+      {(m.previsao_inicio||m.previsao_fim)&&(
+        <div style={{
+          zIndex:1,flexShrink:0,
+          display:"flex",alignItems:"center",justifyContent:"center",
+          gap:12,paddingTop:6,
+          borderTop:dark?"1px solid rgba(255,255,255,0.06)":"1px solid rgba(0,0,0,0.05)",
+        }}>
+          {m.previsao_inicio&&(
+            <div style={{display:"flex",alignItems:"center",gap:5}}>
+              <span style={{fontFamily:"'Orbitron',monospace",
+                fontSize:"clamp(9px,0.8vw,11px)",color:"#4D9FFF",opacity:0.7,fontWeight:700}}>▶</span>
+              <span style={{
+                fontFamily:"'Orbitron',monospace",
+                fontSize:"clamp(12px,1.2vw,18px)",fontWeight:900,
+                color:"#4D9FFF",letterSpacing:"0.08em",
+                fontVariantNumeric:"tabular-nums"}}>
+                {fmtDate(m.previsao_inicio)}
               </span>
             </div>
-            {/* chips de todas as tasks */}
-            <div style={{display:"flex",flexWrap:"wrap",gap:4,overflow:"hidden",flexShrink:0}}>
-              {tasks.map((t,i)=>(
-                <span key={i} style={{fontFamily:"monospace",
-                  fontSize:"clamp(9px,0.8vw,12px)",padding:"2px 7px",
-                  background:t.concluida?`rgba(34,197,94,0.12)`:`rgba(${rgb},0.08)`,
-                  color:t.concluida?"#16a34a":accent,
-                  border:`1px solid ${t.concluida?"rgba(34,197,94,0.35)":`rgba(${rgb},0.3)`}`,
-                  textDecoration:t.concluida?"line-through":"none",
-                  clipPath:dark?"polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)":"none",
-                  borderRadius:dark?0:"999px",
-                  fontWeight:600,letterSpacing:"0.03em",whiteSpace:"nowrap"}}>
-                  {t.texto}
-                </span>
-              ))}
-            </div>
-            {/* contagem + barra */}
-            <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0,marginTop:2}}>
-              <span style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(9px,0.8vw,12px)",
-                color:dark?"rgba(150,150,150,0.8)":"#8888AA",letterSpacing:"0.08em"}}>
-                {done}/{tasks.length} <span style={{opacity:0.6}}>TASKS</span>
-              </span>
-              <span style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(11px,1vw,15px)",
-                fontWeight:900,color:pct===100?"#22C55E":accent,letterSpacing:"0.04em"}}>
-                {pct}%
+          )}
+          {m.previsao_inicio&&m.previsao_fim&&(
+            <span style={{color:dark?"rgba(255,255,255,0.15)":"rgba(0,0,0,0.12)",fontSize:"14px"}}>·</span>
+          )}
+          {m.previsao_fim&&(
+            <div style={{display:"flex",alignItems:"center",gap:5}}>
+              <span style={{fontFamily:"'Orbitron',monospace",
+                fontSize:"clamp(9px,0.8vw,11px)",color:"#22C55E",opacity:0.7,fontWeight:700}}>✓</span>
+              <span style={{
+                fontFamily:"'Orbitron',monospace",
+                fontSize:"clamp(12px,1.2vw,18px)",fontWeight:900,
+                color:"#22C55E",letterSpacing:"0.08em",
+                fontVariantNumeric:"tabular-nums"}}>
+                {fmtDate(m.previsao_fim)}
               </span>
             </div>
-          </>
-        )}
-      </div>
-
-      {/* barra de progresso — sempre na base */}
-      {tasks.length>0&&(
-        <div style={{height:3,background:dark?"rgba(255,255,255,0.06)":"rgba(0,0,0,0.08)",
-          overflow:"hidden",zIndex:1,marginTop:4,flexShrink:0,borderRadius:2}}>
-          <div style={{height:"100%",width:`${pct}%`,
-            background:pct===100?"#22C55E":`linear-gradient(90deg,rgba(${rgb},0.6),${accent})`,
-            transition:"width 0.5s",boxShadow:pct===100?`0 0 8px rgba(34,197,94,0.5)`:"none"}}/>
+          )}
         </div>
       )}
     </div>
   );
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  BIG BOARD CELL — card compacto adaptável (usado em Em Andamento)

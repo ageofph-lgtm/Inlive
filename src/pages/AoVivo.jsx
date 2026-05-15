@@ -260,12 +260,24 @@ function BoardCell({m, D, forceCategory=null}){
       borderRadius:dark?0:"12px",
       clipPath:dark?"polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px))":"none",
     }}>
-      {/* scan sweep */}
-      <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0,
-        background:run
-          ?`linear-gradient(110deg,transparent 30%,rgba(34,197,94,${dark?0.05:0.03}) 50%,transparent 70%)`
-          :`linear-gradient(135deg,rgba(${rgb},${dark?0.04:0.02}),transparent 60%)`,
-        animation:run?"hudScan 5s linear infinite":"none"}}/>
+      {/* sweep de luz animado (só quando running) */}
+      {run&&(
+        <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0,overflow:"hidden"}}>
+          {/* linha de varredura diagonal */}
+          <div style={{
+            position:"absolute",top:0,bottom:0,
+            width:"55%",
+            background:"linear-gradient(105deg,transparent 0%,rgba(34,197,94,0.12) 40%,rgba(34,197,94,0.22) 50%,rgba(34,197,94,0.12) 60%,transparent 100%)",
+            animation:"cardSweep 2.8s cubic-bezier(0.4,0,0.6,1) infinite",
+            filter:"blur(2px)",
+          }}/>
+        </div>
+      )}
+      {/* fundo estático (só quando não running) */}
+      {!run&&(
+        <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0,
+          background:`linear-gradient(135deg,rgba(${rgb},${dark?0.04:0.02}),transparent 60%)`}}/>
+      )}
 
       {/* ── LINHA 1: estado + timer ── sempre visível */}
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:4,zIndex:1,flexShrink:0}}>
@@ -451,68 +463,33 @@ function BoardCell({m, D, forceCategory=null}){
 // ─────────────────────────────────────────────────────────────────────────────
 
 function BigBoard({items, D, isRecon=false}){
-  const running = items.filter(m=>m.timer_status==="running");
-  const paused  = items.filter(m=>m.timer_status!=="running");
-  const nRun = running.length, nPause = paused.length;
+  // No slide "Em Andamento" só chegam running (paused vão para STANDBY)
+  const n = items.length;
+  if(n===0) return null;
 
-  // Colunas adaptativas por contagem
-  const cols = n => n<=1?1:n<=2?2:n<=4?2:n<=6?3:n<=9?4:5;
-  const colsRun   = cols(nRun);
-  const colsPause = cols(nPause);
+  // Colunas adaptativas: nunca deixar um card ocupar a tela toda
+  // 1 item → 2 colunas (card ocupa 50%), 2 → 2, 3-4 → 2, 5-6 → 3, etc.
+  const cols = n===1?2:n<=4?2:n<=6?3:n<=9?4:5;
+  const rows = Math.ceil(n/cols);
 
-  // Linhas de cada secção
-  const rowsRun   = nRun>0?Math.ceil(nRun/colsRun):0;
-  const rowsPause = nPause>0?Math.ceil(nPause/colsPause):0;
-
-  // Peso proporcional: running tem 1.5x mais peso por linha (destaque visual)
-  const wRun   = rowsRun   * 1.5;
-  const wPause = rowsPause * 1.0;
-  const wTotal = wRun + wPause || 1;
-  // grid-template-rows em fr — distribui todo o espaço disponível
-  const gridRows = [
-    nRun>0   ? `${(wRun/wTotal*100).toFixed(1)}fr`   : null,
-    nPause>0 ? `${(wPause/wTotal*100).toFixed(1)}fr` : null,
-  ].filter(Boolean).join(" ");
+  // Altura máxima por card para evitar cards gigantes
+  // Calculamos em % da área disponível (aproximação segura via minmax)
+  const maxCardH = Math.min(260, Math.floor(80/rows)); // em vh aproximado
 
   return(
     <div style={{
       display:"grid",
-      gridTemplateRows: gridRows,
+      gridTemplateColumns:`repeat(${cols},1fr)`,
+      gridAutoRows:`minmax(120px, ${maxCardH}vh)`,
       gap:8,
       flex:1,
       minHeight:0,
       overflow:"hidden",
+      alignContent:"start",
     }}>
-      {/* ── RUNNING — mais altura, destaque ── */}
-      {running.length>0&&(
-        <div style={{
-          display:"grid",
-          gridTemplateColumns:`repeat(${colsRun},1fr)`,
-          gridTemplateRows:`repeat(${rowsRun},1fr)`,
-          gap:8,
-          minHeight:0,
-          overflow:"hidden",
-        }}>
-          {running.map(m=>(
-            <BoardCell key={m.id} m={m} D={D} isRecon={isRecon}/>
-          ))}
-        </div>
-      )}
-      {/* ── PAUSED/IDLE — menos altura ── */}
-      {paused.length>0&&(
-        <div style={{
-          display:"grid",
-          gridTemplateColumns:`repeat(${colsPause},1fr)`,
-          gridTemplateRows:`repeat(${rowsPause},1fr)`,
-          gap:6,
-          minHeight:0,
-          overflow:"hidden",
-        }}>
-          {paused.map(m=>(
-            <BoardCell key={m.id} m={m} D={D} isRecon={isRecon}/>
-          ))}
-        </div>
-      )}
+      {items.map(m=>(
+        <BoardCell key={m.id} m={m} D={D} isRecon={isRecon}/>
+      ))}
     </div>
   );
 }
@@ -1467,99 +1444,105 @@ export default function AoVivo(){
         {standby.length===0
           ?<Empty label="Sem máquinas em pausa" D={D}/>
           :(()=>{
-            // Agrupar por motivo
-            const grupos=PAUSA_COLS.map(col=>({
-              ...col,
-              items:standby.filter(m=>(m.pausa_motivo||"outros")===col.key),
-            })).filter(g=>g.items.length>0);
-            // Colunas com items (máx 4 colunas, distribuídas igualmente)
+            // Sempre mostrar as 4 colunas fixas (mesmo que vazias)
+            const colFmt=(hex)=>{
+              const r=parseInt(hex.slice(1,3),16);const g=parseInt(hex.slice(3,5),16);const b=parseInt(hex.slice(5,7),16);
+              return `${r},${g},${b}`;
+            };
+            const fmtAcc=(s)=>{const h=Math.floor(s/3600);const m=Math.floor((s%3600)/60);return h>0?`${h}h${String(m).padStart(2,"0")}m`:`${m}min`;};
             return(
               <div style={{flex:1,overflow:"hidden",display:"grid",
-                gridTemplateColumns:`repeat(${Math.min(grupos.length,4)},1fr)`,
-                gap:dark?"8px":"10px",padding:"10px 0"}}>
-                {grupos.map(col=>(
-                  <div key={col.key} style={{display:"flex",flexDirection:"column",gap:"6px",overflow:"hidden",minHeight:0}}>
-                    {/* Header da coluna */}
-                    <div style={{display:"flex",alignItems:"center",gap:"8px",
-                      padding:"7px 12px",flexShrink:0,
-                      background:dark?`rgba(${col.color==="F59E0B"?"245,158,11":col.color==="EF4444"?"239,68,68":col.color==="8B5CF6"?"139,92,246":"107,114,128"},0.08)`:
-                        `rgba(${col.color.replace("#","").match(/.{2}/g).map(h=>parseInt(h,16)).join(",")},0.06)`,
-                      border:`1px solid ${col.color}33`,
-                      borderRadius:dark?"6px":"10px"}}>
-                      <span style={{fontSize:"14px"}}>{col.emoji}</span>
-                      <span style={{fontFamily:dark?"'Orbitron',monospace":"'Manrope',sans-serif",
-                        fontSize:"10px",fontWeight:700,
-                        color:col.color,letterSpacing:dark?"0.1em":"0.05em",
-                        textTransform:"uppercase"}}>{col.label}</span>
-                      <span style={{marginLeft:"auto",fontFamily:"'Orbitron',monospace",
-                        fontSize:"14px",fontWeight:900,color:col.color}}>{col.items.length}</span>
-                    </div>
-                    {/* Cards da coluna */}
-                    <div style={{flex:1,overflow:"auto",display:"flex",flexDirection:"column",gap:"5px"}}>
-                      {col.items.map(m=>{
-                        const {accent,rgb}=CAT[getMachineCategory(m)]||CAT.andamento;
-                        const acc=(m.timer_accumulated_seconds||0);
-                        const showAcc=acc>=MIN_TIMER_SECONDS;
-                        return(
-                          <div key={m.id} style={{
-                            padding:"10px 12px",
-                            background:dark?`rgba(${rgb},0.06)`:"rgba(255,255,255,0.7)",
-                            border:dark?`1px solid ${col.color}22`:`1px solid rgba(13,13,15,0.07)`,
-                            borderLeft:`3px solid ${col.color}`,
-                            borderRadius:dark?"6px":"10px",
-                            boxShadow:dark?"none":"0 1px 3px rgba(13,13,15,0.05)",
-                            display:"flex",flexDirection:"column",gap:"5px",
-                            flexShrink:0,
-                          }}>
-                            {/* NS + Modelo */}
-                            <div style={{display:"flex",alignItems:"baseline",gap:"8px",overflow:"hidden"}}>
-                              <span style={{
-                                fontFamily:dark?"'Orbitron',monospace":"'JetBrains Mono',monospace",
-                                fontSize:"14px",fontWeight:dark?900:700,
-                                color:dark?accent:"#0D0D0F",letterSpacing:dark?"0.05em":"-0.01em",
-                                whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
-                                textShadow:dark?`0 0 10px ${accent}55`:"none",
-                                fontVariantNumeric:"tabular-nums"}}>
-                                {m.serie||"—"}
-                              </span>
-                              <span style={{fontFamily:"monospace",fontSize:"9px",
-                                color:D.muted,whiteSpace:"nowrap",overflow:"hidden",
-                                textOverflow:"ellipsis",flexShrink:1}}>
-                                {m.modelo}
-                              </span>
-                            </div>
-                            {/* Técnico + Baia */}
-                            <div style={{display:"flex",alignItems:"center",gap:"6px",flexWrap:"wrap"}}>
-                              {m.tecnico&&(
-                                <span style={{fontFamily:"monospace",fontSize:"9px",
-                                  color:D.muted,letterSpacing:"0.04em",textTransform:"uppercase"}}>
-                                  👤 {m.tecnico}
-                                </span>
-                              )}
-                              {/* Timer acumulado */}
-                              {showAcc&&(
-                                <span style={{display:"flex",alignItems:"center",gap:"3px",
-                                  fontFamily:"'Orbitron',monospace",fontSize:"9px",fontWeight:700,
-                                  color:col.color,letterSpacing:"0.04em"}}>
-                                  ⏱ {(()=>{const s=Math.round(acc);const h=Math.floor(s/3600);const mm=Math.floor((s%3600)/60);return h>0?`${h}h${String(mm).padStart(2,"0")}m`:`${mm}min`;})()}
-                                </span>
-                              )}
-                            </div>
-                            {/* Prio badge */}
-                            {m.prioridade&&(
-                              <span style={{alignSelf:"flex-start",fontFamily:"monospace",
-                                fontSize:"7px",fontWeight:700,padding:"1px 5px",
-                                borderRadius:"4px",background:"rgba(245,158,11,0.15)",
-                                color:"#F59E0B",border:"1px solid rgba(245,158,11,0.3)"}}>
-                                ⚑ PRIORITÁRIA
-                              </span>
-                            )}
+                gridTemplateColumns:"repeat(4,1fr)",
+                gap:dark?"10px":"12px",padding:"8px 0"}}>
+                {PAUSA_COLS.map(col=>{
+                  const items=standby.filter(m=>(m.pausa_motivo||"outros")===col.key);
+                  const rgb=colFmt(col.color);
+                  return(
+                    <div key={col.key} style={{display:"flex",flexDirection:"column",gap:"8px",overflow:"hidden",minHeight:0}}>
+                      {/* ── Header da coluna ── */}
+                      <div style={{display:"flex",alignItems:"center",gap:"8px",
+                        padding:"8px 14px",flexShrink:0,
+                        background:dark?`rgba(${rgb},0.07)`:`rgba(${rgb},0.05)`,
+                        border:`1px solid rgba(${rgb},0.22)`,
+                        borderBottom:`2px solid ${col.color}`,
+                        borderRadius:dark?"4px 4px 0 0":"10px 10px 0 0"}}>
+                        <span style={{fontSize:"15px",lineHeight:1}}>{col.emoji}</span>
+                        <span style={{fontFamily:dark?"'Orbitron',monospace":"'Manrope',sans-serif",
+                          fontSize:"9px",fontWeight:800,color:col.color,
+                          letterSpacing:dark?"0.12em":"0.06em",
+                          textTransform:"uppercase",flex:1,lineHeight:1.2}}>{col.label}</span>
+                        {/* contador */}
+                        {items.length>0&&(
+                          <span style={{fontFamily:"'Orbitron',monospace",
+                            fontSize:"16px",fontWeight:900,color:col.color,
+                            lineHeight:1,textShadow:dark?`0 0 10px ${col.color}88`:"none"}}>
+                            {items.length}
+                          </span>
+                        )}
+                      </div>
+                      {/* ── Lista de máquinas ── */}
+                      <div style={{flex:1,overflow:"auto",display:"flex",flexDirection:"column",gap:"5px",padding:"0 2px"}}>
+                        {items.length===0?(
+                          <div style={{display:"flex",alignItems:"center",justifyContent:"center",
+                            height:"60px",opacity:0.25}}>
+                            <span style={{fontFamily:"'Orbitron',monospace",fontSize:"8px",
+                              letterSpacing:"0.15em",color:col.color}}>—</span>
                           </div>
-                        );
-                      })}
+                        ):items.map(m=>{
+                          const cat=CAT[getMachineCategory(m)]||CAT.andamento;
+                          const acc=m.timer_accumulated_seconds||0;
+                          const showAcc=acc>=MIN_TIMER_SECONDS;
+                          return(
+                            <div key={m.id} style={{
+                              padding:"8px 10px",
+                              background:dark?`rgba(${rgb},0.04)`:"rgba(255,255,255,0.75)",
+                              border:dark?`1px solid rgba(${rgb},0.15)`:`1px solid rgba(13,13,15,0.06)`,
+                              borderLeft:`3px solid ${col.color}`,
+                              borderRadius:dark?"4px":"8px",
+                              boxShadow:dark?"none":"0 1px 3px rgba(13,13,15,0.04)",
+                              display:"flex",flexDirection:"column",gap:"4px",
+                              flexShrink:0,
+                            }}>
+                              {/* NS em destaque */}
+                              <div style={{
+                                fontFamily:dark?"'Orbitron',monospace":"'JetBrains Mono',monospace",
+                                fontSize:dark?"13px":"12px",fontWeight:dark?900:700,
+                                color:dark?cat.accent:"#0D0D0F",
+                                letterSpacing:dark?"0.05em":"-0.01em",
+                                whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
+                                fontVariantNumeric:"tabular-nums",
+                                textShadow:dark?`0 0 8px ${cat.accent}55`:"none"}}>
+                                {m.serie||"—"}
+                              </div>
+                              {/* Modelo — linha secundária compacta */}
+                              <div style={{fontFamily:"monospace",fontSize:"8px",
+                                color:D.muted,whiteSpace:"nowrap",overflow:"hidden",
+                                textOverflow:"ellipsis",letterSpacing:"0.02em"}}>
+                                {m.modelo}
+                              </div>
+                              {/* Rodapé: timer + prio */}
+                              <div style={{display:"flex",alignItems:"center",gap:"5px",flexWrap:"wrap",marginTop:"1px"}}>
+                                {showAcc&&(
+                                  <span style={{fontFamily:"'Orbitron',monospace",fontSize:"9px",
+                                    fontWeight:700,color:col.color,letterSpacing:"0.03em",
+                                    display:"flex",alignItems:"center",gap:"3px"}}>
+                                    ⏱ {fmtAcc(Math.round(acc))}
+                                  </span>
+                                )}
+                                {m.prioridade&&(
+                                  <span style={{fontFamily:"monospace",fontSize:"7px",fontWeight:700,
+                                    padding:"1px 4px",borderRadius:"3px",
+                                    background:"rgba(239,68,68,0.15)",color:"#EF4444",
+                                    border:"1px solid rgba(239,68,68,0.3)"}}>⚑</span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             );
           })()
@@ -1786,6 +1769,7 @@ export default function AoVivo(){
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&family=Bricolage+Grotesque:opsz,wght@12..96,300;400;500;600;700;800&display=swap');
         @keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
         @keyframes hudScan{0%{background-position:200% 0}100%{background-position:-200% 0}}
+        @keyframes cardSweep{0%{left:-60%}100%{left:130%}}
         @keyframes hudPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.08);opacity:0.7}}
         @keyframes hudFadeIn{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
         @keyframes helmetPulse{0%,100%{box-shadow:0 0 10px #5cffff,0 0 20px #5cffff}50%{box-shadow:0 0 4px #5cffff}}

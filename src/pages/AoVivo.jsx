@@ -11,6 +11,7 @@ const BRIDGE_HEADERS = {
   "api_key":"f8517554492e492090b62dd501ad7e14",
 };
 const SLIDE_DURATION = 30000;
+const MIN_TIMER_SECONDS = 300; // < 5 min = timer inválido, ignorado em stats e display
 const JORDAN_URL = "https://media.base44.com/images/public/6a045759b56878764b71db11/b4686dedd_Gemini_Generated_Image_6i6wgc6i6wgc6i6w1.png";
 
 async function callBridge(p) {
@@ -831,7 +832,7 @@ function RowItem({m, idx, D, forceCategory=null, showTimer=true, showDate=false}
         </div>
       )}
       {/* timer: se concluída mostra acumulado estático; senão mostra live */}
-      {(isCon&&(m.timer_accumulated_seconds>0))?(
+      {(isCon&&((m.timer_accumulated_seconds||0)>=MIN_TIMER_SECONDS))?(
         <div style={{display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
           <span style={{fontFamily:"monospace",fontSize:"9px",color:"rgba(34,197,94,0.6)"}}>⏱</span>
           <div style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(11px,0.95vw,13px)",
@@ -1593,7 +1594,7 @@ export default function AoVivo(){
                     <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",
                       gap:4,marginTop:"auto",flexWrap:"nowrap",overflow:"hidden"}}>
                       <div style={{display:"flex",gap:3,alignItems:"center",overflow:"hidden"}}>
-                        {(m.timer_accumulated_seconds>0)&&(
+                        {((m.timer_accumulated_seconds||0)>=MIN_TIMER_SECONDS)&&(
                           <div style={{display:"flex",alignItems:"center",gap:3,flexShrink:0}}>
                             <span style={{fontFamily:"monospace",fontSize:"7px",color:"rgba(34,197,94,0.6)"}}>⏱</span>
                             <span style={{fontFamily:"'Orbitron',monospace",fontSize:"10px",fontWeight:700,
@@ -1630,7 +1631,7 @@ export default function AoVivo(){
 
   // KPIs
   // tempo médio das concluídas com timer (em horas)
-  const withTimer = totalCon.filter(m=>(m.timer_accumulated_seconds||0)>0);
+  const withTimer = totalCon.filter(m=>(m.timer_accumulated_seconds||0)>=MIN_TIMER_SECONDS);
   const avgH = withTimer.length>0
     ? Math.round(withTimer.reduce((s,m)=>s+(m.timer_accumulated_seconds||0),0)/withTimer.length/3600*10)/10
     : 0;

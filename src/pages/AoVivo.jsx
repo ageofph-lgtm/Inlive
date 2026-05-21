@@ -52,6 +52,30 @@ const getPausaMotivo = (mx) => {
 function getMondayUTC(){ const n=new Date(),d=n.getUTCDay(),b=d===0?6:d-1,m=new Date(n); m.setUTCDate(n.getUTCDate()-b); m.setUTCHours(0,0,0,0); return m; }
 function getFridayUTC(){ const f=new Date(getMondayUTC()); f.setUTCDate(f.getUTCDate()+4); f.setUTCHours(23,59,59,999); return f; }
 
+// ── Tempo estimado RECON (espelho do countdown.js do Watcher) ─────────────────
+const RECON_TEMPOS = {
+  rx_fmx:  { ferro:6*3600,  bronze:15*3600, prata:30*3600, ouro:40*3600 },
+  opx_sf:  { ferro:4*3600,  bronze:12*3600, prata:21*3600, ouro:25*3600 },
+};
+function getReconFamiliaAV(modelo=""){
+  const m=modelo.toLowerCase();
+  if(["rx","fmx"].some(f=>m.includes(f))) return"rx_fmx";
+  if(["opx","exu-v","exu","sf"].some(f=>m.includes(f))) return"opx_sf";
+  return null;
+}
+/** Devolve o tempo estimado em segundos para uma máquina RECON idle
+ *  Usa tempo_estimado_segundos da DB se disponível, senão calcula pela tabela */
+function getTempoReconAV(m){
+  const fromDB = Number(m?.tempo_estimado_segundos)||0;
+  if(fromDB>0) return fromDB;
+  const recon = m?.recondicao||{};
+  const cat   = recon.ouro?"ouro":recon.prata?"prata":recon.bronze?"bronze":recon.ferro?"ferro":null;
+  if(!cat) return 0;
+  const familia = getReconFamiliaAV(m?.modelo||"");
+  if(!familia) return 0;
+  return RECON_TEMPOS[familia]?.[cat]||0;
+}
+
 // ── Design ────────────────────────────────────────────────────────────────────
 // Paleta reduzida: vermelho STILL como accent primário, verde para RUN,
 // âmbar para pausado/prio, cinza neutro para estados passivos
@@ -633,10 +657,15 @@ function ReconCell({m, D, scale=1}){
 
   // IDLE — card minimalista
   const recon   = m.recondicao||{};
-  const rLabel  = recon.prata?"PRATA":recon.bronze?"BRONZE":null;
+  const rLabel  = recon.prata?"PRATA":recon.bronze?"BRONZE":recon.ouro?"OURO":recon.ferro?"FERRO":null;
   const accent  = "#9b5cf6"; // roxo recon
   const rgb     = "155,92,246";
   const fmtDate = d => d ? new Date(d+"T12:00:00").toLocaleDateString("pt-PT",{day:"2-digit",month:"2-digit"}) : null;
+  const tempoEst = getTempoReconAV(m);
+  const tempoEstLbl = tempoEst>0 ? (() => {
+    const h=Math.floor(tempoEst/3600), mn=Math.floor((tempoEst%3600)/60);
+    return mn===0?`${h}h`:`${h}h${mn>0?` ${mn}m`:""}`;
+  })() : null;
 
   return(
     <div style={{
@@ -656,25 +685,41 @@ function ReconCell({m, D, scale=1}){
       <div style={{position:"absolute",inset:0,pointerEvents:"none",
         background:`linear-gradient(135deg,rgba(${rgb},${dark?0.04:0.02}),transparent 60%)`}}/>
 
-      {/* topo: badge RECON/PRATA */}
+      {/* topo: badge RECON/PRATA + tempo estimado */}
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",
         zIndex:1,flexShrink:0,marginBottom:4}}>
-        <span style={{
-          fontFamily:"'Orbitron',monospace",fontSize:"7px",fontWeight:800,
-          letterSpacing:"0.12em",padding:"2px 7px",
-          color:accent,background:`rgba(${rgb},0.12)`,
-          border:`1px solid rgba(${rgb},0.35)`,
-          clipPath:dark?"polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)":"none",
-          borderRadius:dark?0:"999px",
-        }}>RECON</span>
-        {rLabel&&<span style={{
-          fontFamily:"'Orbitron',monospace",fontSize:"7px",fontWeight:800,
-          letterSpacing:"0.1em",padding:"2px 6px",
-          color:"#9b5cf6",background:"rgba(155,92,246,0.15)",
-          border:"1px solid rgba(155,92,246,0.4)",
-          clipPath:dark?"polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)":"none",
-          borderRadius:dark?0:"999px",
-        }}>{rLabel}</span>}
+        {/* badges esquerda */}
+        <div style={{display:"flex",alignItems:"center",gap:3}}>
+          <span style={{
+            fontFamily:"'Orbitron',monospace",fontSize:"7px",fontWeight:800,
+            letterSpacing:"0.12em",padding:"2px 7px",
+            color:accent,background:`rgba(${rgb},0.12)`,
+            border:`1px solid rgba(${rgb},0.35)`,
+            clipPath:dark?"polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)":"none",
+            borderRadius:dark?0:"999px",
+          }}>RECON</span>
+          {rLabel&&<span style={{
+            fontFamily:"'Orbitron',monospace",fontSize:"7px",fontWeight:800,
+            letterSpacing:"0.1em",padding:"2px 6px",
+            color:"#9b5cf6",background:"rgba(155,92,246,0.15)",
+            border:"1px solid rgba(155,92,246,0.4)",
+            clipPath:dark?"polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)":"none",
+            borderRadius:dark?0:"999px",
+          }}>{rLabel}</span>}
+        </div>
+        {/* tempo estimado — direita */}
+        {tempoEstLbl&&(
+          <span style={{
+            fontFamily:"'Orbitron',monospace",fontSize:"9px",fontWeight:900,
+            letterSpacing:"0.06em",padding:"2px 7px",
+            color:"#F59E0B",
+            background:"rgba(245,158,11,0.12)",
+            border:"1px solid rgba(245,158,11,0.35)",
+            clipPath:dark?"polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)":"none",
+            borderRadius:dark?0:"999px",
+            flexShrink:0,
+          }}>⏱ {tempoEstLbl}</span>
+        )}
       </div>
 
       {/* NS — central, sem corte, sem ellipsis, ajusta tamanho */}

@@ -21,7 +21,28 @@ async function callBridge(p) {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const pad2 = n => String(n).padStart(2,"0");
-function fmtHMS(s){ if(!s&&s!==0)return"00:00:00"; return`${pad2(Math.floor(s/3600))}:${pad2(Math.floor((s%3600)/60))}:${pad2(s%60)}`; }
+function fmtHMS(s){ if(!s&&s!==0)return"00:00:00"; const abs=Math.abs(Math.round(s)); const sign=s<0?"-":""; return`${sign}${pad2(Math.floor(abs/3600))}:${pad2(Math.floor((abs%3600)/60))}:${pad2(abs%60)}`; }
+
+// ── Countdown helpers ──
+function getModoTimer(m){
+  const est=Number(m?.tempo_estimado_segundos)||0;
+  const acc=Number(m?.timer_accumulated_seconds)||0;
+  if(est>0)return"countdown";
+  if(acc>0)return"legacy";
+  return"idle";
+}
+function calcRestanteAoVivo(m, elapsed){
+  const est=Number(m?.tempo_estimado_segundos)||0;
+  return est - elapsed;
+}
+function getEstadoCD(m, elapsed){
+  const est=Number(m?.tempo_estimado_segundos)||0;
+  if(est===0)return null;
+  const r=calcRestanteAoVivo(m,elapsed);
+  if(r<0)return"atraso";
+  if(r/est<0.20)return"aviso";
+  return"ok";
+}
 function fmtDate(v){ if(!v)return"—"; return new Date(v).toLocaleDateString("pt-PT",{day:"2-digit",month:"short"}); }
 // Extrai motivo de pausa: "paused:aguarda_pecas" → "aguarda_pecas"; "paused" → "outros"
 const getPausaMotivo = (mx) => {
@@ -222,7 +243,16 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
   const accent  = cat.accent;
   const rgb     = cat.rgb;
 
-  const timerCol  = run?"#22C55E":paused?"#F59E0B":"#6b7280";
+  // Countdown awareness
+  const modoTimer  = getModoTimer(m);
+  const isCD       = modoTimer === "countdown";
+  const restanteCD = isCD ? calcRestanteAoVivo(m, elapsed) : null;
+  const estadoCD   = isCD ? getEstadoCD(m, elapsed) : null;
+  const displayTime= isCD && restanteCD !== null ? restanteCD : elapsed;
+
+  const timerCol  = isCD
+    ? (estadoCD==="atraso"?"#EF4444":estadoCD==="aviso"?"#F59E0B":"#22C55E")
+    : run?"#22C55E":paused?"#F59E0B":"#6b7280";
   const recon     = m.recondicao||{};
   const rLabel    = recon.prata?"PRATA":recon.bronze?"BRONZE":null;
   const topBorder = run?"#22C55E":accent;
@@ -347,8 +377,10 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
           fontSize:`clamp(${Math.round(10*scale)}px,${2*scale}vw,${Math.round(32*scale)}px)`,fontWeight:900,flexShrink:0,
           color:timerCol,letterSpacing:"0.06em",
           fontVariantNumeric:"tabular-nums",
-          textShadow:run&&dark?`0 0 16px rgba(34,197,94,0.7)`:paused&&dark?`0 0 12px rgba(245,158,11,0.5)`:"none"}}>
-          {fmtHMS(elapsed)}
+          textShadow:run&&dark?`0 0 16px ${timerCol}99`:paused&&dark?`0 0 12px rgba(245,158,11,0.5)`:"none"}}>
+          {fmtHMS(displayTime)}
+          {/* ícone alerta inline */}
+          {isCD&&estadoCD==="atraso"&&<span style={{marginLeft:6,fontSize:"0.7em",animation:"blink 0.8s infinite"}}>⚠</span>}
         </div>
       </div>
 
@@ -494,7 +526,14 @@ function ReconCell({m, D, scale=1}){
   if(!idle){
     const recon  = m.recondicao||{};
     const rLabel = recon.prata?"PRATA":recon.bronze?"BRONZE":null;
-    const timerCol = run?"#22C55E":"#F59E0B";
+    const modoCD   = getModoTimer(m);
+    const isRCD    = modoCD === "countdown";
+    const restRCD  = isRCD ? calcRestanteAoVivo(m, elapsed) : null;
+    const estadoRCD= isRCD ? getEstadoCD(m, elapsed) : null;
+    const displayRCD = isRCD && restRCD !== null ? restRCD : elapsed;
+    const timerCol = isRCD
+      ? (estadoRCD==="atraso"?"#EF4444":estadoRCD==="aviso"?"#F59E0B":"#22C55E")
+      : run?"#22C55E":"#F59E0B";
     const accent   = "#a78bfa";
     const rgb      = "167,139,250";
     const topBorder= run?"#22C55E":"#F59E0B";
@@ -551,7 +590,8 @@ function ReconCell({m, D, scale=1}){
             fontWeight:900,color:timerCol,letterSpacing:"0.04em",
             fontVariantNumeric:"tabular-nums",flexShrink:0,
             textShadow:dark?`0 0 10px ${timerCol}88`:"none"}}>
-            {fmtHMS(elapsed)}
+            {fmtHMS(displayRCD)}
+            {isRCD&&estadoRCD==="atraso"&&<span style={{marginLeft:4,fontSize:"0.75em"}}>⚠</span>}
           </span>
         </div>
         {/* centro: NS + modelo */}

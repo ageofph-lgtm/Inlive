@@ -707,25 +707,13 @@ function ReconCell({m, D, scale=1}){
             borderRadius:dark?0:"999px",
           }}>{rLabel}</span>}
         </div>
-        {/* tempo estimado — direita */}
-        {tempoEstLbl&&(
-          <span style={{
-            fontFamily:"'Orbitron',monospace",fontSize:"9px",fontWeight:900,
-            letterSpacing:"0.06em",padding:"2px 7px",
-            color:"#F59E0B",
-            background:"rgba(245,158,11,0.12)",
-            border:"1px solid rgba(245,158,11,0.35)",
-            clipPath:dark?"polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)":"none",
-            borderRadius:dark?0:"999px",
-            flexShrink:0,
-          }}>⏱ {tempoEstLbl}</span>
-        )}
+        {/* tempo estimado movido para junto do modelo no centro */}
       </div>
 
-      {/* NS — central, sem corte, sem ellipsis, ajusta tamanho */}
+      {/* NS + modelo + tempo — tudo no centro */}
       <div style={{flex:1,display:"flex",flexDirection:"column",
         alignItems:"center",justifyContent:"center",
-        zIndex:1,gap:3,textAlign:"center",minHeight:0}}>
+        zIndex:1,gap:2,textAlign:"center",minHeight:0}}>
         <div style={{
           fontFamily:"'Orbitron',monospace",
           fontSize:`clamp(${Math.round(11*scale)}px,${2.0*scale}vw,${Math.round(28*scale)}px)`,
@@ -738,16 +726,37 @@ function ReconCell({m, D, scale=1}){
         }}>
           {m.serie||"—"}
         </div>
+        {/* modelo + tempo estimado na mesma linha */}
         <div style={{
-          fontFamily:"'Rajdhani',system-ui,sans-serif",
-          fontSize:`clamp(${Math.round(10*scale)}px,${1.3*scale}vw,${Math.round(18*scale)}px)`,
-          fontWeight:700,
-          color:dark?"rgba(200,180,240,0.75)":"#5B4A8A",
-          letterSpacing:"0.04em",
-          whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
-          maxWidth:"100%",
+          display:"flex",alignItems:"center",justifyContent:"center",
+          gap:5,flexWrap:"nowrap",maxWidth:"100%",overflow:"hidden",
         }}>
-          {m.modelo||"—"}
+          <div style={{
+            fontFamily:"'Rajdhani',system-ui,sans-serif",
+            fontSize:`clamp(${Math.round(9*scale)}px,${1.1*scale}vw,${Math.round(16*scale)}px)`,
+            fontWeight:700,
+            color:dark?"rgba(200,180,240,0.75)":"#5B4A8A",
+            letterSpacing:"0.03em",
+            whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
+            flex:"0 1 auto",minWidth:0,
+          }}>
+            {m.modelo||"—"}
+          </div>
+          {tempoEstLbl&&(
+            <span style={{
+              fontFamily:"'Orbitron',monospace",
+              fontSize:`clamp(8px,${0.9*scale}vw,11px)`,
+              fontWeight:900,
+              color:"#F59E0B",
+              background:"rgba(245,158,11,0.15)",
+              border:"1px solid rgba(245,158,11,0.4)",
+              padding:"1px 5px",
+              borderRadius:"3px",
+              flexShrink:0,
+              whiteSpace:"nowrap",
+              letterSpacing:"0.04em",
+            }}>⏱{tempoEstLbl}</span>
+          )}
         </div>
       </div>
 

@@ -876,6 +876,24 @@ function CalendarFila({items, D, concluidas=[]}){
                           </span>
                         </div>
                       )}
+                      {/* Tempo estimado no calendário */}
+                      {Number(m.tempo_estimado_segundos)>0&&(()=>{
+                        const est=Number(m.tempo_estimado_segundos);
+                        const hh=Math.floor(est/3600); const mm=Math.floor((est%3600)/60);
+                        const lbl=hh===0?`${mm}min`:mm===0?`${hh}h`:`${hh}h ${mm}min`;
+                        const isExp=m.isExpress||m.tarefas?.some(t=>t.texto==="EXPRESS");
+                        return(
+                          <div style={{display:"flex",alignItems:"center",gap:3,marginTop:"3px"}}>
+                            <span style={{fontFamily:"monospace",fontSize:"7px",fontWeight:700,
+                              padding:"1px 5px",borderRadius:"3px",
+                              background:isExp?"rgba(245,158,11,0.15)":"rgba(77,159,255,0.12)",
+                              color:isExp?"#F59E0B":D.blue,
+                              border:isExp?"1px solid rgba(245,158,11,0.35)":`1px solid ${D.blue}33`}}>
+                              ⏱ {lbl}
+                            </span>
+                          </div>
+                        );
+                      })()}
                       {/* Tarefas tiny */}
                       {(m.tarefas||[]).length>0&&(
                         <div style={{display:"flex",gap:"3px",flexWrap:"wrap",marginTop:"4px"}}>
@@ -921,6 +939,18 @@ function CalendarFila({items, D, concluidas=[]}){
                       <div style={{fontFamily:"monospace",fontSize:"9px",color:D.muted,marginTop:"1px"}}>
                         {m.modelo}
                       </div>
+                      {Number(m.tempo_estimado_segundos)>0&&(()=>{
+                        const est=Number(m.tempo_estimado_segundos);
+                        const hh=Math.floor(est/3600); const mm=Math.floor((est%3600)/60);
+                        const lbl=hh===0?`${mm}min`:mm===0?`${hh}h`:`${hh}h ${mm}min`;
+                        return(
+                          <span style={{fontFamily:"monospace",fontSize:"7px",fontWeight:700,
+                            padding:"1px 5px",borderRadius:"3px",marginTop:"3px",display:"inline-block",
+                            background:"rgba(77,159,255,0.12)",color:D.blue,border:`1px solid ${D.blue}33`}}>
+                            ⏱ {lbl}
+                          </span>
+                        );
+                      })()}
                     </div>
                     {(m.tarefas||[]).length>0&&(
                       <div style={{display:"flex",gap:"3px",flexShrink:0}}>
@@ -978,6 +1008,21 @@ function CalendarFila({items, D, concluidas=[]}){
                           {m.serie||"—"}
                         </div>
                         <div style={{fontFamily:"monospace",fontSize:"9px",color:D.muted,marginTop:"2px"}}>{m.modelo}</div>
+                        {Number(m.tempo_estimado_segundos)>0&&(()=>{
+                          const est=Number(m.tempo_estimado_segundos);
+                          const hh=Math.floor(est/3600); const mm2=Math.floor((est%3600)/60);
+                          const lbl=hh===0?`${mm2}min`:mm2===0?`${hh}h`:`${hh}h ${mm2}min`;
+                          const isExp=m.isExpress||m.tarefas?.some(t=>t.texto==="EXPRESS");
+                          return(
+                            <span style={{fontFamily:"monospace",fontSize:"8px",fontWeight:700,
+                              padding:"1px 6px",borderRadius:"3px",marginTop:"4px",display:"inline-block",
+                              background:isExp?"rgba(245,158,11,0.15)":"rgba(77,159,255,0.12)",
+                              color:isExp?"#F59E0B":D.blue,
+                              border:isExp?"1px solid rgba(245,158,11,0.35)":`1px solid ${D.blue}33`}}>
+                              ⏱ {lbl}
+                            </span>
+                          );
+                        })()}
                       </div>
                       {m.prioridade&&<Flag size={12} color={D.yellow} style={{flexShrink:0}}/>}
                     </div>

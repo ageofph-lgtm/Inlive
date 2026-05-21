@@ -186,12 +186,26 @@ function HudTag({color, label, dim=false, glow=false}){
 
 // ── Live timer ────────────────────────────────────────────────────────────────
 function useLiveTimer(m){
-  const [e,sE]=useState(0);
+  const ref=useRef(m);
+  useEffect(()=>{ref.current=m;}); // sempre actualizado
+
+  function calcNow(mm){
+    const acc=Number(mm?.timer_accumulated_seconds)||0;
+    const at=mm?.timer_started_at?new Date(mm.timer_started_at).getTime():null;
+    if(mm?.timer_status==="running"&&at) return acc+Math.floor((Date.now()-at)/1000);
+    return acc;
+  }
+
+  const [e,sE]=useState(()=>calcNow(m));
+
   useEffect(()=>{
-    const acc=m.timer_accumulated_seconds||0,run=m.timer_status==="running",at=m.timer_started_at?new Date(m.timer_started_at).getTime():null;
-    if(run&&at){const u=()=>sE(acc+Math.floor((Date.now()-at)/1000));u();const id=setInterval(u,1000);return()=>clearInterval(id);}
-    else sE(acc);
-  },[m.timer_status,m.timer_started_at,m.timer_accumulated_seconds]);
+    sE(calcNow(ref.current)); // sincronizar imediatamente quando dados mudam
+    if(m?.timer_status!=="running"||!m?.timer_started_at) return;
+    const id=setInterval(()=>sE(calcNow(ref.current)),1000);
+    return()=>clearInterval(id);
+  // só reiniciar interval se mudou o play (novo timer_started_at) ou parou
+  },[m?.timer_status,m?.timer_started_at]); // eslint-disable-line
+
   return e;
 }
 

@@ -2024,8 +2024,8 @@ export default function AoVivo(){
                     gridTemplateColumns:`repeat(${colsA},1fr)`,
                     justifyContent:"center",
                     gap:6,
-                    /* altura um pouco maior que as próximas */
-                    height:"clamp(100px,18vh,170px)",
+                    /* EM ANDAMENTO — altura reduzida para dar espaço às PRÓXIMAS */
+                    height:"clamp(70px,12vh,120px)",
                   }}>
                     {reconActive.map(m=><ReconCell key={m.id} m={m} D={D} scale={scaleA}/>)}
                   </div>
@@ -2036,7 +2036,7 @@ export default function AoVivo(){
 
               {/* ── PRÓXIMAS — menores, flex 1 ── */}
               {nW>0&&(
-                <div style={{flex:nC>0?1.2:1,display:"flex",flexDirection:"column",minHeight:0}}>
+                <div style={{flex:nC>0?2.8:1,display:"flex",flexDirection:"column",minHeight:0}}>
                   <SectionLabel emoji="⏳" text="PRÓXIMAS" count={nW}
                     color={dark?"rgba(167,139,250,0.85)":"#7c3aed"}/>
                   <div style={{
@@ -2057,7 +2057,7 @@ export default function AoVivo(){
 
               {/* ── CONCLUÍDAS — quase do mesmo tamanho que próximas, grid de cards ── */}
               {nC>0&&(
-                <div style={{flex:nW>0?1:1.2,display:"flex",flexDirection:"column",minHeight:0}}>
+                <div style={{flex:nW>0?0.8:1,display:"flex",flexDirection:"column",minHeight:0}}>
                   <SectionLabel emoji="✓" text="CONCLUÍDAS — 30 DIAS" count={nC}
                     color={dark?"rgba(34,197,94,0.80)":"#16a34a"}/>
                   <div style={{

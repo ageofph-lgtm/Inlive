@@ -419,6 +419,11 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
           {fmtHMS(displayTime)}
           {/* ícone alerta inline */}
           {isCD&&estadoCD==="atraso"&&<span style={{marginLeft:6,fontSize:"0.7em",animation:"blink 0.8s infinite"}}>⚠</span>}
+          {isCD&&Number(m.tempo_estimado_segundos)>0&&run&&(
+            <div style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(8px,0.9vw,11px)",fontWeight:600,color:dark?"rgba(255,255,255,0.28)":"rgba(0,0,0,0.22)",letterSpacing:"0.08em",marginTop:2,textAlign:"right",fontVariantNumeric:"tabular-nums"}}>
+              {"/ "+Math.round(Number(m.tempo_estimado_segundos)/3600)+"h total"}
+            </div>
+          )}
         </div>
       </div>
 

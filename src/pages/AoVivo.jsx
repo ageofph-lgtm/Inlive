@@ -420,7 +420,18 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
           {/* ícone alerta inline */}
           {isCD&&estadoCD==="atraso"&&<span style={{marginLeft:6,fontSize:"0.7em",animation:"blink 0.8s infinite"}}>⚠</span>}
           {isCD&&Number(m.tempo_estimado_segundos)>0&&run&&(
-            <div style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(8px,0.9vw,11px)",fontWeight:600,color:dark?"rgba(255,255,255,0.28)":"rgba(0,0,0,0.22)",letterSpacing:"0.08em",marginTop:2,textAlign:"right",fontVariantNumeric:"tabular-nums"}}>
+            <div style={{
+              fontFamily:"'Orbitron',monospace",
+              fontSize:"clamp(10px,1.1vw,14px)",
+              fontWeight:700,
+              color:dark?"rgba(255,255,255,0.55)":"rgba(0,0,0,0.45)",
+              letterSpacing:"0.1em",
+              marginTop:3,
+              textAlign:"right",
+              fontVariantNumeric:"tabular-nums",
+              borderTop:dark?"1px solid rgba(255,255,255,0.08)":"1px solid rgba(0,0,0,0.07)",
+              paddingTop:3,
+            }}>
               {"/ "+Math.round(Number(m.tempo_estimado_segundos)/3600)+"h total"}
             </div>
           )}

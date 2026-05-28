@@ -1125,7 +1125,17 @@ function RowItem({m, idx, D, forceCategory=null, showTimer=true, showDate=false}
   const cat     = CAT[catKey] || CAT.andamento;
   const accent  = cat.accent;
   const rgb     = cat.rgb;
-  const timerCol= run?"#22C55E":"#F59E0B";
+
+  // Countdown awareness (igual ao BoardCell)
+  const modoTimerR  = getModoTimer(m);
+  const isCDR       = modoTimerR === "countdown";
+  const restanteCDR = isCDR ? calcRestanteAoVivo(m, elapsed) : null;
+  const estadoCDR   = isCDR ? getEstadoCD(m, elapsed) : null;
+  const displayTimeR= isCDR && restanteCDR !== null ? restanteCDR : elapsed;
+
+  const timerCol= isCDR
+    ? (estadoCDR==="atraso"?"#EF4444":estadoCDR==="aviso"?"#F59E0B":"#22C55E")
+    : run?"#22C55E":"#F59E0B";
 
   return(
     <div style={{
@@ -1225,8 +1235,9 @@ function RowItem({m, idx, D, forceCategory=null, showTimer=true, showDate=false}
       ):showTimer?(
         <div style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(12px,1vw,14px)",
           fontWeight:900,color:timerCol,letterSpacing:"0.04em",flexShrink:0,
-          textShadow:run?`0 0 8px rgba(34,197,94,0.5)`:"none"}}>
-          {fmtHMS(elapsed)}
+          textShadow:run?`0 0 8px ${timerCol}88`:"none"}}>
+          {fmtHMS(displayTimeR)}
+          {isCDR&&estadoCDR==="atraso"&&<span style={{marginLeft:4,fontSize:"0.75em",animation:"blink 0.8s infinite"}}>⚠</span>}
         </div>
       ):null}
       {tasks.length>0&&(
@@ -2292,7 +2303,7 @@ export default function AoVivo(){
     {l:"ESTA SEMANA", v:conSemana.length,             c:D.green },
     {l:"HOJE",        v:conHoje.length,               c:D.cyan  },
     {l:"MÉD.h/MÁQ",  v:avgH,                         c:D.silver},
-    {l:"TOTAL 2026",  v:totalCon.length,              c:D.sub   },
+    {l:"TOTAL 2026",  v:totalCon.length,              c:"#FF2D78"},
   ];
 
   return(

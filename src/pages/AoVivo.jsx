@@ -1768,8 +1768,8 @@ function AlmocoClock(){
     <div style={{
       fontFamily:"'Orbitron',monospace",
       fontSize:"clamp(36px,6vw,72px)",fontWeight:900,
-      color:"#22C55E",letterSpacing:"0.12em",
-      textShadow:"0 0 30px rgba(34,197,94,0.6)",
+      color:"#FF2D78",letterSpacing:"0.12em",
+      textShadow:"0 0 30px rgba(255,45,120,0.8), 0 0 60px rgba(255,45,120,0.3)",
       fontVariantNumeric:"tabular-nums",
     }}>{h}:{m}:{s}</div>
   );
@@ -2348,15 +2348,15 @@ export default function AoVivo(){
     }}>
       {/* scanlines */}
       <div style={{position:"absolute",inset:0,pointerEvents:"none",
-        backgroundImage:"repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(34,197,94,0.018) 2px,rgba(34,197,94,0.018) 4px)",
+        backgroundImage:"repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,45,120,0.018) 2px,rgba(255,45,120,0.018) 4px)",
         zIndex:0}}/>
-      {/* Jordan — marca central na tela de almoço */}
+      {/* Jordan — destaque na tela de almoço */}
       <img src={JORDAN_URL} alt="Jordan" style={{
         position:"absolute",bottom:32,right:40,
-        width:"clamp(100px,14vw,180px)",
-        opacity:0.22,
-        pointerEvents:"none",zIndex:0,
-        filter:"drop-shadow(0 0 20px rgba(34,197,94,0.3))",
+        width:"clamp(160px,20vw,260px)",
+        opacity:0.92,
+        pointerEvents:"none",zIndex:2,
+        filter:"drop-shadow(0 0 24px rgba(34,197,94,0.5))",
       }}/>
 
       <div style={{position:"relative",zIndex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:16}}>
@@ -2366,22 +2366,23 @@ export default function AoVivo(){
         </div>
         <div style={{
           fontSize:"clamp(28px,4.5vw,52px)",fontWeight:900,letterSpacing:"0.15em",
-          color:"#22C55E",textShadow:"0 0 40px rgba(34,197,94,0.8)",
+          color:"#FF2D78",textShadow:"0 0 40px rgba(255,45,120,0.9), 0 0 80px rgba(255,45,120,0.4)",
           textTransform:"uppercase",
         }}>Horário de Almoço</div>
         <div style={{
           fontSize:"clamp(14px,2vw,24px)",fontWeight:700,letterSpacing:"0.25em",
-          color:"rgba(34,197,94,0.5)",
+          color:"rgba(255,45,120,0.7)",
         }}>12:30 — 13:30</div>
         <AlmocoClock/>
         <div style={{
           marginTop:8,padding:"10px 32px",
           border:"1px solid rgba(34,197,94,0.18)",borderRadius:8,
           fontSize:"clamp(9px,1vw,12px)",fontWeight:600,letterSpacing:"0.1em",
-          color:"rgba(34,197,94,0.35)",textAlign:"center",lineHeight:1.8,
+          color:"rgba(255,45,120,0.45)",textAlign:"center",lineHeight:1.8,
+          border:"1px solid rgba(255,45,120,0.2)",
         }}>
           Todos os timers foram pausados automaticamente<br/>
-          <span style={{color:"rgba(34,197,94,0.2)"}}>
+          <span style={{color:"rgba(255,45,120,0.25)"}}>
             Os técnicos retomam manualmente às 13:30
           </span>
         </div>

@@ -1756,24 +1756,9 @@ const SLIDES=[
   {id:"concluidas",   label:"CONCLUÍDAS"},
 ];
 
+import AlmocoScreen from "../components/AlmocoScreen";
+
 // ── MAIN ──────────────────────────────────────────────────────────────────────
-// ── Relógio para tela de almoço ──────────────────────────────────────────────
-function AlmocoClock(){
-  const [t,sT]=useState(new Date());
-  useEffect(()=>{const id=setInterval(()=>sT(new Date()),1000);return()=>clearInterval(id);},[]);
-  const h=String(t.getHours()).padStart(2,"0");
-  const m=String(t.getMinutes()).padStart(2,"0");
-  const s=String(t.getSeconds()).padStart(2,"0");
-  return(
-    <div style={{
-      fontFamily:"'Orbitron',monospace",
-      fontSize:"clamp(36px,6vw,72px)",fontWeight:900,
-      color:"#22C55E",letterSpacing:"0.12em",
-      textShadow:"0 0 30px rgba(34,197,94,0.6)",
-      fontVariantNumeric:"tabular-nums",
-    }}>{h}:{m}:{s}</div>
-  );
-}
 
 export default function AoVivo(){
   const [dark,sDark] = useState(()=>{ try{return localStorage.getItem("theme")!=="light";}catch{return true;} });
@@ -2339,50 +2324,7 @@ export default function AoVivo(){
   ];
 
   // ── Tela de almoço 12:30–13:30 ──────────────────────────────────────────────
-  if(isAlmoco) return(
-    <div style={{
-      position:"fixed",inset:0,
-      background:"linear-gradient(135deg,#030803 0%,#061006 50%,#030803 100%)",
-      display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
-      fontFamily:"'Orbitron',monospace",gap:20,overflow:"hidden",
-    }}>
-      {/* scanlines */}
-      <div style={{position:"absolute",inset:0,pointerEvents:"none",
-        backgroundImage:"repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(34,197,94,0.018) 2px,rgba(34,197,94,0.018) 4px)",
-        zIndex:0}}/>
-      {/* marca d'água Jordan */}
-      <img src={JORDAN_URL} alt="" style={{position:"absolute",bottom:24,right:24,
-        width:"clamp(60px,6vw,90px)",opacity:0.1,pointerEvents:"none",zIndex:0}}/>
-
-      <div style={{position:"relative",zIndex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:16}}>
-        <div style={{fontSize:"clamp(64px,9vw,100px)",lineHeight:1,
-          filter:"drop-shadow(0 0 28px rgba(34,197,94,0.5))"}}>
-          🍽️
-        </div>
-        <div style={{
-          fontSize:"clamp(28px,4.5vw,52px)",fontWeight:900,letterSpacing:"0.15em",
-          color:"#22C55E",textShadow:"0 0 40px rgba(34,197,94,0.8)",
-          textTransform:"uppercase",
-        }}>Horário de Almoço</div>
-        <div style={{
-          fontSize:"clamp(14px,2vw,24px)",fontWeight:700,letterSpacing:"0.25em",
-          color:"rgba(34,197,94,0.5)",
-        }}>12:30 — 13:30</div>
-        <AlmocoClock/>
-        <div style={{
-          marginTop:8,padding:"10px 32px",
-          border:"1px solid rgba(34,197,94,0.18)",borderRadius:8,
-          fontSize:"clamp(9px,1vw,12px)",fontWeight:600,letterSpacing:"0.1em",
-          color:"rgba(34,197,94,0.35)",textAlign:"center",lineHeight:1.8,
-        }}>
-          Todos os timers foram pausados automaticamente<br/>
-          <span style={{color:"rgba(34,197,94,0.2)"}}>
-            Os técnicos retomam manualmente às 13:30
-          </span>
-        </div>
-      </div>
-    </div>
-  );
+  if(isAlmoco) return <AlmocoScreen />;
 
   return(
     <div style={{width:"100vw",height:"100vh",background:D.dark?D.bg:`radial-gradient(1200px 600px at 85% -10%, rgba(200,16,46,0.04), transparent 60%), radial-gradient(900px 500px at 10% 110%, rgba(176,141,46,0.04), transparent 60%), #F2F2F4`,color:D.text,

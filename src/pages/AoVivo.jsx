@@ -1108,12 +1108,13 @@ function CalendarFila({items, D, concluidas=[]}){
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  ROW ITEM — linha compacta (Prioritárias, NTS, Recon, Concluídas)
+//  ROW ITEM — card centrado estilo BoardCell (NTS, Prioritárias, Concluídas)
 // ─────────────────────────────────────────────────────────────────────────────
 function RowItem({m, idx, D, forceCategory=null, showTimer=true, showDate=false}){
   const dark    = D.dark;
   const elapsed = useLiveTimer(m);
   const run     = m.timer_status==="running";
+  const paused  = m.timer_status?.startsWith("paused");
   const tasks   = m.tarefas||[];
   const done    = tasks.filter(t=>t.concluida).length;
   const pct     = tasks.length?Math.round(done/tasks.length*100):0;
@@ -1126,7 +1127,6 @@ function RowItem({m, idx, D, forceCategory=null, showTimer=true, showDate=false}
   const accent  = cat.accent;
   const rgb     = cat.rgb;
 
-  // Countdown awareness (igual ao BoardCell)
   const modoTimerR  = getModoTimer(m);
   const isCDR       = modoTimerR === "countdown";
   const restanteCDR = isCDR ? calcRestanteAoVivo(m, elapsed) : null;
@@ -1135,114 +1135,164 @@ function RowItem({m, idx, D, forceCategory=null, showTimer=true, showDate=false}
 
   const timerCol= isCDR
     ? (estadoCDR==="atraso"?"#EF4444":estadoCDR==="aviso"?"#F59E0B":"#22C55E")
-    : run?"#22C55E":"#F59E0B";
+    : run?"#22C55E":paused?"#F59E0B":"#6b7280";
+
+  const topBorder = run?"#22C55E":accent;
+  const borderCol = run?"rgba(34,197,94,0.55)":`rgba(${rgb},${dark?0.4:0.5})`;
+  const cardBg = dark
+    ?(run
+      ?`linear-gradient(160deg,rgba(34,197,94,0.08) 0%,rgba(${rgb},0.05) 50%,rgba(8,4,6,0.99) 100%)`
+      :`linear-gradient(160deg,rgba(${rgb},0.10) 0%,rgba(8,4,6,0.99) 100%)`)
+    :"#FFFFFF";
+
+  const timerDisplay = isCon
+    ? (m.timer_accumulated_seconds>=60 ? fmtHMS(m.timer_accumulated_seconds) : null)
+    : showTimer ? fmtHMS(displayTimeR) : null;
+  const timerFinalCol = isCon ? "#22C55E" : timerCol;
 
   return(
     <div style={{
-      position:"relative",overflow:"hidden",
-      display:"flex",alignItems:"center",gap:12,
-      padding:"8px 12px",
-      background:dark
-        ?(isCon?`rgba(34,197,94,0.07)`:run?`linear-gradient(90deg,rgba(34,197,94,0.08),rgba(${rgb},0.06))`:`rgba(${rgb},0.06)`)
-        :"#FFFFFF",
-      border:dark?`1px solid rgba(${rgb},0.25)`:`1px solid rgba(13,13,15,0.06)`,
-      borderLeft:`3px solid ${run?"#22C55E":accent}`,
-      boxShadow:dark?((run||catKey==="prio")?`0 0 8px rgba(${rgb},0.18)`:`0 1px 3px rgba(0,0,0,0.4)`):"0 1px 1px rgba(13,13,15,0.05), 0 2px 4px rgba(13,13,15,0.04)",
-      borderRadius:dark?"4px":"10px",
-      clipPath:dark?"polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px))":"none",
+      position:"relative",
+      display:"flex",flexDirection:"column",
+      padding:"10px 12px 10px",
+      background:dark?cardBg:"#FFFFFF",
+      border:dark?`1px solid ${borderCol}`:`1px solid rgba(13,13,15,0.07)`,
+      borderTop:`3px solid ${topBorder}`,
+      boxShadow:dark?(run?`0 0 18px rgba(34,197,94,0.18), 0 2px 8px rgba(0,0,0,0.7)`:`0 2px 6px rgba(0,0,0,0.5)`):`0 2px 10px rgba(0,0,0,0.07)`,
+      overflow:"hidden",
+      borderRadius:dark?0:"14px",
+      clipPath:dark?"polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))":"none",
+      boxSizing:"border-box",
+      minHeight:"130px",
     }}>
-      <span style={{fontFamily:"'Orbitron',monospace",fontSize:"9px",fontWeight:700,
-        color:`rgba(${rgb},${dark?0.5:0.6})`,flexShrink:0,width:"16px",textAlign:"right"}}>
-        {String(idx+1).padStart(2,"0")}
-      </span>
-      <div style={{flex:1,minWidth:0}}>
+      {/* sweep running */}
+      {run&&dark&&(
+        <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0,overflow:"hidden"}}>
+          <div style={{position:"absolute",top:0,bottom:0,width:"60%",
+            background:"linear-gradient(105deg,transparent 0%,rgba(255,45,120,0.08) 40%,rgba(255,45,120,0.18) 50%,rgba(255,45,120,0.08) 60%,transparent 100%)",
+            animation:"cardSweep 2.8s cubic-bezier(0.4,0,0.6,1) infinite",filter:"blur(3px)"}}/>
+        </div>
+      )}
+
+      {/* ── TOPO: badges esq + timer dir ── */}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:6,zIndex:1,flexShrink:0}}>
+        <div style={{display:"flex",alignItems:"center",gap:4,flexWrap:"nowrap",minWidth:0,overflow:"hidden"}}>
+          <span style={{width:7,height:7,borderRadius:"50%",flexShrink:0,
+            background:isCon?"#22C55E":run?"#22C55E":paused?"#F59E0B":accent,
+            boxShadow:isCon?`0 0 8px #22C55E`:run?`0 0 8px #22C55E`:paused?`0 0 6px rgba(245,158,11,0.6)`:`0 0 6px rgba(${rgb},0.6)`,
+            animation:run?"blink 1.2s ease-in-out infinite":"none"}}/>
+          <span style={{
+            fontFamily:"'Orbitron',monospace",fontSize:"8px",fontWeight:800,letterSpacing:"0.12em",flexShrink:0,
+            padding:"2px 7px",
+            background:isCon?"rgba(34,197,94,0.12)":run?"rgba(34,197,94,0.12)":paused?"rgba(245,158,11,0.12)":`rgba(${rgb},0.12)`,
+            border:`1px solid ${isCon?"rgba(34,197,94,0.4)":run?"rgba(34,197,94,0.4)":paused?"rgba(245,158,11,0.4)":`rgba(${rgb},0.4)`}`,
+            clipPath:dark?"polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)":"none",
+            borderRadius:dark?0:"999px",
+            color:isCon?"#22C55E":run?"#22C55E":paused?"#F59E0B":accent}}>
+            {isCon?"DONE":run?"RUN":paused?"PAUSED":"IDLE"}
+          </span>
+          <span style={{
+            fontFamily:"'Orbitron',monospace",fontSize:"8px",fontWeight:700,letterSpacing:"0.08em",
+            padding:"2px 7px",color:accent,background:`rgba(${rgb},0.12)`,
+            border:`1px solid rgba(${rgb},0.4)`,
+            clipPath:dark?"polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)":"none",
+            borderRadius:dark?0:"999px",textTransform:"uppercase",whiteSpace:"nowrap",flexShrink:0}}>
+            {cat.label}
+          </span>
+          {rLabel&&<span style={{fontFamily:"'Orbitron',monospace",fontSize:"8px",fontWeight:700,
+            padding:"2px 6px",color:CAT.recon.accent,
+            background:"rgba(155,92,246,0.15)",border:"1px solid rgba(155,92,246,0.4)",
+            clipPath:dark?"polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)":"none",
+            borderRadius:dark?0:"999px",flexShrink:0}}>{rLabel}</span>}
+          {m.prioridade&&catKey!=="prio"&&<span style={{fontFamily:"'Orbitron',monospace",fontSize:"8px",fontWeight:700,
+            padding:"2px 6px",color:CAT.prio.accent,
+            background:"rgba(239,68,68,0.15)",border:"1px solid rgba(239,68,68,0.4)",
+            clipPath:dark?"polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)":"none",
+            borderRadius:dark?0:"999px",flexShrink:0}}>⚑ PRIO</span>}
+        </div>
+        {/* Timer topo direito */}
+        {timerDisplay&&(
+          <div style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(12px,1.6vw,22px)",
+            fontWeight:900,flexShrink:0,color:timerFinalCol,letterSpacing:"0.06em",
+            fontVariantNumeric:"tabular-nums",
+            textShadow:dark?`0 0 14px ${timerFinalCol}99`:"none"}}>
+            {timerDisplay}
+            {isCDR&&estadoCDR==="atraso"&&<span style={{marginLeft:4,fontSize:"0.7em",animation:"blink 0.8s infinite"}}>⚠</span>}
+          </div>
+        )}
+        {showDate&&(m.previsao_inicio||m.previsao_fim)&&!timerDisplay&&(
+          <div style={{display:"flex",flexDirection:"column",gap:2,flexShrink:0,alignItems:"flex-end"}}>
+            {m.previsao_inicio&&(
+              <div style={{display:"flex",alignItems:"center",gap:3}}>
+                <span style={{fontFamily:"monospace",fontSize:"7px",color:"#4D9FFF",opacity:0.8}}>▶</span>
+                <span style={{fontFamily:"'Orbitron',monospace",fontSize:"10px",fontWeight:800,
+                  color:"#4D9FFF",letterSpacing:"0.06em",
+                  textShadow:dark?"0 0 6px rgba(77,159,255,0.5)":"none",whiteSpace:"nowrap"}}>
+                  {new Date(m.previsao_inicio+"T12:00:00").toLocaleDateString("pt-PT",{day:"2-digit",month:"2-digit"})}
+                </span>
+              </div>
+            )}
+            {m.previsao_fim&&(
+              <div style={{display:"flex",alignItems:"center",gap:3}}>
+                <span style={{fontFamily:"monospace",fontSize:"7px",color:"#22C55E",opacity:0.8}}>✓</span>
+                <span style={{fontFamily:"'Orbitron',monospace",fontSize:"10px",fontWeight:800,
+                  color:"#22C55E",letterSpacing:"0.06em",
+                  textShadow:dark?"0 0 6px rgba(34,197,94,0.5)":"none",whiteSpace:"nowrap"}}>
+                  {new Date(m.previsao_fim+"T12:00:00").toLocaleDateString("pt-PT",{day:"2-digit",month:"2-digit"})}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* ── CENTRO: NS + Modelo centrados, flex:1 ── */}
+      <div style={{flex:1,display:"flex",flexDirection:"column",
+        alignItems:"center",justifyContent:"center",
+        zIndex:1,gap:4,padding:"6px 0",textAlign:"center",minHeight:0}}>
+        {/* NS */}
         <div style={{
-          fontFamily:dark?"'Orbitron',monospace":"'JetBrains Mono',ui-monospace,monospace",
-          fontSize:"clamp(14px,1.3vw,18px)",fontWeight:dark?900:700,
-          color:dark?accent:"#0D0D0F",
-          letterSpacing:dark?"0.06em":"-0.015em",
-          textShadow:dark?`0 0 10px ${accent}66`:"none",
-          whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
+          fontFamily:"'Orbitron',monospace",
+          fontSize:"clamp(13px,1.8vw,26px)",fontWeight:900,
+          color:dark?"#f5f5f5":"#0D0D0F",
+          letterSpacing:"0.1em",lineHeight:1.1,
+          textShadow:dark?`0 0 18px rgba(240,240,240,0.2), 0 0 36px rgba(${rgb},0.15)`:"none",
+          whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",maxWidth:"100%",
+        }}>
           {m.serie||"—"}
         </div>
+        {/* Modelo */}
         <div style={{
           fontFamily:dark?"'Rajdhani',system-ui,sans-serif":"'Manrope',-apple-system,sans-serif",
-          fontSize:"clamp(11px,1vw,13px)",fontWeight:600,
-          color:dark?"rgba(180,180,180,0.85)":"#8E8E93",
-          marginTop:"2px",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
-          letterSpacing:dark?"0.02em":"0.01em"}}>
+          fontSize:"clamp(10px,1.1vw,15px)",fontWeight:dark?700:600,
+          color:dark?"rgba(200,200,200,0.80)":"#555",
+          letterSpacing:dark?"0.06em":"0.01em",
+          whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",maxWidth:"100%",
+        }}>
           {m.modelo||"—"}
         </div>
+        {/* Tags */}
         {tasks.length>0&&(
-          <div style={{display:"flex",flexWrap:"nowrap",gap:3,marginTop:3,overflow:"hidden"}}>
-            {tasks.slice(0,6).map((t,j)=>(
+          <div style={{display:"flex",flexWrap:"wrap",gap:3,justifyContent:"center",marginTop:2,overflow:"hidden",maxHeight:"32px"}}>
+            {tasks.slice(0,5).map((t,j)=>(
               <span key={j} style={{
-                fontFamily:"monospace",fontSize:"8px",padding:"1px 5px",
+                fontFamily:"monospace",fontSize:"8px",padding:"1px 6px",
                 background:t.concluida?`rgba(34,197,94,0.1)`:`rgba(${rgb},0.08)`,
                 color:t.concluida?"#16a34a":accent,
                 border:`1px solid ${t.concluida?"rgba(34,197,94,0.3)":`rgba(${rgb},0.3)`}`,
                 textDecoration:t.concluida?"line-through":"none",
                 clipPath:"polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)",
-                fontWeight:600,letterSpacing:"0.02em",whiteSpace:"nowrap",flexShrink:0,
+                fontWeight:600,whiteSpace:"nowrap",flexShrink:0,
               }}>{t.texto}</span>
             ))}
-            {tasks.length>6&&<span style={{fontFamily:"monospace",fontSize:"8px",
-              color:dark?"rgba(160,160,160,0.5)":"rgba(30,30,60,0.4)",flexShrink:0}}>
-              +{tasks.length-6}
-            </span>}
           </div>
         )}
       </div>
-      <div style={{display:"flex",gap:4,flexShrink:0,alignItems:"center"}}>
-        <HudTag color={accent} label={cat.label} glow={dark&&(catKey==="prio"||catKey==="express")}/>
-        {rLabel&&<HudTag color={CAT.recon.accent} label={rLabel} glow={false}/>}
-        {m.prioridade&&catKey!=="prio"&&<HudTag color={CAT.prio.accent} label="⚑" glow={dark}/>}
-      </div>
-      {showDate&&(m.previsao_inicio||m.previsao_fim)&&(
-        <div style={{display:"flex",flexDirection:"column",gap:2,flexShrink:0,alignItems:"flex-end"}}>
-          {m.previsao_inicio&&(
-            <div style={{display:"flex",alignItems:"center",gap:3}}>
-              <span style={{fontFamily:"monospace",fontSize:"7px",color:"#4D9FFF",opacity:0.8}}>▶</span>
-              <span style={{fontFamily:"'Orbitron',monospace",fontSize:"9px",fontWeight:800,
-                color:"#4D9FFF",letterSpacing:"0.06em",
-                textShadow:dark?"0 0 6px rgba(77,159,255,0.5)":"none",whiteSpace:"nowrap"}}>
-                {new Date(m.previsao_inicio+"T12:00:00").toLocaleDateString("pt-PT",{day:"2-digit",month:"2-digit"})}
-              </span>
-            </div>
-          )}
-          {m.previsao_fim&&(
-            <div style={{display:"flex",alignItems:"center",gap:3}}>
-              <span style={{fontFamily:"monospace",fontSize:"7px",color:"#22C55E",opacity:0.8}}>✓</span>
-              <span style={{fontFamily:"'Orbitron',monospace",fontSize:"9px",fontWeight:800,
-                color:"#22C55E",letterSpacing:"0.06em",
-                textShadow:dark?"0 0 6px rgba(34,197,94,0.5)":"none",whiteSpace:"nowrap"}}>
-                {new Date(m.previsao_fim+"T12:00:00").toLocaleDateString("pt-PT",{day:"2-digit",month:"2-digit"})}
-              </span>
-            </div>
-          )}
-        </div>
-      )}
-      {/* timer: se concluída mostra acumulado estático; senão mostra live */}
-      {(isCon&&((m.timer_accumulated_seconds||0)>=MIN_TIMER_SECONDS))?(
-        <div style={{display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
-          <span style={{fontFamily:"monospace",fontSize:"9px",color:"rgba(34,197,94,0.6)"}}>⏱</span>
-          <div style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(15px,1.4vw,20px)",
-            fontWeight:900,color:"#22C55E",letterSpacing:"0.06em",
-            textShadow:`0 0 12px rgba(34,197,94,0.6)`}}>
-            {fmtHMS(m.timer_accumulated_seconds)}
-          </div>
-        </div>
-      ):showTimer?(
-        <div style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(15px,1.4vw,20px)",
-          fontWeight:900,color:timerCol,letterSpacing:"0.06em",flexShrink:0,
-          textShadow:run?`0 0 12px ${timerCol}aa`:"none"}}>
-          {fmtHMS(displayTimeR)}
-          {isCDR&&estadoCDR==="atraso"&&<span style={{marginLeft:4,fontSize:"0.75em",animation:"blink 0.8s infinite"}}>⚠</span>}
-        </div>
-      ):null}
+
+      {/* ── BARRA progresso ── */}
       {tasks.length>0&&(
-        <div style={{position:"absolute",bottom:0,left:0,right:0,height:"2px",
-          background:`rgba(0,0,0,${dark?0.03:0.06})`}}>
+        <div style={{position:"absolute",bottom:0,left:0,right:0,height:"3px",
+          background:`rgba(0,0,0,0.15)`}}>
           <div style={{height:"100%",width:`${pct}%`,
             background:`linear-gradient(90deg,#c8102e,${accent})`,
             boxShadow:`0 0 4px rgba(${rgb},0.4)`,transition:"width 0.5s"}}/>
@@ -1935,58 +1985,9 @@ export default function AoVivo(){
                             <span style={{fontFamily:"'Orbitron',monospace",fontSize:"8px",
                               letterSpacing:"0.15em",color:col.color}}>—</span>
                           </div>
-                        ):items.map(m=>{
-                          const cat=CAT[getMachineCategory(m)]||CAT.andamento;
-                          const acc=m.timer_accumulated_seconds||0;
-                          const showAcc=acc>=MIN_TIMER_SECONDS;
-                          return(
-                            <div key={m.id} style={{
-                              padding:"12px 14px",
-                              background:dark?`rgba(${rgb},0.05)`:"rgba(255,255,255,0.75)",
-                              border:dark?`1px solid rgba(${rgb},0.15)`:`1px solid rgba(13,13,15,0.06)`,
-                              borderLeft:`3px solid ${col.color}`,
-                              borderRadius:dark?"4px":"8px",
-                              boxShadow:dark?"none":"0 1px 3px rgba(13,13,15,0.04)",
-                              display:"flex",flexDirection:"column",gap:"4px",
-                              flexShrink:0,
-                            }}>
-                              {/* NS em destaque */}
-                              <div style={{
-                                fontFamily:dark?"'Orbitron',monospace":"'JetBrains Mono',monospace",
-                                fontSize:dark?"clamp(14px,1.3vw,18px)":"13px",fontWeight:dark?900:700,
-                                color:dark?cat.accent:"#0D0D0F",
-                                letterSpacing:dark?"0.05em":"-0.01em",
-                                whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
-                                fontVariantNumeric:"tabular-nums",
-                                textShadow:dark?`0 0 10px ${cat.accent}77`:"none"}}>
-                                {m.serie||"—"}
-                              </div>
-                              {/* Modelo */}
-                              <div style={{fontFamily:"monospace",fontSize:"clamp(10px,0.9vw,12px)",
-                                color:D.muted,whiteSpace:"nowrap",overflow:"hidden",
-                                textOverflow:"ellipsis",letterSpacing:"0.02em",marginTop:"2px"}}>
-                                {m.modelo}
-                              </div>
-                              {/* Rodapé: timer + prio */}
-                              <div style={{display:"flex",alignItems:"center",gap:"5px",flexWrap:"wrap",marginTop:"1px"}}>
-                                {showAcc&&(
-                                  <span style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(12px,1.1vw,15px)",
-                                    fontWeight:900,color:col.color,letterSpacing:"0.04em",
-                                    display:"flex",alignItems:"center",gap:"4px",
-                                    textShadow:`0 0 8px ${col.color}88`}}>
-                                    ⏱ {fmtAcc(Math.round(acc))}
-                                  </span>
-                                )}
-                                {m.prioridade&&(
-                                  <span style={{fontFamily:"monospace",fontSize:"7px",fontWeight:700,
-                                    padding:"1px 4px",borderRadius:"3px",
-                                    background:"rgba(239,68,68,0.15)",color:"#EF4444",
-                                    border:"1px solid rgba(239,68,68,0.3)"}}>⚑</span>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
+                        ):items.map((m,i)=>(
+                          <RowItem key={m.id} m={m} idx={i} D={D} forceCategory={getMachineCategory(m)} showTimer={true}/>
+                        ))}
                       </div>
                     </div>
                   );
@@ -2000,10 +2001,16 @@ export default function AoVivo(){
     prioritarias:(
       <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
         <SlideHead title="PRIORITÁRIAS" icon={<Flag size={16}/>} color={D.yellow} pulse D={D} count={prioritarias.length}/>
-        {prioritarias.length===0?<Empty label="Sem prioritárias activas ✓" D={D}/>:
-          <div style={{display:"flex",flexDirection:"column",gap:"4px"}}>
-            {prioritarias.map((m,i)=><RowItem key={m.id} m={m} idx={i} D={D} forceCategory="prio"/>)}
-          </div>}
+        {prioritarias.length===0?<Empty label="Sem prioritárias activas ✓" D={D}/>:(()=>{
+          const n=prioritarias.length;
+          const cols=n<=2?2:n<=4?2:n<=6?3:4;
+          const rows=Math.ceil(n/cols);
+          return(
+            <div style={{display:"grid",gridTemplateColumns:`repeat(${cols},1fr)`,gridTemplateRows:`repeat(${rows},1fr)`,gap:8,flex:1,minHeight:0,overflow:"hidden"}}>
+              {prioritarias.map((m,i)=><RowItem key={m.id} m={m} idx={i} D={D} forceCategory="prio"/>)}
+            </div>
+          );
+        })()}
       </div>
     ),
     proximas:(
@@ -2018,11 +2025,18 @@ export default function AoVivo(){
     nts:(
       <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
         <SlideHead title="NTS" icon={<ListOrdered size={16}/>} color={D.pink} D={D} count={ntsAnd.length+ntsAF.length}/>
-        {ntsAnd.length+ntsAF.length===0?<Empty label="Sem máquinas NTS" D={D}/>:
-          <div style={{display:"flex",flexDirection:"column",gap:"4px"}}>
-            {ntsAnd.length>0&&<><SecLabel label="▶ EM ANDAMENTO" D={D}/>{ntsAnd.map((m,i)=><RowItem key={m.id} m={m} idx={i} D={D} forceCategory="nts" showDate={true}/>)}</>}
-            {ntsAF.length>0&&<><SecLabel label="⏳ A FAZER" D={D}/>{ntsAF.map((m,i)=><RowItem key={m.id} m={m} idx={i} D={D} forceCategory="nts" showTimer={false} showDate={true}/>)}</>}
-          </div>}
+        {ntsAnd.length+ntsAF.length===0?<Empty label="Sem máquinas NTS" D={D}/>:(()=>{
+          const all=[...ntsAnd,...ntsAF];
+          const n=all.length;
+          const cols=n<=2?2:n<=4?2:n<=6?3:4;
+          const rows=Math.ceil(n/cols);
+          return(
+            <div style={{display:"grid",gridTemplateColumns:`repeat(${cols},1fr)`,gridTemplateRows:`repeat(${rows},1fr)`,gap:8,flex:1,minHeight:0,overflow:"hidden"}}>
+              {ntsAnd.map((m,i)=><RowItem key={m.id} m={m} idx={i} D={D} forceCategory="nts" showDate={true}/>)}
+              {ntsAF.map((m,i)=><RowItem key={m.id} m={m} idx={ntsAnd.length+i} D={D} forceCategory="nts" showTimer={false} showDate={true}/>)}
+            </div>
+          );
+        })()}
       </div>
     ),
     recon:(()=>{
@@ -2221,8 +2235,8 @@ export default function AoVivo(){
                 return(
                   <div key={m.id} style={{
                     position:"relative",
-                    display:"flex",flexDirection:"column",gap:3,
-                    padding:"6px 8px 5px",
+                    display:"flex",flexDirection:"column",
+                    padding:"10px 12px 10px",
                     background:D.dark
                       ?`linear-gradient(135deg,rgba(34,197,94,0.12) 0%,rgba(8,4,6,0.97) 100%)`
                       :`linear-gradient(135deg,rgba(34,197,94,0.1) 0%,rgba(255,255,255,0.97) 100%)`,
@@ -2242,18 +2256,19 @@ export default function AoVivo(){
                       <CheckCircle2 size={22} color="#22C55E"/>
                     </div>
                     {/* série + modelo */}
-                    <div>
+                    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"6px 0",textAlign:"center"}}>
                       <div style={{fontFamily:"'Orbitron',monospace",
-                        fontSize:"clamp(13px,1.2vw,18px)",fontWeight:900,
-                        color:"#22C55E",letterSpacing:"0.05em",lineHeight:1.1,
-                        textShadow:D.dark?"0 0 10px rgba(34,197,94,0.5)":"none",
+                        fontSize:"clamp(13px,1.4vw,20px)",fontWeight:900,
+                        color:D.dark?"#f5f5f5":"#0D0D0F",letterSpacing:"0.1em",lineHeight:1.1,
+                        textShadow:D.dark?"0 0 18px rgba(240,240,240,0.2)":"none",
                         whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
-                        paddingRight:"22px"}}>
+                        textAlign:"center",maxWidth:"100%"}}>
                         {m.serie||"—"}
                       </div>
-                      <div style={{fontFamily:"'Rajdhani',system-ui,sans-serif",fontSize:"clamp(11px,1vw,14px)",fontWeight:600,
-                        color:D.dark?"rgba(180,180,180,0.85)":"rgba(30,30,60,0.65)",
-                        marginTop:3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
+                      <div style={{fontFamily:"'Rajdhani',system-ui,sans-serif",fontSize:"clamp(11px,1vw,15px)",fontWeight:600,
+                        color:D.dark?"rgba(200,200,200,0.80)":"#555",
+                        marginTop:3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
+                        textAlign:"center",maxWidth:"100%"}}>
                         {m.modelo||"—"}
                       </div>
                     </div>

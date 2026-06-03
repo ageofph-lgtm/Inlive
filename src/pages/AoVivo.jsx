@@ -1056,7 +1056,7 @@ function CalendarFila({items, D, concluidas=[]}){
                       border:`1px solid ${D.blue}22`,
                       borderLeft:`3px solid ${D.blue}`,
                       borderRadius:"6px",
-                      padding:"8px 12px",display:"flex",alignItems:"center",gap:"12px",overflow:"hidden"}}>
+                      padding:"12px 14px",display:"flex",alignItems:"center",gap:"12px",overflow:"hidden"}}>
                       {/* Data em destaque */}
                       <div style={{flexShrink:0,textAlign:"center",
                         background:`${D.blue}14`,border:`1px solid ${D.blue}33`,
@@ -1158,18 +1158,18 @@ function RowItem({m, idx, D, forceCategory=null, showTimer=true, showDate=false}
       <div style={{flex:1,minWidth:0}}>
         <div style={{
           fontFamily:dark?"'Orbitron',monospace":"'JetBrains Mono',ui-monospace,monospace",
-          fontSize:"clamp(12px,1.05vw,14px)",fontWeight:dark?900:600,
-          color:dark?"#f0f0f0":"#0D0D0F",
+          fontSize:"clamp(14px,1.3vw,18px)",fontWeight:dark?900:700,
+          color:dark?accent:"#0D0D0F",
           letterSpacing:dark?"0.06em":"-0.015em",
-          textShadow:"none",
+          textShadow:dark?`0 0 10px ${accent}66`:"none",
           whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
           {m.serie||"—"}
         </div>
         <div style={{
           fontFamily:dark?"'Rajdhani',system-ui,sans-serif":"'Manrope',-apple-system,sans-serif",
-          fontSize:"11px",fontWeight:500,
-          color:dark?"rgba(140,140,140,0.75)":"#8E8E93",
-          marginTop:"1px",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
+          fontSize:"clamp(11px,1vw,13px)",fontWeight:600,
+          color:dark?"rgba(180,180,180,0.85)":"#8E8E93",
+          marginTop:"2px",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
           letterSpacing:dark?"0.02em":"0.01em"}}>
           {m.modelo||"—"}
         </div>
@@ -1226,16 +1226,16 @@ function RowItem({m, idx, D, forceCategory=null, showTimer=true, showDate=false}
       {(isCon&&((m.timer_accumulated_seconds||0)>=MIN_TIMER_SECONDS))?(
         <div style={{display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
           <span style={{fontFamily:"monospace",fontSize:"9px",color:"rgba(34,197,94,0.6)"}}>⏱</span>
-          <div style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(11px,0.95vw,13px)",
-            fontWeight:900,color:"#22C55E",letterSpacing:"0.04em",
-            textShadow:`0 0 8px rgba(34,197,94,0.5)`}}>
+          <div style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(15px,1.4vw,20px)",
+            fontWeight:900,color:"#22C55E",letterSpacing:"0.06em",
+            textShadow:`0 0 12px rgba(34,197,94,0.6)`}}>
             {fmtHMS(m.timer_accumulated_seconds)}
           </div>
         </div>
       ):showTimer?(
-        <div style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(12px,1vw,14px)",
-          fontWeight:900,color:timerCol,letterSpacing:"0.04em",flexShrink:0,
-          textShadow:run?`0 0 8px ${timerCol}88`:"none"}}>
+        <div style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(15px,1.4vw,20px)",
+          fontWeight:900,color:timerCol,letterSpacing:"0.06em",flexShrink:0,
+          textShadow:run?`0 0 12px ${timerCol}aa`:"none"}}>
           {fmtHMS(displayTimeR)}
           {isCDR&&estadoCDR==="atraso"&&<span style={{marginLeft:4,fontSize:"0.75em",animation:"blink 0.8s infinite"}}>⚠</span>}
         </div>
@@ -1941,8 +1941,8 @@ export default function AoVivo(){
                           const showAcc=acc>=MIN_TIMER_SECONDS;
                           return(
                             <div key={m.id} style={{
-                              padding:"8px 10px",
-                              background:dark?`rgba(${rgb},0.04)`:"rgba(255,255,255,0.75)",
+                              padding:"12px 14px",
+                              background:dark?`rgba(${rgb},0.05)`:"rgba(255,255,255,0.75)",
                               border:dark?`1px solid rgba(${rgb},0.15)`:`1px solid rgba(13,13,15,0.06)`,
                               borderLeft:`3px solid ${col.color}`,
                               borderRadius:dark?"4px":"8px",
@@ -1953,26 +1953,27 @@ export default function AoVivo(){
                               {/* NS em destaque */}
                               <div style={{
                                 fontFamily:dark?"'Orbitron',monospace":"'JetBrains Mono',monospace",
-                                fontSize:dark?"13px":"12px",fontWeight:dark?900:700,
+                                fontSize:dark?"clamp(14px,1.3vw,18px)":"13px",fontWeight:dark?900:700,
                                 color:dark?cat.accent:"#0D0D0F",
                                 letterSpacing:dark?"0.05em":"-0.01em",
                                 whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
                                 fontVariantNumeric:"tabular-nums",
-                                textShadow:dark?`0 0 8px ${cat.accent}55`:"none"}}>
+                                textShadow:dark?`0 0 10px ${cat.accent}77`:"none"}}>
                                 {m.serie||"—"}
                               </div>
-                              {/* Modelo — linha secundária compacta */}
-                              <div style={{fontFamily:"monospace",fontSize:"8px",
+                              {/* Modelo */}
+                              <div style={{fontFamily:"monospace",fontSize:"clamp(10px,0.9vw,12px)",
                                 color:D.muted,whiteSpace:"nowrap",overflow:"hidden",
-                                textOverflow:"ellipsis",letterSpacing:"0.02em"}}>
+                                textOverflow:"ellipsis",letterSpacing:"0.02em",marginTop:"2px"}}>
                                 {m.modelo}
                               </div>
                               {/* Rodapé: timer + prio */}
                               <div style={{display:"flex",alignItems:"center",gap:"5px",flexWrap:"wrap",marginTop:"1px"}}>
                                 {showAcc&&(
-                                  <span style={{fontFamily:"'Orbitron',monospace",fontSize:"9px",
-                                    fontWeight:700,color:col.color,letterSpacing:"0.03em",
-                                    display:"flex",alignItems:"center",gap:"3px"}}>
+                                  <span style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(12px,1.1vw,15px)",
+                                    fontWeight:900,color:col.color,letterSpacing:"0.04em",
+                                    display:"flex",alignItems:"center",gap:"4px",
+                                    textShadow:`0 0 8px ${col.color}88`}}>
                                     ⏱ {fmtAcc(Math.round(acc))}
                                   </span>
                                 )}
@@ -2202,8 +2203,8 @@ export default function AoVivo(){
             <div style={{
               display:"grid",
               gridTemplateColumns:`repeat(${cols},1fr)`,
-              gridAutoRows:"minmax(80px, 1fr)",
-              gap:6,
+              gridAutoRows:"minmax(0, 1fr)",
+              gap:8,
               flex:1,
               minHeight:0,
               overflowY:"auto",
@@ -2213,6 +2214,7 @@ export default function AoVivo(){
               {sorted.map((m,i)=>{
                 const dt=m.dataConclusao;
                 const dateStr=dt?new Date(dt).toLocaleDateString("pt-PT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"—";
+                const timeStr=dt?new Date(dt).toLocaleTimeString("pt-PT",{hour:"2-digit",minute:"2-digit"}):"";
                 const recon=m.recondicao||{};
                 const rLabel=recon.prata?"PRATA":recon.bronze?"BRONZE":null;
                 const tasks=m.tarefas||[];
@@ -2242,16 +2244,16 @@ export default function AoVivo(){
                     {/* série + modelo */}
                     <div>
                       <div style={{fontFamily:"'Orbitron',monospace",
-                        fontSize:"clamp(10px,0.9vw,13px)",fontWeight:900,
-                        color:D.dark?"#e8e8e8":"#0d0e1a",letterSpacing:"0.05em",lineHeight:1.1,
-                        textShadow:"none",
+                        fontSize:"clamp(13px,1.2vw,18px)",fontWeight:900,
+                        color:"#22C55E",letterSpacing:"0.05em",lineHeight:1.1,
+                        textShadow:D.dark?"0 0 10px rgba(34,197,94,0.5)":"none",
                         whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
                         paddingRight:"22px"}}>
                         {m.serie||"—"}
                       </div>
-                      <div style={{fontFamily:"'Rajdhani',system-ui,sans-serif",fontSize:"11px",fontWeight:500,
-                        color:D.dark?"rgba(140,140,140,0.7)":"rgba(30,30,60,0.55)",
-                        marginTop:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
+                      <div style={{fontFamily:"'Rajdhani',system-ui,sans-serif",fontSize:"clamp(11px,1vw,14px)",fontWeight:600,
+                        color:D.dark?"rgba(180,180,180,0.85)":"rgba(30,30,60,0.65)",
+                        marginTop:3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
                         {m.modelo||"—"}
                       </div>
                     </div>
@@ -2280,8 +2282,9 @@ export default function AoVivo(){
                         {((m.timer_accumulated_seconds||0)>=MIN_TIMER_SECONDS)&&(
                           <div style={{display:"flex",alignItems:"center",gap:3,flexShrink:0}}>
                             <span style={{fontFamily:"monospace",fontSize:"7px",color:"rgba(34,197,94,0.6)"}}>⏱</span>
-                            <span style={{fontFamily:"'Orbitron',monospace",fontSize:"10px",fontWeight:700,
-                              color:"#22C55E",letterSpacing:"0.04em"}}>
+                            <span style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(13px,1.2vw,17px)",fontWeight:900,
+                              color:"#22C55E",letterSpacing:"0.06em",
+                              textShadow:D.dark?"0 0 10px rgba(34,197,94,0.6)":"none"}}>
                               {fmtHMS(m.timer_accumulated_seconds)}
                             </span>
                           </div>

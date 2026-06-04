@@ -5,7 +5,7 @@
 // O AoVivo.jsx chama /api/functions/bridgeProxy sem nenhuma credencial.
 //
 // Variáveis de ambiente necessárias (configurar no painel Base44):
-//   SAGAN_BRIDGE_SECRET   → segredo da saganBridge
+//   INLIVE_READ_SECRET    → segredo read-only para o InLive (distinto do segredo full do Sagan)
 //   SAGAN_API_KEY         → api_key do app Watcher
 //
 // Apenas acções de leitura são permitidas (list, filter, get).
@@ -15,7 +15,7 @@
 const BRIDGE_URL = "https://watcherweb.base44.app/api/functions/saganBridge";
 
 // Segredos lidos de env vars — nunca expostos no bundle público nem no código
-const SAGAN_SECRET  = Deno.env.get("SAGAN_BRIDGE_SECRET") ?? "";
+const SAGAN_SECRET  = Deno.env.get("INLIVE_READ_SECRET") ?? "";
 const SAGAN_API_KEY = Deno.env.get("SAGAN_API_KEY") ?? "";
 
 // Acções permitidas ao InLive (read-only)

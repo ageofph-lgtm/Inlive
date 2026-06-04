@@ -41,7 +41,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
   // Validar que as env vars estão configuradas
   if (!SAGAN_SECRET || !SAGAN_API_KEY) {
-    console.error("bridgeProxy: env vars SAGAN_BRIDGE_SECRET ou SAGAN_API_KEY não configuradas");
+    console.error("bridgeProxy: env vars INLIVE_READ_SECRET ou SAGAN_API_KEY não configuradas");
     return new Response(
       JSON.stringify({ error: "Proxy not configured" }),
       { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }

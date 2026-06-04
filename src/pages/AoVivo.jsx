@@ -4,10 +4,14 @@ import { Activity, Flag, CheckCircle2, ListOrdered, Sun, Moon,
          ChevronLeft, ChevronRight, Pause, Play, Wrench, CalendarDays } from "lucide-react";
 
 // ── Config ────────────────────────────────────────────────────────────────────
-// Proxy server-side: segredos nunca chegam ao browser.
-// bridgeProxy valida que só acções de leitura (list/filter/get) são executadas.
-const BRIDGE_URL    = "/api/functions/bridgeProxy";
-const BRIDGE_HEADERS = { "Content-Type":"application/json" };
+// Chama directamente a saganBridge do Watcher com segredo read-only.
+// Read-only enforced pelo saganBridge (INLIVE_READ_SECRET só permite list/filter/get).
+const BRIDGE_URL    = "https://watcherweb.base44.app/api/functions/saganBridge";
+const BRIDGE_HEADERS = {
+  "Content-Type":"application/json",
+  "x-sagan-secret":"82fa97ccb55b2b3d2939ea2567617bb5096ee3a7a1b8e421",
+  "api_key":"f8517554492e492090b62dd501ad7e14"
+};
 const SLIDE_DURATION = 30000;
 const MIN_TIMER_SECONDS = 300; // < 5 min = timer inválido, ignorado em stats e display
 const JORDAN_URL = "https://media.base44.com/images/public/6a045759b56878764b71db11/b4686dedd_Gemini_Generated_Image_6i6wgc6i6wgc6i6w1.png";

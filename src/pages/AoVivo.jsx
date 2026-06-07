@@ -2438,65 +2438,78 @@ export default function AoVivo(){
         *{box-sizing:border-box}
       `}</style>
 
-      {/* ── MICRO STRIP — logo + relógio + controles, ultra compacto ── */}
+      {/* ── MICRO STRIP ── */}
       <div style={{display:"flex",alignItems:"center",gap:"10px",
         padding:"4px clamp(10px,1.2vw,18px)",
         background:D.dark?D.surface:"rgba(255,255,255,0.82)",
         borderBottom:`1px solid ${D.dark?D.hudLine:"rgba(13,13,15,0.07)"}`,
         flexShrink:0}}>
+
+        {/* ESQUERDA: logo + WATCHER maior, puxado pro centro */}
         <img src="https://media.base44.com/images/public/6a045759b56878764b71db11/b4686dedd_Gemini_Generated_Image_6i6wgc6i6wgc6i6w1.png"
-          alt="" style={{width:"24px",height:"24px",objectFit:"contain",
+          alt="" style={{width:"26px",height:"26px",objectFit:"contain",
           filter:D.dark?`drop-shadow(0 0 6px ${D.pink}aa)`:"none",flexShrink:0}}/>
-        <span style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(9px,0.75vw,11px)",
-          fontWeight:900,letterSpacing:"0.2em",color:D.dark?D.pink:"#0D0D0F",
-          textShadow:D.dark?`0 0 8px ${D.pink}66`:"none"}}>WATCHER</span>
-        <span style={{fontFamily:"monospace",fontSize:"clamp(7px,0.58vw,9px)",
-          color:D.muted,letterSpacing:"0.1em"}}>· AO VIVO · SYNC 30s</span>
-        <div style={{flex:1}}/>
-        <Clock D={D}/>
-        <div style={{display:"flex",gap:"2px"}}>
-          <button onClick={prev} style={{background:D.dark?D.sub:"rgba(255,255,255,0.9)",
-            border:`1px solid ${D.dark?D.line:"rgba(13,13,15,0.08)"}`,
-            padding:"3px 6px",cursor:"pointer",color:D.text,display:"flex",
-            borderRadius:D.dark?0:"8px",
-            clipPath:D.dark?"polygon(3px 0, 100% 0, 100% 100%, 0 100%, 0 3px)":"none"}}>
-            <ChevronLeft size={12}/>
-          </button>
-          <button onClick={()=>sPaused(p=>!p)} style={{
-            background:paused?(dark?`${D.yellow}26`:"rgba(217,119,6,0.08)"):(dark?D.sub:"rgba(255,255,255,0.9)"),
-            border:`1px solid ${paused?D.yellow:(dark?D.line:"rgba(13,13,15,0.08)")}`,
-            padding:"3px 8px",cursor:"pointer",color:paused?D.yellow:D.text,
-            display:"flex",alignItems:"center",gap:"4px",borderRadius:dark?0:"8px"}}>
-            {paused?<Play size={10}/>:<Pause size={10}/>}
-            <span style={{fontFamily:"'Orbitron',monospace",fontSize:"9px",fontWeight:700,letterSpacing:"0.1em"}}>
-              {paused?"RETOMAR":"PAUSAR"}
-            </span>
-          </button>
-          <button onClick={next} style={{background:D.sub,border:`1px solid ${D.line}`,
-            padding:"3px 6px",cursor:"pointer",color:D.text,display:"flex",
-            borderRadius:D.dark?0:"8px",
-            clipPath:D.dark?"polygon(0 0, 100% 0, 100% calc(100% - 3px), calc(100% - 3px) 100%, 0 100%)":"none"}}>
-            <ChevronRight size={12}/>
-          </button>
+        <span style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(13px,1.1vw,16px)",
+          fontWeight:900,letterSpacing:"0.22em",color:D.dark?D.pink:"#0D0D0F",
+          textShadow:D.dark?`0 0 10px ${D.pink}77`:"none",marginRight:"auto"}}>WATCHER</span>
+
+        {/* CENTRO: LIVE + Relógio menor + nav */}
+        <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+          {/* LIVE — à esquerda do relógio */}
+          <div style={{display:"flex",alignItems:"center",gap:"4px",
+            padding:"2px 7px",
+            background:dark?`${D.green}1a`:"rgba(22,163,74,0.08)",
+            border:dark?`1px solid ${D.green}55`:"1px solid rgba(22,163,74,0.18)",
+            borderRadius:dark?0:"999px",
+            clipPath:dark?"polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)":"none"}}>
+            <div style={{width:"5px",height:"5px",background:D.green,
+              clipPath:"polygon(50% 0, 100% 50%, 50% 100%, 0 50%)",
+              animation:"blink 1.2s ease-in-out infinite"}}/>
+            <span style={{fontFamily:"'Orbitron',monospace",fontSize:"8px",fontWeight:800,
+              color:D.green,letterSpacing:"0.15em"}}>LIVE</span>
+          </div>
+
+          {/* Relógio — menor */}
+          <div style={{transform:"scale(0.82)",transformOrigin:"center"}}>
+            <Clock D={D}/>
+          </div>
+
+          {/* Nav prev/pause/next */}
+          <div style={{display:"flex",gap:"2px"}}>
+            <button onClick={prev} style={{background:D.dark?D.sub:"rgba(255,255,255,0.9)",
+              border:`1px solid ${D.dark?D.line:"rgba(13,13,15,0.08)"}`,
+              padding:"3px 6px",cursor:"pointer",color:D.text,display:"flex",
+              borderRadius:D.dark?0:"8px",
+              clipPath:D.dark?"polygon(3px 0, 100% 0, 100% 100%, 0 100%, 0 3px)":"none"}}>
+              <ChevronLeft size={12}/>
+            </button>
+            <button onClick={()=>sPaused(p=>!p)} style={{
+              background:paused?(dark?`${D.yellow}26`:"rgba(217,119,6,0.08)"):(dark?D.sub:"rgba(255,255,255,0.9)"),
+              border:`1px solid ${paused?D.yellow:(dark?D.line:"rgba(13,13,15,0.08)")}`,
+              padding:"3px 8px",cursor:"pointer",color:paused?D.yellow:D.text,
+              display:"flex",alignItems:"center",gap:"4px",borderRadius:dark?0:"8px"}}>
+              {paused?<Play size={10}/>:<Pause size={10}/>}
+              <span style={{fontFamily:"'Orbitron',monospace",fontSize:"9px",fontWeight:700,letterSpacing:"0.1em"}}>
+                {paused?"RETOMAR":"PAUSAR"}
+              </span>
+            </button>
+            <button onClick={next} style={{background:D.sub,border:`1px solid ${D.line}`,
+              padding:"3px 6px",cursor:"pointer",color:D.text,display:"flex",
+              borderRadius:D.dark?0:"8px",
+              clipPath:D.dark?"polygon(0 0, 100% 0, 100% calc(100% - 3px), calc(100% - 3px) 100%, 0 100%)":"none"}}>
+              <ChevronRight size={12}/>
+            </button>
+          </div>
         </div>
+
+        {/* DIREITA: botão tema */}
         <button onClick={()=>{sDark(d=>!d);localStorage.setItem("theme",dark?"light":"dark");}}
           style={{background:dark?D.sub:"rgba(255,255,255,0.9)",
           border:`1px solid ${dark?D.line:"rgba(13,13,15,0.08)"}`,
-          padding:"3px 6px",cursor:"pointer",color:D.text,display:"flex",borderRadius:dark?0:"8px"}}>
+          padding:"3px 6px",cursor:"pointer",color:D.text,display:"flex",borderRadius:dark?0:"8px",
+          marginLeft:"auto"}}>
           {dark?<Sun size={11}/>:<Moon size={11}/>}
         </button>
-        <div style={{display:"flex",alignItems:"center",gap:"5px",
-          padding:"3px 8px",
-          background:dark?`${D.green}1a`:"rgba(22,163,74,0.08)",
-          border:dark?`1px solid ${D.green}55`:"1px solid rgba(22,163,74,0.18)",
-          borderRadius:dark?0:"999px",
-          clipPath:dark?"polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)":"none"}}>
-          <div style={{width:"6px",height:"6px",background:D.green,
-            clipPath:"polygon(50% 0, 100% 50%, 50% 100%, 0 50%)",
-            animation:"blink 1.2s ease-in-out infinite"}}/>
-          <span style={{fontFamily:"'Orbitron',monospace",fontSize:"9px",fontWeight:800,
-            color:D.green,letterSpacing:"0.15em"}}>LIVE</span>
-        </div>
       </div>
       {/* PROGRESS BAR */}
       <div style={{position:"relative",height:"2px",background:dark?"rgba(210,210,210,0.08)":"rgba(13,13,15,0.06)",flexShrink:0,overflow:"hidden"}}>

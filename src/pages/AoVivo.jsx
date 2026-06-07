@@ -2416,7 +2416,7 @@ export default function AoVivo(){
   return(
     <div style={{width:"100vw",height:"100vh",background:D.dark?D.bg:`radial-gradient(1200px 600px at 85% -10%, rgba(200,16,46,0.04), transparent 60%), radial-gradient(900px 500px at 10% 110%, rgba(176,141,46,0.04), transparent 60%), #F2F2F4`,color:D.text,
       display:"flex",flexDirection:"column",fontFamily:D.dark?"'Rajdhani',system-ui,sans-serif":"'Manrope',-apple-system,sans-serif",
-      overflow:"hidden",position:"fixed",top:0,left:0,padding:"2.5% 3%",boxSizing:"border-box"}}>
+      overflow:"hidden",position:"fixed",top:0,left:0,transform:"scale(0.90)",transformOrigin:"top left",width:"111.11vw",height:"111.11vh"}}>
       {/* ARMOR BACKGROUND — scanlines + hex grid + vignette */}
       {dark&&<div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:0,
         background:`repeating-linear-gradient(0deg,transparent 0px,transparent 2px,rgba(200,16,46,0.018) 2px,rgba(200,16,46,0.018) 3px),radial-gradient(ellipse at 50% 100%,rgba(200,16,46,0.1),transparent 60%),radial-gradient(ellipse at 50% 0%,rgba(210,210,210,0.05),transparent 50%)`}}/>}

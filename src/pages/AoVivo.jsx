@@ -2438,168 +2438,72 @@ export default function AoVivo(){
         *{box-sizing:border-box}
       `}</style>
 
-      {/* ── TOPBAR ── */}
-      <div style={{position:"relative",display:"flex",alignItems:"center",gap:"14px",
-        padding:"10px clamp(14px,1.5vw,24px)",
+      {/* ── MICRO STRIP — logo + relógio + controles, ultra compacto ── */}
+      <div style={{display:"flex",alignItems:"center",gap:"10px",
+        padding:"4px clamp(10px,1.2vw,18px)",
         background:D.dark?D.surface:"rgba(255,255,255,0.82)",
-        backdropFilter:D.dark?"none":"saturate(180%) blur(20px)",
-        WebkitBackdropFilter:D.dark?"none":"saturate(180%) blur(20px)",
         borderBottom:`1px solid ${D.dark?D.hudLine:"rgba(13,13,15,0.07)"}`,
-        flexShrink:0,flexWrap:"wrap",
-        boxShadow:D.dark?`0 0 20px ${D.hudGlow}, inset 0 -1px 0 ${D.hudLine}`:"0 1px 2px rgba(13,13,15,0.04), 0 8px 24px -8px rgba(13,13,15,0.06)"}}>
-        {/* faixa discreta na borda inferior */}
-        <div style={{position:"absolute",bottom:-1,left:0,right:0,height:"1px",
-          background:D.dark?`linear-gradient(90deg, transparent, ${D.pink}88, transparent)`:`linear-gradient(90deg, transparent, rgba(200,16,46,0.3), transparent)`,
-          opacity:D.dark?0.6:0.4}}/>
-
-        {/* Logo */}
-        <div style={{display:"flex",alignItems:"center",gap:"12px",flexShrink:0,
-          paddingRight:"14px",borderRight:`1px solid ${D.line}`}}>
-          <div style={{position:"relative",padding:"3px"}}>
-            <HudCorners color={D.pink} size={8} thickness={1.5} inset={-1} opacity={0.9} D={D}/>
-            <img src="https://media.base44.com/images/public/6a045759b56878764b71db11/b4686dedd_Gemini_Generated_Image_6i6wgc6i6wgc6i6w1.png"
-              alt="" style={{width:"clamp(34px,2.7vw,42px)",height:"clamp(34px,2.7vw,42px)",
-              objectFit:"contain",filter:D.dark?`drop-shadow(0 0 8px ${D.pink}aa)`:"none",display:"block"}}/>
-          </div>
-          <div>
-            <div style={{
-              fontFamily:D.dark?"'Orbitron',monospace":"'Bricolage Grotesque',-apple-system,sans-serif",
-              fontSize:"clamp(13px,1.1vw,17px)",fontWeight:D.dark?900:700,
-              letterSpacing:D.dark?"0.22em":"-0.02em",
-              color:D.dark?D.pink:"#0D0D0F",
-              textShadow:D.dark?`0 0 12px ${D.pink}77`:"none",
-              lineHeight:1}}>
-              WATCHER
-            </div>
-            <div style={{display:"flex",alignItems:"center",gap:"6px",marginTop:"3px"}}>
-              <span style={{
-                fontFamily:D.dark?"'Orbitron',monospace":"'Manrope',-apple-system,sans-serif",
-                fontSize:"clamp(9px,0.7vw,11px)",fontWeight:700,
-                letterSpacing:D.dark?"0.2em":"0.12em",
-                color:D.dark?D.cyan:"#16A34A",
-                padding:D.dark?"0":"2px 8px",
-                background:D.dark?"transparent":"rgba(22,163,74,0.1)",
-                border:D.dark?"none":"1px solid rgba(22,163,74,0.2)",
-                borderRadius:D.dark?0:"999px",
-                textTransform:"uppercase"}}>AO VIVO</span>
-              <span style={{fontFamily:"monospace",fontSize:"clamp(8px,0.6vw,10px)",
-                color:D.muted,letterSpacing:"0.1em"}}>· SYNC 30s</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div style={{display:"flex",gap:"4px",flex:1,justifyContent:"center",flexWrap:"wrap"}}>
-          {SLIDES.map((s,i)=>{
-            const active = i===slide;
-            return(
-              <button key={s.id} onClick={()=>goTo(i)} style={{
-                position:"relative",
-                fontFamily:D.dark?"'Orbitron',monospace":"'Manrope',-apple-system,sans-serif",
-                fontSize:"clamp(9px,0.78vw,12px)",
-                letterSpacing:D.dark?"0.14em":"-0.005em",
-                fontWeight:active?700:600,
-                padding:D.dark?"6px 14px":"8px 15px",
-                cursor:"pointer",border:"none",
-                background:active
-                  ? (D.dark?D.pink:"#0D0D0F")
-                  : (D.dark?D.sub:"transparent"),
-                color:active?"#fff":D.dark?D.muted:"#5C5C61",
-                textShadow:"none",
-                boxShadow:active&&D.dark?`0 2px 8px rgba(200,16,46,0.35)`:active?"0 1px 2px rgba(13,13,15,0.2), 0 4px 8px -2px rgba(13,13,15,0.12)":"none",
-                clipPath:D.dark?"polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)":"none",
-                borderRadius:D.dark?0:"999px",
-                transition:"all 0.2s",
-              }}>
-                <span style={{opacity:active?1:0.55,marginRight:"6px",fontSize:"0.85em"}}>
-                  {String(i+1).padStart(2,"0")}
-                </span>
-                {s.label}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Controles */}
-        <div style={{display:"flex",alignItems:"center",gap:"8px",flexShrink:0}}>
-          <Clock D={D}/>
-
-          <div style={{display:"flex",gap:"2px"}}>
-            <button onClick={prev} title="Anterior" style={{
-              background:D.dark?D.sub:"rgba(255,255,255,0.9)",
-              border:`1px solid ${D.dark?D.line:"rgba(13,13,15,0.08)"}`,
-              padding:"6px 8px",cursor:"pointer",color:D.text,display:"flex",
-              borderRadius:D.dark?0:"10px",
-              boxShadow:D.dark?"none":"0 1px 2px rgba(13,13,15,0.06)",
-              clipPath:D.dark?"polygon(4px 0, 100% 0, 100% 100%, 0 100%, 0 4px)":"none"}}>
-              <ChevronLeft size={14}/>
-            </button>
-            <button onClick={()=>sPaused(p=>!p)} title={paused?"Retomar":"Pausar"} style={{
-              background:paused
-                ?(dark?`${D.yellow}26`:"rgba(217,119,6,0.08)")
-                :(dark?D.sub:"rgba(255,255,255,0.9)"),
-              border:`1px solid ${paused?D.yellow:(dark?D.line:"rgba(13,13,15,0.08)")}`,
-              padding:"6px 12px",cursor:"pointer",
-              color:paused?D.yellow:D.text,
-              display:"flex",alignItems:"center",gap:"5px",
-              borderRadius:dark?0:"10px",
-              boxShadow:dark?"none":"0 1px 2px rgba(13,13,15,0.06)"}}>
-              {paused?<Play size={12}/>:<Pause size={12}/>}
-              <span style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(9px,0.7vw,11px)",
-                fontWeight:700,letterSpacing:"0.12em"}}>
-                {paused?"RETOMAR":"PAUSAR"}
-              </span>
-            </button>
-            <button onClick={next} title="Seguinte" style={{
-              background:D.sub,border:`1px solid ${D.line}`,
-              padding:"6px 8px",cursor:"pointer",color:D.text,display:"flex",
-              clipPath:"polygon(0 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%)"}}>
-              <ChevronRight size={14}/>
-            </button>
-          </div>
-
-          <button onClick={()=>{sDark(d=>!d);localStorage.setItem("theme",dark?"light":"dark");}}
-            title="Tema" style={{
-            background:dark?D.sub:"rgba(255,255,255,0.9)",
-            border:`1px solid ${dark?D.line:"rgba(13,13,15,0.08)"}`,
-            padding:"6px 8px",cursor:"pointer",color:D.text,display:"flex",
-            borderRadius:dark?0:"10px",
-            boxShadow:dark?"none":"0 1px 2px rgba(13,13,15,0.06)"}}>
-            {dark?<Sun size={13}/>:<Moon size={13}/>}
+        flexShrink:0}}>
+        <img src="https://media.base44.com/images/public/6a045759b56878764b71db11/b4686dedd_Gemini_Generated_Image_6i6wgc6i6wgc6i6w1.png"
+          alt="" style={{width:"24px",height:"24px",objectFit:"contain",
+          filter:D.dark?`drop-shadow(0 0 6px ${D.pink}aa)`:"none",flexShrink:0}}/>
+        <span style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(9px,0.75vw,11px)",
+          fontWeight:900,letterSpacing:"0.2em",color:D.dark?D.pink:"#0D0D0F",
+          textShadow:D.dark?`0 0 8px ${D.pink}66`:"none"}}>WATCHER</span>
+        <span style={{fontFamily:"monospace",fontSize:"clamp(7px,0.58vw,9px)",
+          color:D.muted,letterSpacing:"0.1em"}}>· AO VIVO · SYNC 30s</span>
+        <div style={{flex:1}}/>
+        <Clock D={D}/>
+        <div style={{display:"flex",gap:"2px"}}>
+          <button onClick={prev} style={{background:D.dark?D.sub:"rgba(255,255,255,0.9)",
+            border:`1px solid ${D.dark?D.line:"rgba(13,13,15,0.08)"}`,
+            padding:"3px 6px",cursor:"pointer",color:D.text,display:"flex",
+            borderRadius:D.dark?0:"8px",
+            clipPath:D.dark?"polygon(3px 0, 100% 0, 100% 100%, 0 100%, 0 3px)":"none"}}>
+            <ChevronLeft size={12}/>
           </button>
-
-          {/* LIVE indicator táctico */}
-          <div style={{display:"flex",alignItems:"center",gap:"6px",
-            padding:"4px 10px",
-            background:dark?`${D.green}1a`:"rgba(22,163,74,0.08)",
-            border:dark?`1px solid ${D.green}55`:"1px solid rgba(22,163,74,0.18)",
-            borderRadius:dark?0:"999px",
-            clipPath:dark?"polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)":"none"}}>
-            <div style={{width:"7px",height:"7px",background:D.green,
-              boxShadow:dark?`0 0 8px ${D.green}, 0 0 16px ${D.green}77`:"0 0 0 3px rgba(22,163,74,0.18)",
-              clipPath:"polygon(50% 0, 100% 50%, 50% 100%, 0 50%)",
-              animation:"blink 1.2s ease-in-out infinite"}}/>
-            <span style={{
-              fontFamily:dark?"'Orbitron',monospace":"'Manrope',-apple-system,sans-serif",
-              fontSize:"clamp(9px,0.7vw,11px)",fontWeight:800,
-              color:D.green,
-              letterSpacing:dark?"0.18em":"0.12em",
-              textTransform:"uppercase"}}>LIVE</span>
-          </div>
+          <button onClick={()=>sPaused(p=>!p)} style={{
+            background:paused?(dark?`${D.yellow}26`:"rgba(217,119,6,0.08)"):(dark?D.sub:"rgba(255,255,255,0.9)"),
+            border:`1px solid ${paused?D.yellow:(dark?D.line:"rgba(13,13,15,0.08)")}`,
+            padding:"3px 8px",cursor:"pointer",color:paused?D.yellow:D.text,
+            display:"flex",alignItems:"center",gap:"4px",borderRadius:dark?0:"8px"}}>
+            {paused?<Play size={10}/>:<Pause size={10}/>}
+            <span style={{fontFamily:"'Orbitron',monospace",fontSize:"9px",fontWeight:700,letterSpacing:"0.1em"}}>
+              {paused?"RETOMAR":"PAUSAR"}
+            </span>
+          </button>
+          <button onClick={next} style={{background:D.sub,border:`1px solid ${D.line}`,
+            padding:"3px 6px",cursor:"pointer",color:D.text,display:"flex",
+            borderRadius:D.dark?0:"8px",
+            clipPath:D.dark?"polygon(0 0, 100% 0, 100% calc(100% - 3px), calc(100% - 3px) 100%, 0 100%)":"none"}}>
+            <ChevronRight size={12}/>
+          </button>
+        </div>
+        <button onClick={()=>{sDark(d=>!d);localStorage.setItem("theme",dark?"light":"dark");}}
+          style={{background:dark?D.sub:"rgba(255,255,255,0.9)",
+          border:`1px solid ${dark?D.line:"rgba(13,13,15,0.08)"}`,
+          padding:"3px 6px",cursor:"pointer",color:D.text,display:"flex",borderRadius:dark?0:"8px"}}>
+          {dark?<Sun size={11}/>:<Moon size={11}/>}
+        </button>
+        <div style={{display:"flex",alignItems:"center",gap:"5px",
+          padding:"3px 8px",
+          background:dark?`${D.green}1a`:"rgba(22,163,74,0.08)",
+          border:dark?`1px solid ${D.green}55`:"1px solid rgba(22,163,74,0.18)",
+          borderRadius:dark?0:"999px",
+          clipPath:dark?"polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)":"none"}}>
+          <div style={{width:"6px",height:"6px",background:D.green,
+            clipPath:"polygon(50% 0, 100% 50%, 50% 100%, 0 50%)",
+            animation:"blink 1.2s ease-in-out infinite"}}/>
+          <span style={{fontFamily:"'Orbitron',monospace",fontSize:"9px",fontWeight:800,
+            color:D.green,letterSpacing:"0.15em"}}>LIVE</span>
         </div>
       </div>
-
       {/* PROGRESS BAR */}
-      <div style={{position:"relative",height:dark?"3px":"2px",background:dark?"rgba(210,210,210,0.08)":"rgba(13,13,15,0.06)",flexShrink:0,overflow:"hidden"}}>
+      <div style={{position:"relative",height:"2px",background:dark?"rgba(210,210,210,0.08)":"rgba(13,13,15,0.06)",flexShrink:0,overflow:"hidden"}}>
         <div style={{height:"100%",width:`${prog*100}%`,
-          background:dark
-            ?`linear-gradient(90deg,#c8102e,#ff2240,#c0c0c0,#e8e8e8)`
-            :`linear-gradient(90deg,#C8102E,#B08D2E)`,
-          boxShadow:dark?`0 0 10px rgba(255,34,64,0.7), 0 0 20px rgba(210,210,210,0.25)`:"none",
+          background:dark?`linear-gradient(90deg,#c8102e,#ff2240,#c0c0c0,#e8e8e8)`:`linear-gradient(90deg,#C8102E,#B08D2E)`,
+          boxShadow:dark?`0 0 8px rgba(255,34,64,0.7)`:"none",
           transition:"width 0.1s linear"}}/>
-        {/* riscas tácticas */}
-        <div style={{position:"absolute",inset:0,pointerEvents:"none",
-          backgroundImage:`repeating-linear-gradient(90deg, transparent 0, transparent ${100/SLIDES.length}%, ${D.muted}55 ${100/SLIDES.length}%, ${D.muted}55 calc(${100/SLIDES.length}% + 1px))`}}/>
       </div>
 
       {/* KPI BAR */}

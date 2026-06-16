@@ -2423,6 +2423,11 @@ export default function AoVivo(){
   // ── Tela de almoço 12:30–13:30 ──────────────────────────────────────────────
   if(isAlmoco) return(
     <div style={{
+      position:"fixed",inset:0,
+      background:"linear-gradient(135deg,#030803 0%,#061006 50%,#030803 100%)",
+      display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
+      fontFamily:"'Orbitron',monospace",gap:20,overflow:"hidden",
+    }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&family=Bricolage+Grotesque:opsz,wght@12..96,300;400;500;600;700;800&display=swap');
         @keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
@@ -2437,11 +2442,6 @@ export default function AoVivo(){
         ::-webkit-scrollbar-thumb{background:rgba(210,210,210,0.2);border-radius:2px}
         *{box-sizing:border-box}
       `}</style>
-      position:"fixed",inset:0,
-      background:"linear-gradient(135deg,#030803 0%,#061006 50%,#030803 100%)",
-      display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
-      fontFamily:"'Orbitron',monospace",gap:20,overflow:"hidden",
-    }}>
       {/* scanlines */}
       <div style={{position:"absolute",inset:0,pointerEvents:"none",
         backgroundImage:"repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,45,120,0.012) 2px,rgba(255,45,120,0.012) 4px)",

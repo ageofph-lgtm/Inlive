@@ -432,7 +432,7 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
         {/* NS */}
         <div style={{fontFamily:"'Orbitron',monospace",fontWeight:900,
           letterSpacing:".04em",textAlign:"center",lineHeight:1,
-          fontSize:FS(scale>=0.88?30:scale>=0.75?22:scale>=0.62?17:13),
+          fontSize:FS(scale>=0.88?36:scale>=0.75?27:scale>=0.62?21:16),
           color:dark?"#fff":"#0D0D0F",
           textShadow:dark?"0 0 18px rgba(255,255,255,.1)":"none",
           overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
@@ -477,13 +477,13 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
       {/* ── ROW 3: datas (só se scale>=0.62) ── */}
       {showDatas&&(
         <div style={{flexShrink:0,overflow:"hidden",
-          display:"flex",alignItems:"center",gap:Math.round(8*scale),flexWrap:"wrap",
+          display:"flex",alignItems:"center",justifyContent:"center",gap:Math.round(8*scale),flexWrap:"wrap",
           padding:`0 ${Math.round(12*scale)}px`,
           marginBottom:Math.round(4*scale)}}>
           {(m.previsao_inicio||m.dataEntrada)&&(
             <span style={{display:"inline-flex",alignItems:"center",gap:4,
               fontFamily:"'JetBrains Mono',monospace",
-              fontSize:FS(scale>=0.88?11:9),overflow:"hidden",flexShrink:0}}>
+              fontSize:FS(scale>=0.88?13:11),overflow:"hidden",flexShrink:0}}>
               <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
                 fontSize:FS(7.5),letterSpacing:".12em",
                 color:dark?"rgba(140,140,140,.5)":"#bbb"}}>ENT</span>
@@ -498,7 +498,7 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
           {m.previsao_fim&&(
             <span style={{display:"inline-flex",alignItems:"center",gap:4,
               fontFamily:"'JetBrains Mono',monospace",
-              fontSize:FS(scale>=0.88?11:9),overflow:"hidden",flexShrink:0}}>
+              fontSize:FS(scale>=0.88?13:11),overflow:"hidden",flexShrink:0}}>
               <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
                 fontSize:FS(7.5),letterSpacing:".12em",
                 color:dark?"rgba(140,140,140,.5)":"#bbb"}}>ENTREGA</span>
@@ -541,7 +541,7 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
                   borderRadius:2,flexShrink:0,
                   border:`1.5px solid ${st}3a`,background:"transparent"}}/>
                 <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
-                  fontSize:FS(scale>=0.88?12:10),letterSpacing:".03em",
+                  fontSize:FS(scale>=0.88?14:12),letterSpacing:".03em",
                   color:dark?"#c0c0c8":"#555",lineHeight:1.2,flex:1,
                   overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
                   {t.texto}

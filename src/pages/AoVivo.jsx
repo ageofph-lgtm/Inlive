@@ -295,45 +295,38 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
                : paused   ? (dark?"#FFB200":"#B08D2E")
                :             cat.accent;
 
-  const TECH_CLR = {raphael:"#FFD166",nuno:"#B68BFF",rogerio:"#FF8C69",yano:"#5CFFFF",patrick:"#90EE90"};
-  const techId   = (()=>{ const e=m.estado||""; const x=e.match(/(?:em-preparacao|concluida)-(.+)/); return x?x[1]:(m.tecnico||null); })();
-  const techClr  = TECH_CLR[techId]||"rgba(130,130,130,0.4)";
+  const TECH_CLR={raphael:"#FFD166",nuno:"#B68BFF",rogerio:"#FF8C69",yano:"#5CFFFF",patrick:"#90EE90"};
+  const techId  =(()=>{const e=m.estado||"";const x=e.match(/(?:em-preparacao|concluida)-(.+)/);return x?x[1]:(m.tecnico||null);})();
+  const techClr = TECH_CLR[techId]||"rgba(130,130,130,0.4)";
 
-  const TIPO_BADGE = {
-    nova:    {label:"NTS",  color:dark?"#FF3344":"#DC2626",  bg:"rgba(255,51,68,.08)",   border:"rgba(255,51,68,.28)"},
-    usada:   {label:"RECON",color:dark?"#9B7BFF":"#7C3AED",  bg:"rgba(155,123,255,.08)", border:"rgba(155,123,255,.28)"},
-    aluguer: {label:"ACP",  color:dark?"#4D9FFF":"#0A6EBF",  bg:"rgba(77,159,255,.08)",  border:"rgba(77,159,255,.28)"},
+  const TIPO_BADGE={
+    nova:   {label:"NTS",  color:dark?"#FF3344":"#DC2626", bg:"rgba(255,51,68,.08)",   border:"rgba(255,51,68,.28)"},
+    usada:  {label:"RECON",color:dark?"#9B7BFF":"#7C3AED", bg:"rgba(155,123,255,.08)", border:"rgba(155,123,255,.28)"},
+    aluguer:{label:"ACP",  color:dark?"#4D9FFF":"#0A6EBF", bg:"rgba(77,159,255,.08)",  border:"rgba(77,159,255,.28)"},
   };
-  const tipoBadge = TIPO_BADGE[m.tipo||m.tipo_origem||m.tipoOrigem||""]||null;
-  const isPrio    = !!m.prioridade;
+  const tipoBadge=TIPO_BADGE[m.tipo||m.tipo_origem||m.tipoOrigem||""]||null;
+  const isPrio   =!!m.prioridade;
 
-  const motivo      = paused ? getPausaMotivo(m) : null;
-  const motivoLabel = {aguarda_pecas:"📦 PEÇAS",prioritaria:"🚨 PRIO",aguarda_decisao:"⏳ DECISÃO",outros:"💬"};
-  const motivoColor = {aguarda_pecas:"#F59E0B",prioritaria:"#EF4444",aguarda_decisao:"#8B5CF6",outros:"#6B7280"};
-  const mColor      = motivo ? (motivoColor[motivo]||"#F59E0B") : null;
+  const motivo      =paused?getPausaMotivo(m):null;
+  const motivoLabel ={aguarda_pecas:"📦 PEÇAS",prioritaria:"🚨 PRIO",aguarda_decisao:"⏳ DECISÃO",outros:"💬"};
+  const motivoColor ={aguarda_pecas:"#F59E0B",prioritaria:"#EF4444",aguarda_decisao:"#8B5CF6",outros:"#6B7280"};
+  const mColor      =motivo?(motivoColor[motivo]||"#F59E0B"):null;
 
-  const pct       = meta>0 ? Math.min((elapsed/meta)*100,100) : 0;
-  const restamSec = Math.max(meta-elapsed,0);
-  const atrasoSec = elapsed-meta;
-  const fmtDate   = d => d ? new Date(d+"T12:00:00").toLocaleDateString("pt-PT",{day:"2-digit",month:"2-digit"}) : null;
-  const fmtH      = s => { const h=Math.floor(s/3600),mn=Math.floor((s%3600)/60); return mn===0?`${h}h`:`${h}h${String(mn).padStart(2,"0")}`; };
+  const pct      =meta>0?Math.min((elapsed/meta)*100,100):0;
+  const restamSec=Math.max(meta-elapsed,0);
+  const atrasoSec=elapsed-meta;
+  const fmtDate  =d=>d?new Date(d+"T12:00:00").toLocaleDateString("pt-PT",{day:"2-digit",month:"2-digit"}):null;
+  const fmtH     =s=>{const h=Math.floor(s/3600),mn=Math.floor((s%3600)/60);return mn===0?`${h}h`:`${h}h${String(mn).padStart(2,"0")}`;};
 
-  // gauge SVG
-  const R=44, CIRC=2*Math.PI*R, dash=CIRC*(1-pct/100);
+  // modo por scale
+  const mode=scale>=0.88?"full":scale>=0.62?"compact":"micro";
+  // tasks visíveis
+  const MAX_T  =mode==="full"?4:mode==="compact"?2:0;
+  const visTasks=tasks.slice(0,MAX_T);
+  const hiddenN =tasks.length-visTasks.length;
 
-  // ── Modo determinado pelo scale do BigBoard ──────────────────────────────────
-  // FULL: scale>=0.88 (1-4 cards) — tudo visível, layout distribuído
-  // COMPACT: scale>=0.62 (5-9 cards) — NS + barra + max 2 tasks
-  // MICRO: scale<0.62 (10+ cards) — ultra denso, sem tasks
-  const mode = scale >= 0.88 ? "full" : scale >= 0.62 ? "compact" : "micro";
-
-  // tasks visíveis por modo
-  const MAX_T   = mode==="full" ? 4 : mode==="compact" ? 2 : 0;
-  const visTasks= tasks.slice(0, MAX_T);
-  const hiddenN = tasks.length - visTasks.length;
-
-  // ── wrapper comum ────────────────────────────────────────────────────────────
-  const wrapStyle = {
+  // wrapper
+  const W={
     position:"relative",display:"flex",flexDirection:"column",
     height:"100%",boxSizing:"border-box",overflow:"hidden",
     borderRadius:dark?0:"10px",
@@ -346,15 +339,13 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
     clipPath:dark?"polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))":"none",
   };
 
-  // ── decorações de posição (linha topo, spine, corners) ───────────────────────
-  const Decos = ()=>(
+  // linha topo + spine + corners
+  const Decos=()=>(
     <>
       <div style={{position:"absolute",top:0,left:0,right:0,height:"2px",zIndex:3,
-        background:`linear-gradient(90deg,${stColor},transparent 75%)`,
-        boxShadow:`0 0 12px ${stColor}`}}/>
+        background:`linear-gradient(90deg,${stColor},transparent 75%)`,boxShadow:`0 0 12px ${stColor}`}}/>
       <div style={{position:"absolute",top:10,bottom:10,left:0,width:"3px",zIndex:3,
-        borderRadius:"0 3px 3px 0",background:techClr,
-        boxShadow:dark?`0 0 6px ${techClr}44`:"none"}}/>
+        borderRadius:"0 3px 3px 0",background:techClr,boxShadow:dark?`0 0 6px ${techClr}44`:"none"}}/>
       {(isRisk||isLate)&&dark&&(<>
         <div style={{position:"absolute",top:5,right:5,width:10,height:10,zIndex:4,
           borderTop:`1.5px solid ${stColor}`,borderRight:`1.5px solid ${stColor}`,opacity:.7}}/>
@@ -364,443 +355,276 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
     </>
   );
 
+  // ── TOPO: badges + timer + % ─────────────────────────────────────────────────
+  const Topo=({timerFontSize="clamp(16px,2vw,26px)"})=>(
+    <div style={{display:"flex",alignItems:"center",gap:5,flexShrink:0,flexWrap:"wrap",
+      padding:mode==="micro"?"8px 12px 6px 16px":"10px 16px 8px 18px",
+      borderBottom:`1px solid ${dark?"rgba(255,255,255,.05)":"rgba(0,0,0,.06)"}`}}>
+      {/* badges */}
+      {isLate&&<BadgePillV2 color={dark?"#FF3344":"#DC2626"} bg="rgba(255,51,68,.1)" border="rgba(255,51,68,.32)">{mode==="micro"?"✕":"✕ ATRASO"}</BadgePillV2>}
+      {isRisk&&!isLate&&<BadgePillV2 color={dark?"#FFB200":"#B08D2E"} bg="rgba(255,178,0,.1)" border="rgba(255,178,0,.28)">{mode==="micro"?"⚠":"⚠ RISCO"}</BadgePillV2>}
+      {!isRisk&&!isLate&&run&&(
+        <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,
+          fontSize:mode==="micro"?9:10,letterSpacing:".1em",
+          padding:mode==="micro"?"2px 5px":"3px 7px",borderRadius:3,
+          color:dark?"#2BE564":"#16A34A",background:"rgba(43,229,100,.1)",
+          border:"1px solid rgba(43,229,100,.3)",display:"inline-flex",alignItems:"center",gap:3}}>
+          <span style={{width:5,height:5,borderRadius:"50%",background:dark?"#2BE564":"#16A34A",
+            boxShadow:"0 0 5px #2BE564",animation:"blink 1.6s infinite"}}/>RUN
+        </span>
+      )}
+      {paused&&!run&&<BadgePillV2 color={dark?"#FFB200":"#B08D2E"} bg="rgba(255,178,0,.1)" border="rgba(255,178,0,.28)">⏸</BadgePillV2>}
+      {isPrio&&<span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:800,
+        fontSize:mode==="micro"?9:10,padding:mode==="micro"?"2px 5px":"3px 7px",
+        borderRadius:3,color:"#0a0a0a",background:"#FFB200"}}>⚡{mode!=="micro"&&" PRIO"}</span>}
+      {tipoBadge&&<BadgePillV2 color={tipoBadge.color} bg={tipoBadge.bg} border={tipoBadge.border}>{tipoBadge.label}</BadgePillV2>}
+      {/* % progress pill — substitui o gauge circular */}
+      {meta>0&&(
+        <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
+          fontSize:mode==="micro"?9:10,letterSpacing:".06em",
+          padding:mode==="micro"?"2px 5px":"2px 7px",borderRadius:3,
+          color:stColor,background:`color-mix(in srgb,${stColor} 12%,transparent)`,
+          border:`1px solid color-mix(in srgb,${stColor} 30%,transparent)`}}>
+          {Math.round(pct)}%
+        </span>
+      )}
+      {/* timer */}
+      <div style={{marginLeft:"auto",textAlign:"right",flexShrink:0}}>
+        <div style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:600,
+          fontSize:timerFontSize,letterSpacing:".02em",color:stColor,lineHeight:1,
+          textShadow:dark?`0 0 18px ${stColor}66`:"none"}}>
+          {fmtHMS(isCD&&restante!==null?restante:elapsed)}
+          {isLate&&<span style={{marginLeft:5,fontSize:"0.6em",animation:"blink 0.8s infinite"}}>⚠</span>}
+        </div>
+        {meta>0&&mode!=="micro"&&(
+          <div style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,fontSize:9,
+            color:dark?"rgba(200,200,200,.4)":"#bbb",letterSpacing:".1em",marginTop:2}}>
+            /{fmtH(meta)} meta
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  // ── NS PLATE: NS + modelo + barra integrada ──────────────────────────────────
+  // A barra fica aqui — sempre visível, nunca cortada
+  const NsPlate=({grow=false})=>(
+    <div style={{
+      flexShrink:0,flex:grow?1:undefined,
+      display:"flex",flexDirection:"column",
+      alignItems:"center",justifyContent:"center",
+      padding:mode==="micro"?"12px 8px 10px":mode==="compact"?"14px 8px 12px":"clamp(14px,3vh,28px) 8px",
+      background:dark?"rgba(0,0,0,.45)":"rgba(0,0,0,.03)",
+      border:`1px solid ${dark?"rgba(255,255,255,.06)":"rgba(0,0,0,.07)"}`,
+      borderRadius:dark?"3px":"10px",
+      margin:mode==="micro"?"10px 10px 8px":mode==="compact"?"10px 12px 8px":"12px 14px 8px",
+      position:"relative",overflow:"hidden",
+    }}>
+      {dark&&run&&<div style={{position:"absolute",inset:0,
+        background:`radial-gradient(ellipse 80% 60% at 50% 110%,${stColor}15,transparent)`,
+        pointerEvents:"none"}}/>}
+      {/* NS */}
+      <div style={{fontFamily:"'Orbitron',monospace",fontWeight:900,
+        letterSpacing:".04em",textAlign:"center",lineHeight:1,
+        fontSize:mode==="micro"?`clamp(11px,${1.5*scale}vw,18px)`:mode==="compact"?`clamp(14px,${1.8*scale}vw,22px)`:`clamp(18px,2.6vw,34px)`,
+        color:dark?"#fff":"#0D0D0F",
+        textShadow:dark?"0 0 20px rgba(255,255,255,.1)":"none",
+        position:"relative",zIndex:1}}>
+        {m.serie||"—"}
+      </div>
+      {/* modelo */}
+      <div style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
+        fontSize:mode==="micro"?`clamp(8px,${0.8*scale}vw,11px)`:mode==="compact"?`clamp(9px,${0.9*scale}vw,12px)`:"clamp(10px,1vw,14px)",
+        letterSpacing:".16em",color:dark?"rgba(180,180,180,.55)":"#888",
+        marginTop:mode==="micro"?3:5,position:"relative",zIndex:1}}>
+        {m.modelo||"—"}
+      </div>
+      {/* ── BARRA DE PROGRESSO — integrada no plate, sempre visível ── */}
+      {meta>0&&(
+        <div style={{width:"100%",marginTop:mode==="micro"?8:10,position:"relative",zIndex:1}}>
+          {/* label + valor */}
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",
+            marginBottom:4,padding:"0 2px"}}>
+            <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,
+              fontSize:mode==="micro"?8:9,letterSpacing:".16em",
+              color:dark?"rgba(150,150,150,.55)":"#bbb"}}>
+              {isLate?"+ ATRASO":"RESTAM"}
+            </span>
+            <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
+              fontSize:mode==="micro"?`clamp(10px,${1.1*scale}vw,13px)`:mode==="compact"?`clamp(11px,${1.2*scale}vw,14px)`:"clamp(13px,1.4vw,17px)",
+              letterSpacing:".03em",color:stColor,
+              textShadow:dark?`0 0 10px ${stColor}55`:"none"}}>
+              {fmtHMS(isLate?atrasoSec:restamSec)}
+            </span>
+          </div>
+          {/* barra */}
+          <div style={{height:mode==="micro"?4:5,
+            background:dark?"rgba(255,255,255,.08)":"rgba(0,0,0,.09)",
+            borderRadius:3,overflow:"hidden"}}>
+            <div style={{height:"100%",width:`${pct}%`,borderRadius:3,
+              background:isLate
+                ?"repeating-linear-gradient(45deg,#FF3344 0 4px,#7a0e1a 4px 8px)"
+                :stColor,
+              boxShadow:`0 0 7px ${stColor}`,transition:"width .8s ease"}}/>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  // ── DATAS ROW ────────────────────────────────────────────────────────────────
+  const DatasRow=()=>(
+    <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap",
+      padding:"0 14px",marginBottom:6,flexShrink:0}}>
+      {(m.previsao_inicio||m.dataEntrada)&&(
+        <span style={{display:"flex",alignItems:"center",gap:5,fontFamily:"'JetBrains Mono',monospace",fontSize:11}}>
+          <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,fontSize:8.5,
+            letterSpacing:".14em",color:dark?"rgba(150,150,150,.55)":"#bbb"}}>ENT</span>
+          <span style={{fontWeight:700,color:dark?"#6FC3FF":"#0A6EBF",
+            textShadow:dark?"0 0 8px rgba(111,195,255,.35)":"none"}}>
+            {fmtDate(m.previsao_inicio||m.dataEntrada)}
+          </span>
+        </span>
+      )}
+      {(m.previsao_inicio||m.dataEntrada)&&m.previsao_fim&&
+        <span style={{color:dark?"rgba(255,255,255,.12)":"rgba(0,0,0,.15)",fontSize:11}}>→</span>}
+      {m.previsao_fim&&(
+        <span style={{display:"flex",alignItems:"center",gap:5,fontFamily:"'JetBrains Mono',monospace",fontSize:11}}>
+          <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,fontSize:8.5,
+            letterSpacing:".14em",color:dark?"rgba(150,150,150,.55)":"#bbb"}}>ENTREGA</span>
+          <span style={{fontWeight:700,
+            color:isLate?(dark?"#FF3344":"#DC2626"):isRisk?(dark?"#FFB200":"#B08D2E"):(dark?"#2BE564":"#16A34A"),
+            textShadow:dark?`0 0 8px ${isLate?"#FF334466":isRisk?"#FFB20066":"#2BE56466"}`:"none"}}>
+            {fmtDate(m.previsao_fim)}
+          </span>
+        </span>
+      )}
+    </div>
+  );
+
+  // ── TASKS LIST ───────────────────────────────────────────────────────────────
+  const TasksList=()=>(
+    <div style={{flexShrink:0,padding:"0 14px",marginBottom:6}}>
+      <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:5}}>
+        <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,fontSize:8.5,
+          letterSpacing:".2em",color:dark?"rgba(150,150,150,.55)":"#bbb"}}>TAREFAS</span>
+        <div style={{height:1,flex:1,background:dark?"rgba(255,255,255,.05)":"rgba(0,0,0,.06)"}}/>
+        <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:8.5,
+          color:dark?"rgba(150,150,150,.45)":"#ccc"}}>{doneCount}/{allTasks.length}</span>
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:4}}>
+        {visTasks.map((t,i)=>(
+          <div key={i} style={{display:"flex",alignItems:"center",gap:8,
+            padding:"5px 9px",
+            background:dark?"rgba(255,255,255,.025)":"rgba(0,0,0,.025)",
+            border:`1px solid ${dark?"rgba(255,255,255,.04)":"rgba(0,0,0,.05)"}`,
+            borderLeft:`2px solid ${stColor}55`,
+            borderRadius:dark?"2px":"5px"}}>
+            <div style={{width:11,height:11,borderRadius:2,flexShrink:0,
+              border:`1.5px solid ${stColor}44`,background:"transparent"}}/>
+            <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
+              fontSize:mode==="compact"?11:12,letterSpacing:".03em",
+              color:dark?"#c8c8d0":"#555",lineHeight:1.2,flex:1,
+              overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+              {t.texto}
+            </span>
+          </div>
+        ))}
+        {hiddenN>0&&(
+          <div style={{textAlign:"center",padding:"3px 0",
+            fontFamily:"'Rajdhani',sans-serif",fontWeight:600,fontSize:9,
+            letterSpacing:".12em",color:dark?"rgba(150,150,150,.38)":"#ccc",
+            border:`1px dashed ${dark?"rgba(255,255,255,.07)":"rgba(0,0,0,.09)"}`,
+            borderRadius:dark?"2px":"4px"}}>
+            +{hiddenN} {hiddenN===1?"tarefa":"tarefas"} restantes
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  // ── RODAPÉ ───────────────────────────────────────────────────────────────────
+  const Rodape=()=>(
+    <div style={{flexShrink:0,display:"flex",alignItems:"center",justifyContent:"space-between",
+      padding:mode==="micro"?"6px 12px 8px 16px":"8px 14px 10px 18px",
+      borderTop:`1px solid ${dark?"rgba(255,255,255,.04)":"rgba(0,0,0,.05)"}`}}>
+      <div style={{display:"flex",alignItems:"center",gap:6}}>
+        <div style={{width:mode==="micro"?7:9,height:mode==="micro"?7:9,borderRadius:"50%",
+          background:techClr,boxShadow:dark?`0 0 6px ${techClr}`:"none"}}/>
+        <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
+          fontSize:mode==="micro"?8:9,letterSpacing:".16em",
+          color:dark?"rgba(150,150,150,.4)":"#ccc"}}>TÉC</span>
+      </div>
+      {meta>0&&(
+        <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
+          fontSize:mode==="micro"?10:11,color:dark?"rgba(200,200,200,.7)":"#666"}}>
+          <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
+            fontSize:mode==="micro"?8:9,letterSpacing:".14em",
+            color:dark?"rgba(150,150,150,.4)":"#ccc",marginRight:4}}>META</span>
+          {fmtH(meta)}
+        </span>
+      )}
+    </div>
+  );
+
   // ══════════════════════════════════════════════════════════════════════════════
-  //  MODO MICRO — ultra-denso (10+ cards)
-  //  Linha única: badges + NS + timer + barra fina
+  //  MICRO — topo + ns(com barra) + rodapé
   // ══════════════════════════════════════════════════════════════════════════════
   if(mode==="micro"){
     return(
-      <div style={wrapStyle}>
+      <div style={W}>
         <Decos/>
-        <div style={{
-          flex:1,display:"flex",flexDirection:"column",justifyContent:"space-between",
-          padding:"8px 12px 7px 16px",gap:4,
-        }}>
-          {/* linha 1: badges + timer */}
-          <div style={{display:"flex",alignItems:"center",gap:4,flexWrap:"nowrap"}}>
-            {run&&<span style={{width:5,height:5,borderRadius:"50%",background:stColor,
-              boxShadow:`0 0 5px ${stColor}`,animation:"blink 1.6s infinite",flexShrink:0}}/>}
-            {tipoBadge&&<span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,fontSize:8,
-              letterSpacing:".08em",padding:"1px 5px",borderRadius:2,
-              color:tipoBadge.color,background:tipoBadge.bg,border:`1px solid ${tipoBadge.border}`,
-              flexShrink:0}}>{tipoBadge.label}</span>}
-            {isPrio&&<span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:800,fontSize:8,
-              padding:"1px 5px",borderRadius:2,color:"#0a0a0a",background:"#FFB200",flexShrink:0}}>⚡</span>}
-            <div style={{marginLeft:"auto",fontFamily:"'JetBrains Mono',monospace",fontWeight:600,
-              fontSize:`clamp(10px,${1.2*scale}vw,16px)`,color:stColor,letterSpacing:".02em",flexShrink:0}}>
-              {fmtHMS(isCD&&restante!==null?restante:elapsed)}
-            </div>
-          </div>
-          {/* NS */}
-          <div style={{fontFamily:"'Orbitron',monospace",fontWeight:900,
-            fontSize:`clamp(11px,${1.6*scale}vw,20px)`,letterSpacing:".04em",
-            color:dark?"#fff":"#0D0D0F",lineHeight:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-            {m.serie||"—"}
-          </div>
-          {/* modelo */}
-          <div style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
-            fontSize:`clamp(9px,${0.9*scale}vw,12px)`,letterSpacing:".14em",
-            color:dark?"rgba(180,180,180,.5)":"#999",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-            {m.modelo||"—"}
-          </div>
-          {/* barra fina */}
-          {meta>0&&(
-            <div style={{height:3,background:dark?"rgba(255,255,255,.06)":"rgba(0,0,0,.08)",borderRadius:2,overflow:"hidden",marginTop:2}}>
-              <div style={{height:"100%",width:`${pct}%`,borderRadius:2,
-                background:isLate?"repeating-linear-gradient(45deg,#FF3344 0 3px,#7a0e1a 3px 6px)":stColor,
-                boxShadow:`0 0 5px ${stColor}`}}/>
-            </div>
-          )}
-          {/* rodapé: dot + meta */}
-          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-            <div style={{width:7,height:7,borderRadius:"50%",background:techClr,
-              boxShadow:dark?`0 0 5px ${techClr}`:"none"}}/>
-            {meta>0&&<span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,fontSize:9,
-              letterSpacing:".12em",color:dark?"rgba(150,150,150,.5)":"#ccc"}}>
-              META {fmtH(meta)}
-            </span>}
-          </div>
-        </div>
+        <Topo timerFontSize={`clamp(11px,${1.3*scale}vw,17px)`}/>
+        <NsPlate grow/>
+        <Rodape/>
       </div>
     );
   }
 
   // ══════════════════════════════════════════════════════════════════════════════
-  //  MODO COMPACT — médio (5-9 cards)
-  //  TOPO: badges+timer | NS+modelo | barra RESTAM + datas | max 2 tasks | rodapé
-  //  Tudo flexShrink:0, nunca cresce para além do disponível
+  //  COMPACT — topo + ns(com barra) + datas + tasks + rodapé
   // ══════════════════════════════════════════════════════════════════════════════
   if(mode==="compact"){
     return(
-      <div style={wrapStyle}>
+      <div style={W}>
         <Decos/>
-        <div style={{
-          flex:1,display:"flex",flexDirection:"column",
-          padding:"9px 14px 9px 17px",gap:0,overflow:"hidden",
-        }}>
-          {/* TOPO: badges + timer */}
-          <div style={{display:"flex",alignItems:"center",gap:4,flexShrink:0,marginBottom:6,flexWrap:"wrap"}}>
-            {run&&<span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,fontSize:9,letterSpacing:".1em",
-              padding:"2px 6px",borderRadius:3,color:dark?"#2BE564":"#16A34A",
-              background:"rgba(43,229,100,.1)",border:"1px solid rgba(43,229,100,.28)",
-              display:"inline-flex",alignItems:"center",gap:3,flexShrink:0}}>
-              <span style={{width:5,height:5,borderRadius:"50%",background:dark?"#2BE564":"#16A34A",
-                boxShadow:"0 0 5px #2BE564",animation:"blink 1.6s infinite"}}/>RUN
-            </span>}
-            {paused&&!run&&<BadgePillV2 color={dark?"#FFB200":"#B08D2E"} bg="rgba(255,178,0,.1)" border="rgba(255,178,0,.28)">⏸</BadgePillV2>}
-            {isLate&&<BadgePillV2 color={dark?"#FF3344":"#DC2626"} bg="rgba(255,51,68,.1)" border="rgba(255,51,68,.32)">✕</BadgePillV2>}
-            {isRisk&&!isLate&&<BadgePillV2 color={dark?"#FFB200":"#B08D2E"} bg="rgba(255,178,0,.1)" border="rgba(255,178,0,.28)">⚠</BadgePillV2>}
-            {isPrio&&<span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:800,fontSize:9,
-              padding:"2px 5px",borderRadius:3,color:"#0a0a0a",background:"#FFB200",flexShrink:0}}>⚡</span>}
-            {tipoBadge&&<BadgePillV2 color={tipoBadge.color} bg={tipoBadge.bg} border={tipoBadge.border}>{tipoBadge.label}</BadgePillV2>}
-            <div style={{marginLeft:"auto",textAlign:"right",flexShrink:0}}>
-              <div style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:600,
-                fontSize:`clamp(14px,${1.6*scale}vw,20px)`,color:stColor,letterSpacing:".02em",lineHeight:1}}>
-                {fmtHMS(isCD&&restante!==null?restante:elapsed)}
-              </div>
-              {meta>0&&<div style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,fontSize:9,
-                color:dark?"rgba(200,200,200,.4)":"#bbb",letterSpacing:".1em",marginTop:2}}>
-                /{fmtH(meta)} meta
-              </div>}
-            </div>
-          </div>
-
-          {/* NS + modelo */}
-          <div style={{flexShrink:0,
-            background:dark?"rgba(0,0,0,.4)":"rgba(0,0,0,.03)",
-            border:`1px solid ${dark?"rgba(255,255,255,.05)":"rgba(0,0,0,.06)"}`,
-            borderRadius:dark?"2px":"8px",
-            padding:"10px 8px 8px",textAlign:"center",marginBottom:8,
-            position:"relative",overflow:"hidden",
-          }}>
-            {dark&&run&&<div style={{position:"absolute",inset:0,
-              background:`radial-gradient(ellipse 80% 50% at 50% 110%,${stColor}14,transparent)`,
-              pointerEvents:"none"}}/>}
-            <div style={{fontFamily:"'Orbitron',monospace",fontWeight:900,
-              fontSize:`clamp(14px,${1.8*scale}vw,24px)`,letterSpacing:".04em",
-              color:dark?"#fff":"#0D0D0F",lineHeight:1,position:"relative",zIndex:1}}>
-              {m.serie||"—"}
-            </div>
-            <div style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
-              fontSize:`clamp(9px,${0.9*scale}vw,12px)`,letterSpacing:".16em",
-              color:dark?"rgba(180,180,180,.55)":"#888",marginTop:4,position:"relative",zIndex:1}}>
-              {m.modelo||"—"}
-            </div>
-          </div>
-
-          {/* barra RESTAM + datas */}
-          {meta>0&&(
-            <div style={{flexShrink:0,marginBottom:8}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:3}}>
-                <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,fontSize:8.5,
-                  letterSpacing:".16em",color:dark?"rgba(150,150,150,.6)":"#bbb"}}>
-                  {isLate?"+ ATRASO":"RESTAM"}
-                </span>
-                <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
-                  fontSize:`clamp(11px,${1.2*scale}vw,15px)`,color:stColor,letterSpacing:".03em"}}>
-                  {fmtHMS(isLate?atrasoSec:restamSec)}
-                </span>
-              </div>
-              <div style={{height:5,background:dark?"rgba(255,255,255,.07)":"rgba(0,0,0,.08)",
-                borderRadius:3,overflow:"hidden",marginBottom:5}}>
-                <div style={{height:"100%",width:`${pct}%`,borderRadius:3,
-                  background:isLate
-                    ?"repeating-linear-gradient(45deg,#FF3344 0 4px,#7a0e1a 4px 8px)"
-                    :stColor,
-                  boxShadow:`0 0 7px ${stColor}`,transition:"width .8s ease"}}/>
-              </div>
-              {/* datas em linha */}
-              <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
-                {(m.previsao_inicio||m.dataEntrada)&&(
-                  <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,letterSpacing:".04em"}}>
-                    <span style={{color:dark?"rgba(150,150,150,.5)":"#ccc",fontSize:8,marginRight:3}}>ENT</span>
-                    <span style={{color:dark?"#6FC3FF":"#0A6EBF",fontWeight:700}}>{fmtDate(m.previsao_inicio||m.dataEntrada)}</span>
-                  </span>
-                )}
-                {m.previsao_fim&&<span style={{color:dark?"rgba(255,255,255,.12)":"rgba(0,0,0,.15)",fontSize:10}}>→</span>}
-                {m.previsao_fim&&(
-                  <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,letterSpacing:".04em"}}>
-                    <span style={{color:dark?"rgba(150,150,150,.5)":"#ccc",fontSize:8,marginRight:3}}>ENTREGA</span>
-                    <span style={{fontWeight:700,
-                      color:isLate?(dark?"#FF3344":"#DC2626"):isRisk?(dark?"#FFB200":"#B08D2E"):(dark?"#2BE564":"#16A34A")}}>
-                      {fmtDate(m.previsao_fim)}
-                    </span>
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* tasks — max 2 */}
-          {visTasks.length>0&&(
-            <div style={{flexShrink:0,display:"flex",flexDirection:"column",gap:4,marginBottom:6}}>
-              {visTasks.map((t,i)=>(
-                <div key={i} style={{display:"flex",alignItems:"center",gap:7,
-                  padding:"5px 8px",
-                  background:dark?"rgba(255,255,255,.025)":"rgba(0,0,0,.03)",
-                  border:`1px solid ${dark?"rgba(255,255,255,.04)":"rgba(0,0,0,.05)"}`,
-                  borderLeft:`2px solid ${stColor}55`,
-                  borderRadius:dark?"2px":"5px"}}>
-                  <div style={{width:10,height:10,borderRadius:2,flexShrink:0,
-                    border:`1.5px solid ${stColor}44`,background:"transparent"}}/>
-                  <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
-                    fontSize:`clamp(10px,${0.9*scale}vw,12px)`,
-                    color:dark?"#c8c8d0":"#555",lineHeight:1.2,flex:1,
-                    overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-                    {t.texto}
-                  </span>
-                </div>
-              ))}
-              {hiddenN>0&&(
-                <div style={{textAlign:"center",padding:"3px 0",
-                  fontFamily:"'Rajdhani',sans-serif",fontWeight:600,fontSize:9,
-                  letterSpacing:".12em",color:dark?"rgba(150,150,150,.4)":"#ccc"}}>
-                  +{hiddenN} restantes
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* rodapé */}
-          <div style={{marginTop:"auto",flexShrink:0,display:"flex",alignItems:"center",
-            justifyContent:"space-between",paddingTop:6,
-            borderTop:`1px solid ${dark?"rgba(255,255,255,.04)":"rgba(0,0,0,.05)"}`}}>
-            <div style={{display:"flex",alignItems:"center",gap:6}}>
-              <div style={{width:8,height:8,borderRadius:"50%",background:techClr,
-                boxShadow:dark?`0 0 6px ${techClr}`:"none"}}/>
-              <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,fontSize:9,
-                letterSpacing:".16em",color:dark?"rgba(150,150,150,.4)":"#ccc"}}>TÉC</span>
-            </div>
-            {meta>0&&<span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:11,
-              color:dark?"rgba(200,200,200,.7)":"#666",letterSpacing:".04em"}}>
-              <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,fontSize:9,
-                letterSpacing:".16em",color:dark?"rgba(150,150,150,.45)":"#ccc",marginRight:4}}>META</span>
-              {fmtH(meta)}
-            </span>}
-          </div>
-        </div>
+        <Topo timerFontSize={`clamp(14px,${1.6*scale}vw,20px)`}/>
+        <NsPlate/>
+        {(m.previsao_inicio||m.dataEntrada||m.previsao_fim)&&<DatasRow/>}
+        {visTasks.length>0&&<TasksList/>}
+        <div style={{flex:1}}/>
+        <Rodape/>
       </div>
     );
   }
 
   // ══════════════════════════════════════════════════════════════════════════════
-  //  MODO FULL — espaçoso (1-4 cards)
-  //  Layout em 3 zonas: TOPO fixo | CENTRO flex-1 | RODAPÉ fixo
+  //  FULL — topo + ns(com barra) + datas + tasks + rodapé, com espaço a respirar
   // ══════════════════════════════════════════════════════════════════════════════
   return(
-    <div style={wrapStyle}>
+    <div style={W}>
       <Decos/>
-
-      {/* TOPO */}
-      <div style={{
-        padding:"12px 18px 10px 20px",
-        display:"flex",alignItems:"center",gap:6,flexShrink:0,
-        borderBottom:`1px solid ${dark?"rgba(255,255,255,.05)":"rgba(0,0,0,.06)"}`,
-        flexWrap:"wrap",
-      }}>
-        {isLate&&<BadgePillV2 color={dark?"#FF3344":"#DC2626"} bg="rgba(255,51,68,.1)" border="rgba(255,51,68,.32)">✕ ATRASADO</BadgePillV2>}
-        {isRisk&&!isLate&&<BadgePillV2 color={dark?"#FFB200":"#B08D2E"} bg="rgba(255,178,0,.1)" border="rgba(255,178,0,.28)">⚠ RISCO</BadgePillV2>}
-        {!isRisk&&!isLate&&run&&(
-          <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,fontSize:10,letterSpacing:".1em",
-            padding:"3px 8px",borderRadius:3,color:dark?"#2BE564":"#16A34A",
-            background:"rgba(43,229,100,.1)",border:"1px solid rgba(43,229,100,.3)",
-            display:"inline-flex",alignItems:"center",gap:4}}>
-            <span style={{width:6,height:6,borderRadius:"50%",background:dark?"#2BE564":"#16A34A",
-              boxShadow:"0 0 6px #2BE564",animation:"blink 1.6s infinite"}}/>RUN
-          </span>
-        )}
-        {paused&&!run&&<BadgePillV2 color={dark?"#FFB200":"#B08D2E"} bg="rgba(255,178,0,.1)" border="rgba(255,178,0,.28)">⏸ PAUSA</BadgePillV2>}
-        {isPrio&&<span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:800,fontSize:10,letterSpacing:".1em",
-          padding:"3px 8px",borderRadius:3,color:"#0a0a0a",background:"#FFB200"}}>⚡ PRIO</span>}
-        {tipoBadge&&<BadgePillV2 color={tipoBadge.color} bg={tipoBadge.bg} border={tipoBadge.border}>{tipoBadge.label}</BadgePillV2>}
-        <div style={{marginLeft:"auto",textAlign:"right",flexShrink:0}}>
-          <div style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:600,
-            fontSize:"clamp(18px,2.2vw,28px)",letterSpacing:".02em",color:stColor,lineHeight:1,
-            textShadow:dark?`0 0 20px ${stColor}66`:"none"}}>
-            {fmtHMS(isCD&&restante!==null?restante:elapsed)}
-            {isLate&&<span style={{marginLeft:6,fontSize:"0.6em",animation:"blink 0.8s infinite"}}>⚠</span>}
-          </div>
-          {meta>0&&<div style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,fontSize:10,
-            color:dark?"rgba(200,200,200,.45)":"#aaa",letterSpacing:".12em",marginTop:3}}>
-            /{fmtH(meta)} meta
-          </div>}
-        </div>
-      </div>
-
-      {/* CENTRO flex-1 */}
-      <div style={{flex:1,display:"flex",flexDirection:"column",padding:"0 18px 0 20px",minHeight:0,overflow:"hidden"}}>
-
-        {/* NS */}
-        <div style={{flexShrink:0,display:"flex",flexDirection:"column",
-          alignItems:"center",justifyContent:"center",
-          padding:"clamp(14px,3.5vh,32px) 8px",
-          background:dark?"rgba(0,0,0,.45)":"rgba(0,0,0,.03)",
-          border:`1px solid ${dark?"rgba(255,255,255,.06)":"rgba(0,0,0,.07)"}`,
-          borderRadius:dark?"3px":"10px",margin:"14px 0 0",
-          position:"relative",overflow:"hidden"}}>
-          {dark&&run&&<div style={{position:"absolute",inset:0,
-            background:`radial-gradient(ellipse 80% 60% at 50% 110%,${stColor}18,transparent)`,
-            pointerEvents:"none"}}/>}
-          <div style={{fontFamily:"'Orbitron',monospace",fontWeight:900,
-            letterSpacing:".05em",fontSize:"clamp(20px,3vw,38px)",
-            lineHeight:1,color:dark?"#ffffff":"#0D0D0F",
-            textShadow:dark?"0 0 24px rgba(255,255,255,.12)":"none",
-            position:"relative",zIndex:1,textAlign:"center"}}>
-            {m.serie||"—"}
-          </div>
-          <div style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
-            fontSize:"clamp(11px,1.2vw,15px)",letterSpacing:".18em",
-            color:dark?"rgba(200,200,200,.55)":"#888",marginTop:6,
-            position:"relative",zIndex:1}}>
-            {m.modelo||"—"}
+      <Topo timerFontSize="clamp(18px,2.2vw,28px)"/>
+      <NsPlate grow/>
+      {(m.previsao_inicio||m.dataEntrada||m.previsao_fim)&&<DatasRow/>}
+      {visTasks.length>0&&<TasksList/>}
+      {motivo&&(
+        <div style={{flexShrink:0,display:"flex",alignItems:"center",gap:8,
+          margin:"0 14px 8px",padding:"9px 12px",borderRadius:dark?"3px":"8px",
+          background:dark?`color-mix(in srgb,${mColor} 8%,transparent)`:`color-mix(in srgb,${mColor} 5%,#fff)`,
+          border:`1px solid ${mColor}44`}}>
+          <span style={{fontSize:15,lineHeight:1,flexShrink:0}}>{motivoLabel[motivo]?.split(" ")[0]||"💬"}</span>
+          <div>
+            <div style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,fontSize:8.5,
+              letterSpacing:".2em",color:dark?"rgba(150,150,150,.55)":"#bbb",marginBottom:2}}>MOTIVO DE PAUSA</div>
+            <div style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,fontSize:12,
+              letterSpacing:".06em",color:mColor||"#F59E0B"}}>
+              {motivoLabel[motivo]?.replace(/^.+ /,"")||"PAUSA"}
+            </div>
           </div>
         </div>
-
-        {/* gauge + barra + datas */}
-        {meta>0&&(
-          <div style={{flexShrink:0,display:"flex",alignItems:"center",gap:14,
-            padding:"14px 0 12px",
-            borderBottom:visTasks.length>0?`1px solid ${dark?"rgba(255,255,255,.05)":"rgba(0,0,0,.06)"}`:undefined}}>
-            {/* gauge */}
-            <div style={{flexShrink:0,position:"relative",width:56,height:56}}>
-              <svg viewBox="0 0 100 100" style={{width:56,height:56,transform:"rotate(-90deg)"}}>
-                <circle cx="50" cy="50" r={R} fill="none"
-                  stroke={dark?"rgba(255,255,255,.07)":"rgba(0,0,0,.08)"} strokeWidth="8"/>
-                <circle cx="50" cy="50" r={R} fill="none"
-                  stroke={stColor} strokeWidth="8" strokeLinecap="round"
-                  strokeDasharray={`${CIRC}`} strokeDashoffset={`${dash}`}
-                  style={{filter:dark?`drop-shadow(0 0 4px ${stColor})`:"none",
-                    transition:"stroke-dashoffset .8s ease"}}/>
-              </svg>
-              <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center"}}>
-                <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
-                  fontSize:11,color:stColor}}>{Math.round(pct)}%</span>
-              </div>
-            </div>
-            <div style={{flex:1,display:"flex",flexDirection:"column",gap:6}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}>
-                <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,fontSize:10,
-                  letterSpacing:".18em",color:dark?"rgba(160,160,160,.7)":"#999"}}>
-                  {isLate?"+ ATRASO":"RESTAM"}
-                </span>
-                <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
-                  fontSize:16,color:stColor,textShadow:dark?`0 0 12px ${stColor}55`:"none"}}>
-                  {fmtHMS(isLate?atrasoSec:restamSec)}
-                </span>
-              </div>
-              <div style={{height:6,background:dark?"rgba(255,255,255,.07)":"rgba(0,0,0,.08)",
-                borderRadius:3,overflow:"hidden"}}>
-                <div style={{height:"100%",width:`${pct}%`,borderRadius:3,
-                  background:isLate?"repeating-linear-gradient(45deg,#FF3344 0 4px,#7a0e1a 4px 8px)":stColor,
-                  boxShadow:`0 0 8px ${stColor}`,transition:"width .8s ease"}}/>
-              </div>
-              <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
-                {(m.previsao_inicio||m.dataEntrada)&&(
-                  <div style={{display:"flex",alignItems:"center",gap:5}}>
-                    <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,fontSize:9,
-                      letterSpacing:".14em",color:dark?"rgba(150,150,150,.6)":"#bbb"}}>ENTRADA</span>
-                    <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:14,
-                      color:dark?"#6FC3FF":"#0A6EBF",
-                      textShadow:dark?"0 0 10px rgba(111,195,255,.4)":"none"}}>
-                      {fmtDate(m.previsao_inicio||m.dataEntrada)}
-                    </span>
-                  </div>
-                )}
-                {(m.previsao_inicio||m.dataEntrada)&&m.previsao_fim&&
-                  <span style={{color:dark?"rgba(255,255,255,.15)":"rgba(0,0,0,.2)",fontSize:12}}>→</span>}
-                {m.previsao_fim&&(
-                  <div style={{display:"flex",alignItems:"center",gap:5}}>
-                    <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,fontSize:9,
-                      letterSpacing:".14em",color:dark?"rgba(150,150,150,.6)":"#bbb"}}>ENTREGA</span>
-                    <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:14,
-                      color:isLate?(dark?"#FF3344":"#DC2626"):isRisk?(dark?"#FFB200":"#B08D2E"):(dark?"#2BE564":"#16A34A"),
-                      textShadow:dark?`0 0 10px ${isLate?"#FF334488":isRisk?"#FFB20088":"#2BE56488"}`:"none"}}>
-                      {fmtDate(m.previsao_fim)}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* tasks — max 4 */}
-        {visTasks.length>0&&(
-          <div style={{flexShrink:0,display:"flex",flexDirection:"column",padding:"12px 0 10px"}}>
-            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
-              <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,fontSize:9,
-                letterSpacing:".2em",color:dark?"rgba(150,150,150,.6)":"#bbb"}}>TAREFAS</span>
-              <div style={{height:"1px",flex:1,background:dark?"rgba(255,255,255,.06)":"rgba(0,0,0,.07)"}}/>
-              <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:9,
-                color:dark?"rgba(150,150,150,.5)":"#ccc"}}>{doneCount}/{allTasks.length}</span>
-            </div>
-            <div style={{display:"flex",flexDirection:"column",gap:5}}>
-              {visTasks.map((t,i)=>(
-                <div key={i} style={{display:"flex",alignItems:"center",gap:10,
-                  padding:"7px 10px",
-                  background:dark?"rgba(255,255,255,.03)":"rgba(0,0,0,.03)",
-                  border:`1px solid ${dark?"rgba(255,255,255,.05)":"rgba(0,0,0,.06)"}`,
-                  borderLeft:`3px solid ${stColor}`,borderRadius:dark?"2px":"6px"}}>
-                  <div style={{width:13,height:13,borderRadius:3,flexShrink:0,
-                    border:`1.5px solid ${stColor}55`,background:"transparent"}}/>
-                  <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,fontSize:13,
-                    letterSpacing:".03em",color:dark?"#d0d0d8":"#444",lineHeight:1.2,flex:1,
-                    overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-                    {t.texto}
-                  </span>
-                </div>
-              ))}
-              {hiddenN>0&&(
-                <div style={{textAlign:"center",padding:"5px 0",
-                  fontFamily:"'Rajdhani',sans-serif",fontWeight:600,fontSize:10,
-                  letterSpacing:".12em",color:dark?"rgba(150,150,150,.4)":"#ccc",
-                  border:`1px dashed ${dark?"rgba(255,255,255,.08)":"rgba(0,0,0,.1)"}`,
-                  borderRadius:dark?"2px":"5px"}}>
-                  + {hiddenN} {hiddenN===1?"tarefa":"tarefas"} restantes
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* motivo pausa */}
-        {motivo&&(
-          <div style={{display:"flex",alignItems:"center",gap:8,padding:"10px 12px",
-            borderRadius:dark?"3px":"8px",flexShrink:0,margin:"8px 0",
-            background:dark?`color-mix(in srgb,${mColor} 8%,transparent)`:`color-mix(in srgb,${mColor} 5%,#fff)`,
-            border:`1px solid ${mColor}44`}}>
-            <span style={{fontSize:16,lineHeight:1,flexShrink:0}}>{motivoLabel[motivo]?.split(" ")[0]||"💬"}</span>
-            <div>
-              <div style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,fontSize:9,
-                letterSpacing:".2em",color:dark?"rgba(150,150,150,.6)":"#bbb",marginBottom:2}}>MOTIVO DE PAUSA</div>
-              <div style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,fontSize:13,
-                letterSpacing:".06em",color:mColor||"#F59E0B"}}>
-                {motivoLabel[motivo]?.replace(/^.+ /,"")||"PAUSA"}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* RODAPÉ */}
-      <div style={{padding:"10px 18px 12px 20px",flexShrink:0,
-        borderTop:`1px solid ${dark?"rgba(255,255,255,.05)":"rgba(0,0,0,.06)"}`,
-        display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-        <div style={{display:"flex",alignItems:"center",gap:8}}>
-          <div style={{width:10,height:10,borderRadius:"50%",background:techClr,
-            boxShadow:dark?`0 0 8px ${techClr}`:"none"}}/>
-          <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,fontSize:10,
-            letterSpacing:".18em",color:dark?"rgba(150,150,150,.45)":"#ccc"}}>TÉC</span>
-        </div>
-        {meta>0&&(
-          <div style={{display:"flex",alignItems:"center",gap:6}}>
-            <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,fontSize:9,
-              letterSpacing:".18em",color:dark?"rgba(150,150,150,.5)":"#ccc"}}>META</span>
-            <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:13,
-              color:dark?"rgba(200,200,200,.8)":"#555"}}>{fmtH(meta)}</span>
-          </div>
-        )}
-      </div>
+      )}
+      <Rodape/>
     </div>
   );
 }
@@ -808,7 +632,7 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
 function BadgePillV2({color,bg,border,children}){
   return(
     <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,fontSize:10,
-      letterSpacing:".1em",padding:"3px 8px",borderRadius:3,
+      letterSpacing:".1em",padding:"3px 7px",borderRadius:3,
       color,background:bg,border:`1px solid ${border}`,
       display:"inline-flex",alignItems:"center",gap:3,whiteSpace:"nowrap"}}>
       {children}

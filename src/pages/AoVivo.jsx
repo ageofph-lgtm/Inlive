@@ -299,7 +299,6 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
   const TECH_CLR = {raphael:"#FFD166",nuno:"#B68BFF",rogerio:"#FF8C69",yano:"#5CFFFF",patrick:"#90EE90"};
   const techId   = (()=>{ const e=m.estado||""; const x=e.match(/(?:em-preparacao|concluida)-(.+)/); return x?x[1]:(m.tecnico||null); })();
   const techClr  = TECH_CLR[techId]||"rgba(130,130,130,0.4)";
-  const techName = techId ? techId.charAt(0).toUpperCase()+techId.slice(1) : "—";
 
   const TIPO_BADGE = {
     nova:    {label:"NTS",  color:dark?"#FF3344":"#DC2626",  bg:"rgba(255,51,68,.08)",   border:"rgba(255,51,68,.28)"},
@@ -320,7 +319,12 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
   const fmtDate  = d => d ? new Date(d+"T12:00:00").toLocaleDateString("pt-PT",{day:"2-digit",month:"2-digit"}) : null;
   const fmtH     = s => { const h=Math.floor(s/3600),mn=Math.floor((s%3600)/60); return mn===0?`${h}h`:`${h}h${String(mn).padStart(2,"0")}`; };
 
-  // gauge SVG — anel de progresso
+  // FIX 2: limitar tasks visíveis — máx 4 (compact: 3), resto colapsa em "+N"
+  const MAX_TASKS = compact ? 3 : 4;
+  const visibleTasks  = tasks.slice(0, MAX_TASKS);
+  const hiddenCount   = tasks.length - visibleTasks.length;
+
+  // gauge SVG
   const R=44, CIRC=2*Math.PI*R;
   const dash = CIRC*(1-pct/100);
 
@@ -376,7 +380,7 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
           padding:"3px 8px",borderRadius:3,color:"#0a0a0a",background:"#FFB200"}}>⚡ PRIO</span>}
         {tipoBadge&&<BadgePillV2 color={tipoBadge.color} bg={tipoBadge.bg} border={tipoBadge.border}>{tipoBadge.label}</BadgePillV2>}
 
-        {/* TIMER — direita, grande */}
+        {/* TIMER à direita */}
         <div style={{marginLeft:"auto",textAlign:"right",flexShrink:0}}>
           <div style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:600,
             fontSize:compact?"18px":"clamp(18px,2.2vw,28px)",
@@ -394,25 +398,24 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
         </div>
       </div>
 
-      {/* ══ CENTRO — flex-1, distribui verticalmente ══ */}
+      {/* ══ CENTRO — flex-1 ══ */}
       <div style={{
         flex:1,display:"flex",flexDirection:"column",
         padding:"0 18px 0 20px",minHeight:0,overflow:"hidden",
       }}>
 
-        {/* NS + modelo — protagonista, cresce com o espaço disponível */}
+        {/* NS + modelo */}
         <div style={{
-          flex:"0 0 auto",
+          flexShrink:0,
           display:"flex",flexDirection:"column",
           alignItems:"center",justifyContent:"center",
-          padding:compact?"16px 8px":"clamp(16px,4vh,36px) 8px",
+          padding:compact?"16px 8px":"clamp(14px,3.5vh,32px) 8px",
           background:dark?"rgba(0,0,0,.45)":"rgba(0,0,0,.03)",
           border:`1px solid ${dark?"rgba(255,255,255,.06)":"rgba(0,0,0,.07)"}`,
           borderRadius:dark?"3px":"10px",
           margin:"14px 0 0",
           position:"relative",overflow:"hidden",
         }}>
-          {/* glow fundo no NS */}
           {dark&&run&&<div style={{position:"absolute",inset:0,
             background:`radial-gradient(ellipse 80% 60% at 50% 110%,${stColor}18,transparent)`,
             pointerEvents:"none"}}/>}
@@ -433,24 +436,24 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
           </div>
         </div>
 
-        {/* gauge + barra + meta — bloco central */}
+        {/* gauge + barra + datas */}
         {meta>0&&(
           <div style={{
-            flex:"0 0 auto",
+            flexShrink:0,
             display:"flex",alignItems:"center",gap:14,
             padding:"14px 0 12px",
-            borderBottom:tasks.length>0?`1px solid ${dark?"rgba(255,255,255,.05)":"rgba(0,0,0,.06)"}`:undefined,
+            borderBottom:visibleTasks.length>0
+              ?`1px solid ${dark?"rgba(255,255,255,.05)":"rgba(0,0,0,.06)"}`
+              :undefined,
           }}>
-            {/* gauge circular pequeno */}
+            {/* gauge */}
             <div style={{flexShrink:0,position:"relative",width:56,height:56}}>
               <svg viewBox="0 0 100 100" style={{width:56,height:56,transform:"rotate(-90deg)"}}>
                 <circle cx="50" cy="50" r={R} fill="none"
                   stroke={dark?"rgba(255,255,255,.07)":"rgba(0,0,0,.08)"} strokeWidth="8"/>
                 <circle cx="50" cy="50" r={R} fill="none"
-                  stroke={stColor} strokeWidth="8"
-                  strokeLinecap="round"
-                  strokeDasharray={`${CIRC}`}
-                  strokeDashoffset={`${dash}`}
+                  stroke={stColor} strokeWidth="8" strokeLinecap="round"
+                  strokeDasharray={`${CIRC}`} strokeDashoffset={`${dash}`}
                   style={{filter:dark?`drop-shadow(0 0 4px ${stColor})`:"none",
                     transition:"stroke-dashoffset .8s ease"}}/>
               </svg>
@@ -465,7 +468,6 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
 
             {/* barra + info */}
             <div style={{flex:1,display:"flex",flexDirection:"column",gap:6}}>
-              {/* label RESTAM / ATRASO */}
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}>
                 <div style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,
                   fontSize:10,letterSpacing:".18em",
@@ -478,19 +480,15 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
                   {fmtHMS(isLate?atrasoSec:restamSec)}
                 </div>
               </div>
-
-              {/* barra */}
               <div style={{height:6,background:dark?"rgba(255,255,255,.07)":"rgba(0,0,0,.08)",
                 borderRadius:3,overflow:"hidden"}}>
                 <div style={{height:"100%",width:`${pct}%`,borderRadius:3,
                   background:isLate
                     ?"repeating-linear-gradient(45deg,#FF3344 0 4px,#7a0e1a 4px 8px)"
                     :stColor,
-                  boxShadow:`0 0 8px ${stColor}`,
-                  transition:"width .8s ease"}}/>
+                  boxShadow:`0 0 8px ${stColor}`,transition:"width .8s ease"}}/>
               </div>
-
-              {/* datas ENTRADA → ENTREGA — destacadas */}
+              {/* datas */}
               <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
                 {(m.previsao_inicio||m.dataEntrada)&&(
                   <div style={{display:"flex",alignItems:"center",gap:5}}>
@@ -526,53 +524,65 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
           </div>
         )}
 
-        {/* tasks — lista com checkbox visual, flex-1 para ocupar o espaço restante */}
-        {tasks.length>0&&(
+        {/* tasks — máx MAX_TASKS, nunca corta o card */}
+        {visibleTasks.length>0&&(
           <div style={{
-            flex:1,display:"flex",flexDirection:"column",
-            padding:"12px 0 10px",overflow:"hidden",
-            minHeight:0,
+            flexShrink:0,
+            display:"flex",flexDirection:"column",
+            padding:"12px 0 10px",
           }}>
-            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8,flexShrink:0}}>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
               <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,
                 fontSize:9,letterSpacing:".2em",
                 color:dark?"rgba(150,150,150,.6)":"#bbb"}}>TAREFAS</span>
               <div style={{height:"1px",flex:1,
                 background:dark?"rgba(255,255,255,.06)":"rgba(0,0,0,.07)"}}/>
-              {allTasks.length>0&&(
-                <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:9,
-                  color:dark?"rgba(150,150,150,.5)":"#ccc"}}>
-                  {doneCount}/{allTasks.length}
-                </span>
-              )}
+              <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:9,
+                color:dark?"rgba(150,150,150,.5)":"#ccc"}}>
+                {doneCount}/{allTasks.length}
+              </span>
             </div>
-            <div style={{flex:1,overflow:"hidden",display:"flex",flexDirection:"column",gap:6}}>
-              {tasks.map((t,i)=>(
+            <div style={{display:"flex",flexDirection:"column",gap:5}}>
+              {visibleTasks.map((t,i)=>(
                 <div key={i} style={{
                   display:"flex",alignItems:"center",gap:10,
-                  padding:"7px 10px",
+                  padding:"6px 10px",
                   background:dark?"rgba(255,255,255,.03)":"rgba(0,0,0,.03)",
                   border:`1px solid ${dark?"rgba(255,255,255,.05)":"rgba(0,0,0,.06)"}`,
                   borderLeft:`3px solid ${stColor}`,
                   borderRadius:dark?"2px":"6px",
-                  flexShrink:0,
                 }}>
-                  {/* checkbox vazio */}
-                  <div style={{width:14,height:14,borderRadius:3,flexShrink:0,
-                    border:`1.5px solid ${stColor}44`,
-                    background:"transparent"}}/>
+                  <div style={{width:13,height:13,borderRadius:3,flexShrink:0,
+                    border:`1.5px solid ${stColor}55`,background:"transparent"}}/>
                   <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
                     fontSize:compact?"12px":"13px",letterSpacing:".03em",
-                    color:dark?"#d0d0d8":"#444",lineHeight:1.2,flex:1}}>
+                    color:dark?"#d0d0d8":"#444",lineHeight:1.2,flex:1,
+                    overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
                     {t.texto}
                   </span>
                 </div>
               ))}
+              {/* "+N mais" — nunca mostra se cabem todas */}
+              {hiddenCount>0&&(
+                <div style={{
+                  display:"flex",alignItems:"center",justifyContent:"center",
+                  padding:"5px 10px",
+                  background:"transparent",
+                  border:`1px dashed ${dark?"rgba(255,255,255,.1)":"rgba(0,0,0,.1)"}`,
+                  borderRadius:dark?"2px":"6px",
+                }}>
+                  <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
+                    fontSize:11,letterSpacing:".12em",
+                    color:dark?"rgba(150,150,150,.5)":"#bbb"}}>
+                    + {hiddenCount} {hiddenCount===1?"tarefa":"tarefas"} restantes
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         )}
 
-        {/* Motivo pausa — bloco destaque */}
+        {/* Motivo pausa */}
         {motivo&&(
           <div style={{
             display:"flex",alignItems:"center",gap:8,
@@ -595,22 +605,22 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
 
       </div>
 
-      {/* ══ RODAPÉ — técnico + hora meta ══ */}
+      {/* ══ RODAPÉ — só dot do técnico (sem nome) + meta ══ */}
       <div style={{
         padding:"10px 18px 12px 20px",
         borderTop:`1px solid ${dark?"rgba(255,255,255,.05)":"rgba(0,0,0,.06)"}`,
         display:"flex",alignItems:"center",justifyContent:"space-between",
         flexShrink:0,
       }}>
-        {/* técnico */}
+        {/* FIX 1: apenas dot colorido, sem nome */}
         <div style={{display:"flex",alignItems:"center",gap:8}}>
           <div style={{width:10,height:10,borderRadius:"50%",
-            background:techClr,boxShadow:dark?`0 0 8px ${techClr}`:"none",flexShrink:0}}/>
+            background:techClr,
+            boxShadow:dark?`0 0 8px ${techClr}`:"none",
+            flexShrink:0}}/>
           <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,
-            fontSize:11,letterSpacing:".14em",
-            color:dark?"rgba(200,200,200,.6)":"#999",textTransform:"uppercase"}}>
-            {techName}
-          </span>
+            fontSize:10,letterSpacing:".18em",
+            color:dark?"rgba(150,150,150,.45)":"#ccc"}}>TÉC</span>
         </div>
 
         {/* meta horária */}

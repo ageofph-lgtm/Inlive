@@ -275,7 +275,9 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
   const elapsed   = useLiveTimer(m);
   const run       = m.timer_status==="running";
   const paused    = m.timer_status?.startsWith("paused");
-  const tasks     = (m.tarefas||[]).filter(t=>!t.concluida);
+  const allTasks  = m.tarefas||[];
+  const tasks     = allTasks.filter(t=>!t.concluida);
+  const doneCount = allTasks.length - tasks.length;
 
   const catKey    = forceCategory || getMachineCategory(m);
   const cat       = CAT[catKey] || CAT.andamento;
@@ -297,6 +299,7 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
   const TECH_CLR = {raphael:"#FFD166",nuno:"#B68BFF",rogerio:"#FF8C69",yano:"#5CFFFF",patrick:"#90EE90"};
   const techId   = (()=>{ const e=m.estado||""; const x=e.match(/(?:em-preparacao|concluida)-(.+)/); return x?x[1]:(m.tecnico||null); })();
   const techClr  = TECH_CLR[techId]||"rgba(130,130,130,0.4)";
+  const techName = techId ? techId.charAt(0).toUpperCase()+techId.slice(1) : "—";
 
   const TIPO_BADGE = {
     nova:    {label:"NTS",  color:dark?"#FF3344":"#DC2626",  bg:"rgba(255,51,68,.08)",   border:"rgba(255,51,68,.28)"},
@@ -307,7 +310,7 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
   const isPrio    = !!m.prioridade;
 
   const motivo      = paused ? getPausaMotivo(m) : null;
-  const motivoLabel = {aguarda_pecas:"📦 PEÇAS",prioritaria:"🚨 PRIO",aguarda_decisao:"⏳ DECISÃO",outros:"💬 OUTROS"};
+  const motivoLabel = {aguarda_pecas:"📦 PEÇAS",prioritaria:"🚨 PRIORITÁRIA",aguarda_decisao:"⏳ AGUARDA DECISÃO",outros:"💬 OUTROS"};
   const motivoColor = {aguarda_pecas:"#F59E0B",prioritaria:"#EF4444",aguarda_decisao:"#8B5CF6",outros:"#6B7280"};
   const mColor      = motivo ? (motivoColor[motivo]||"#F59E0B") : null;
 
@@ -315,6 +318,11 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
   const restamSec= Math.max(meta-elapsed,0);
   const atrasoSec= elapsed-meta;
   const fmtDate  = d => d ? new Date(d+"T12:00:00").toLocaleDateString("pt-PT",{day:"2-digit",month:"2-digit"}) : null;
+  const fmtH     = s => { const h=Math.floor(s/3600),mn=Math.floor((s%3600)/60); return mn===0?`${h}h`:`${h}h${String(mn).padStart(2,"0")}`; };
+
+  // gauge SVG — anel de progresso
+  const R=44, CIRC=2*Math.PI*R;
+  const dash = CIRC*(1-pct/100);
 
   return(
     <div style={{
@@ -322,166 +330,311 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
       height:"100%",boxSizing:"border-box",
       borderRadius:dark?0:"12px",overflow:"hidden",
       background:dark
-        ?`linear-gradient(180deg,color-mix(in srgb,${stColor} 8%,#141416),#141416 44%)`
-        :`linear-gradient(180deg,color-mix(in srgb,${stColor} 5%,#fff),#fff 44%)`,
-      border:`1px solid color-mix(in srgb,${stColor} 24%,transparent)`,
-      boxShadow:`0 0 0 1px rgba(0,0,0,.4),0 16px 40px -24px color-mix(in srgb,${stColor} 55%,transparent)`,
+        ?`linear-gradient(170deg,color-mix(in srgb,${stColor} 10%,#0e0e11) 0%,#0a0a0d 35%,#080808 100%)`
+        :`linear-gradient(170deg,color-mix(in srgb,${stColor} 6%,#fff) 0%,#fff 40%)`,
+      border:`1px solid color-mix(in srgb,${stColor} 28%,transparent)`,
+      boxShadow:`0 0 0 1px rgba(0,0,0,.5),0 20px 60px -20px color-mix(in srgb,${stColor} 60%,transparent)`,
       animation:isLate?"pulseCard 1.4s ease-in-out infinite":"none",
-      clipPath:dark?"polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))":"none",
+      clipPath:dark?"polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px))":"none",
     }}>
-      {/* linha de topo = ESTADO */}
+      {/* linha de topo */}
       <div style={{position:"absolute",top:0,left:0,right:0,height:"2px",zIndex:3,
-        background:`linear-gradient(90deg,${stColor},transparent 88%)`,
-        boxShadow:`0 0 10px ${stColor}`}}/>
+        background:`linear-gradient(90deg,${stColor} 0%,transparent 75%)`,
+        boxShadow:`0 0 14px ${stColor}`}}/>
       {/* spine esquerda = TÉCNICO */}
-      <div style={{position:"absolute",top:10,bottom:10,left:0,width:"3px",zIndex:3,
-        borderRadius:"0 3px 3px 0",background:techClr}}/>
+      <div style={{position:"absolute",top:12,bottom:12,left:0,width:"3px",zIndex:3,
+        borderRadius:"0 4px 4px 0",background:techClr,
+        boxShadow:dark?`0 0 8px ${techClr}44`:"none"}}/>
       {/* HUD corners */}
       {(isRisk||isLate)&&dark&&(<>
-        <div style={{position:"absolute",top:5,right:5,width:9,height:9,zIndex:4,
-          borderTop:`1.5px solid ${stColor}`,borderRight:`1.5px solid ${stColor}`,opacity:.65}}/>
-        <div style={{position:"absolute",bottom:5,left:5,width:9,height:9,zIndex:4,
-          borderBottom:`1.5px solid ${stColor}`,borderLeft:`1.5px solid ${stColor}`,opacity:.65}}/>
+        <div style={{position:"absolute",top:6,right:6,width:12,height:12,zIndex:4,
+          borderTop:`1.5px solid ${stColor}`,borderRight:`1.5px solid ${stColor}`,opacity:.7}}/>
+        <div style={{position:"absolute",bottom:6,left:6,width:12,height:12,zIndex:4,
+          borderBottom:`1.5px solid ${stColor}`,borderLeft:`1.5px solid ${stColor}`,opacity:.7}}/>
       </>)}
 
-      <div style={{padding:compact?"10px 13px 8px":"13px 14px 11px",display:"flex",flexDirection:"column",gap:0,flex:1,minHeight:0}}>
+      {/* ══ TOPO — badges + timer ══ */}
+      <div style={{
+        padding:"12px 18px 10px 20px",
+        display:"flex",alignItems:"center",gap:6,flexShrink:0,
+        borderBottom:`1px solid ${dark?"rgba(255,255,255,.05)":"rgba(0,0,0,.06)"}`,
+        flexWrap:"wrap",
+      }}>
+        {isLate&&<BadgePillV2 color={dark?"#FF3344":"#DC2626"} bg="rgba(255,51,68,.1)" border="rgba(255,51,68,.32)">✕ ATRASADO</BadgePillV2>}
+        {isRisk&&!isLate&&<BadgePillV2 color={dark?"#FFB200":"#B08D2E"} bg="rgba(255,178,0,.1)" border="rgba(255,178,0,.28)">⚠ RISCO</BadgePillV2>}
+        {!isRisk&&!isLate&&run&&(
+          <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,fontSize:10,letterSpacing:".1em",
+            padding:"3px 8px",borderRadius:3,color:dark?"#2BE564":"#16A34A",
+            background:"rgba(43,229,100,.1)",border:"1px solid rgba(43,229,100,.3)",
+            display:"inline-flex",alignItems:"center",gap:4}}>
+            <span style={{width:6,height:6,borderRadius:"50%",background:dark?"#2BE564":"#16A34A",
+              boxShadow:"0 0 6px #2BE564",animation:"blink 1.6s infinite"}}/>RUN
+          </span>
+        )}
+        {paused&&!run&&<BadgePillV2 color={dark?"#FFB200":"#B08D2E"} bg="rgba(255,178,0,.1)" border="rgba(255,178,0,.28)">⏸ PAUSA</BadgePillV2>}
+        {isPrio&&<span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:800,fontSize:10,letterSpacing:".1em",
+          padding:"3px 8px",borderRadius:3,color:"#0a0a0a",background:"#FFB200"}}>⚡ PRIO</span>}
+        {tipoBadge&&<BadgePillV2 color={tipoBadge.color} bg={tipoBadge.bg} border={tipoBadge.border}>{tipoBadge.label}</BadgePillV2>}
 
-        {/* badges + timer */}
-        <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:7,flexWrap:"wrap",flexShrink:0}}>
-          {isLate&&<BadgePillV2 color={dark?"#FF3344":"#DC2626"} bg="rgba(255,51,68,.1)" border="rgba(255,51,68,.32)">✕ ATRASO</BadgePillV2>}
-          {isRisk&&!isLate&&<BadgePillV2 color={dark?"#FFB200":"#B08D2E"} bg="rgba(255,178,0,.1)" border="rgba(255,178,0,.28)">⚠ RISCO</BadgePillV2>}
-          {!isRisk&&!isLate&&run&&(
-            <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,fontSize:9,letterSpacing:".1em",
-              padding:"2px 6px",borderRadius:3,color:dark?"#2BE564":"#16A34A",
-              background:"rgba(43,229,100,.1)",border:"1px solid rgba(43,229,100,.28)",
-              display:"inline-flex",alignItems:"center",gap:3}}>
-              <span style={{width:5,height:5,borderRadius:"50%",background:dark?"#2BE564":"#16A34A",
-                boxShadow:"0 0 5px #2BE564",animation:"blink 1.6s infinite"}}/>RUN
-            </span>
-          )}
-          {paused&&!run&&<BadgePillV2 color={dark?"#FFB200":"#B08D2E"} bg="rgba(255,178,0,.1)" border="rgba(255,178,0,.28)">⏸ PAUSA</BadgePillV2>}
-          {isPrio&&<span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:800,fontSize:9,letterSpacing:".1em",
-            padding:"2px 6px",borderRadius:3,color:"#0a0a0a",background:"#FFB200"}}>PRIO</span>}
-          {tipoBadge&&<BadgePillV2 color={tipoBadge.color} bg={tipoBadge.bg} border={tipoBadge.border}>{tipoBadge.label}</BadgePillV2>}
-          <div style={{marginLeft:"auto",textAlign:"right",flexShrink:0}}>
-            <div style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:600,
-              fontSize:compact?"16px":"20px",letterSpacing:".02em",color:stColor,lineHeight:1}}>
-              {fmtHMS(isCD&&restante!==null?restante:elapsed)}
-            </div>
-            {meta>0&&run&&(
-              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:9,
-                color:dark?"rgba(255,255,255,.4)":"rgba(0,0,0,.35)",letterSpacing:".06em",marginTop:2}}>
-                /{Math.round(meta/3600)}h meta
-              </div>
-            )}
+        {/* TIMER — direita, grande */}
+        <div style={{marginLeft:"auto",textAlign:"right",flexShrink:0}}>
+          <div style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:600,
+            fontSize:compact?"18px":"clamp(18px,2.2vw,28px)",
+            letterSpacing:".02em",color:stColor,lineHeight:1,
+            textShadow:dark?`0 0 20px ${stColor}66`:"none"}}>
+            {fmtHMS(isCD&&restante!==null?restante:elapsed)}
+            {isLate&&<span style={{marginLeft:6,fontSize:"0.6em",animation:"blink 0.8s infinite"}}>⚠</span>}
           </div>
+          {meta>0&&(
+            <div style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,fontSize:10,
+              color:dark?"rgba(200,200,200,.45)":"#aaa",letterSpacing:".12em",marginTop:3}}>
+              /{fmtH(meta)} meta
+            </div>
+          )}
         </div>
+      </div>
 
-        {/* NS — herói sobre placa preta */}
+      {/* ══ CENTRO — flex-1, distribui verticalmente ══ */}
+      <div style={{
+        flex:1,display:"flex",flexDirection:"column",
+        padding:"0 18px 0 20px",minHeight:0,overflow:"hidden",
+      }}>
+
+        {/* NS + modelo — protagonista, cresce com o espaço disponível */}
         <div style={{
-          background:dark?"#07070a":"rgba(0,0,0,.04)",
-          border:`1px solid ${dark?"rgba(210,210,210,.07)":"rgba(0,0,0,.07)"}`,
-          borderRadius:dark?"3px":"8px",
-          padding:compact?"10px 6px 8px":"12px 7px 9px",
-          marginBottom:compact?"7px":"8px",textAlign:"center",flexShrink:0,
+          flex:"0 0 auto",
+          display:"flex",flexDirection:"column",
+          alignItems:"center",justifyContent:"center",
+          padding:compact?"16px 8px":"clamp(16px,4vh,36px) 8px",
+          background:dark?"rgba(0,0,0,.45)":"rgba(0,0,0,.03)",
+          border:`1px solid ${dark?"rgba(255,255,255,.06)":"rgba(0,0,0,.07)"}`,
+          borderRadius:dark?"3px":"10px",
+          margin:"14px 0 0",
+          position:"relative",overflow:"hidden",
         }}>
-          <div style={{fontFamily:"'Orbitron',monospace",fontWeight:800,letterSpacing:".04em",
-            fontSize:compact?"clamp(13px,1.5vw,18px)":"clamp(14px,2vw,22px)",
-            lineHeight:1.05,color:dark?"#ffffff":"#0D0D0F",
-            textShadow:dark?"0 0 16px rgba(255,255,255,.08)":"none"}}>
+          {/* glow fundo no NS */}
+          {dark&&run&&<div style={{position:"absolute",inset:0,
+            background:`radial-gradient(ellipse 80% 60% at 50% 110%,${stColor}18,transparent)`,
+            pointerEvents:"none"}}/>}
+          <div style={{fontFamily:"'Orbitron',monospace",fontWeight:900,
+            letterSpacing:".05em",textAlign:"center",
+            fontSize:compact?"clamp(16px,2vw,22px)":"clamp(20px,3vw,38px)",
+            lineHeight:1,color:dark?"#ffffff":"#0D0D0F",
+            textShadow:dark?"0 0 24px rgba(255,255,255,.12)":"none",
+            position:"relative",zIndex:1}}>
             {m.serie||"—"}
           </div>
           <div style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
-            fontSize:compact?"10px":"11px",letterSpacing:".14em",
-            color:dark?"rgba(200,200,200,.65)":"#666",marginTop:compact?"3px":"4px"}}>
+            fontSize:compact?"11px":"clamp(11px,1.2vw,15px)",
+            letterSpacing:".18em",textTransform:"uppercase",
+            color:dark?"rgba(200,200,200,.55)":"#888",
+            marginTop:"6px",position:"relative",zIndex:1}}>
             {m.modelo||"—"}
           </div>
         </div>
 
-        {/* Tasks */}
-        {!compact&&tasks.length>0&&(
-          <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:7,flexShrink:0}}>
-            {tasks.slice(0,3).map((t,i)=>(
-              <span key={i} style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,fontSize:9.5,
-                letterSpacing:".03em",color:dark?"#cfcfd4":"#555",
-                background:dark?"rgba(255,255,255,.04)":"rgba(0,0,0,.05)",
-                border:`1px solid ${dark?"rgba(210,210,210,.07)":"rgba(0,0,0,.08)"}`,
-                padding:"2px 7px",borderRadius:3}}>
-                <span style={{color:stColor}}>▸ </span>{t.texto}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* BARRA RESTAM — elemento-assinatura v2 */}
+        {/* gauge + barra + meta — bloco central */}
         {meta>0&&(
-          <div style={{marginBottom:compact?"7px":"8px",flexShrink:0}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:3}}>
-              <div style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:600,fontSize:11,letterSpacing:".04em",color:stColor}}>
-                <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,fontSize:8.5,
-                  color:dark?"rgba(150,150,150,.65)":"#999",letterSpacing:".18em",marginRight:4}}>
-                  {isLate?"+ ATRASO":"RESTAM"}
+          <div style={{
+            flex:"0 0 auto",
+            display:"flex",alignItems:"center",gap:14,
+            padding:"14px 0 12px",
+            borderBottom:tasks.length>0?`1px solid ${dark?"rgba(255,255,255,.05)":"rgba(0,0,0,.06)"}`:undefined,
+          }}>
+            {/* gauge circular pequeno */}
+            <div style={{flexShrink:0,position:"relative",width:56,height:56}}>
+              <svg viewBox="0 0 100 100" style={{width:56,height:56,transform:"rotate(-90deg)"}}>
+                <circle cx="50" cy="50" r={R} fill="none"
+                  stroke={dark?"rgba(255,255,255,.07)":"rgba(0,0,0,.08)"} strokeWidth="8"/>
+                <circle cx="50" cy="50" r={R} fill="none"
+                  stroke={stColor} strokeWidth="8"
+                  strokeLinecap="round"
+                  strokeDasharray={`${CIRC}`}
+                  strokeDashoffset={`${dash}`}
+                  style={{filter:dark?`drop-shadow(0 0 4px ${stColor})`:"none",
+                    transition:"stroke-dashoffset .8s ease"}}/>
+              </svg>
+              <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",
+                alignItems:"center",justifyContent:"center"}}>
+                <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
+                  fontSize:11,color:stColor,lineHeight:1}}>
+                  {Math.round(pct)}%
                 </span>
-                {fmtHMS(isLate?atrasoSec:restamSec)}
-              </div>
-              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:9.5,color:dark?"rgba(150,150,150,.55)":"#aaa"}}>
-                {isLate?`+${Math.round(((elapsed/meta)-1)*100)}% acima`:`${Math.round(pct)}%`}
               </div>
             </div>
-            <div style={{height:5,background:dark?"rgba(255,255,255,.06)":"rgba(0,0,0,.07)",borderRadius:3,overflow:"hidden"}}>
-              <div style={{height:"100%",width:`${pct}%`,borderRadius:3,
-                background:isLate?"repeating-linear-gradient(45deg,#FF3344 0 4px,#8b1520 4px 8px)":stColor,
-                boxShadow:`0 0 7px ${stColor}`,transition:"width .6s ease"}}/>
+
+            {/* barra + info */}
+            <div style={{flex:1,display:"flex",flexDirection:"column",gap:6}}>
+              {/* label RESTAM / ATRASO */}
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}>
+                <div style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,
+                  fontSize:10,letterSpacing:".18em",
+                  color:dark?"rgba(160,160,160,.7)":"#999"}}>
+                  {isLate?"+ ATRASO":"RESTAM"}
+                </div>
+                <div style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
+                  fontSize:compact?"13px":"16px",letterSpacing:".03em",
+                  color:stColor,textShadow:dark?`0 0 12px ${stColor}55`:"none"}}>
+                  {fmtHMS(isLate?atrasoSec:restamSec)}
+                </div>
+              </div>
+
+              {/* barra */}
+              <div style={{height:6,background:dark?"rgba(255,255,255,.07)":"rgba(0,0,0,.08)",
+                borderRadius:3,overflow:"hidden"}}>
+                <div style={{height:"100%",width:`${pct}%`,borderRadius:3,
+                  background:isLate
+                    ?"repeating-linear-gradient(45deg,#FF3344 0 4px,#7a0e1a 4px 8px)"
+                    :stColor,
+                  boxShadow:`0 0 8px ${stColor}`,
+                  transition:"width .8s ease"}}/>
+              </div>
+
+              {/* datas ENTRADA → ENTREGA — destacadas */}
+              <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+                {(m.previsao_inicio||m.dataEntrada)&&(
+                  <div style={{display:"flex",alignItems:"center",gap:5}}>
+                    <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
+                      fontSize:9,letterSpacing:".14em",
+                      color:dark?"rgba(150,150,150,.6)":"#bbb"}}>ENTRADA</span>
+                    <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
+                      fontSize:compact?"12px":"14px",letterSpacing:".04em",
+                      color:dark?"#6FC3FF":"#0A6EBF",
+                      textShadow:dark?"0 0 10px rgba(111,195,255,.4)":"none"}}>
+                      {fmtDate(m.previsao_inicio||m.dataEntrada)}
+                    </span>
+                  </div>
+                )}
+                {(m.previsao_inicio||m.dataEntrada)&&m.previsao_fim&&(
+                  <span style={{color:dark?"rgba(255,255,255,.15)":"rgba(0,0,0,.2)",fontSize:12}}>→</span>
+                )}
+                {m.previsao_fim&&(
+                  <div style={{display:"flex",alignItems:"center",gap:5}}>
+                    <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
+                      fontSize:9,letterSpacing:".14em",
+                      color:dark?"rgba(150,150,150,.6)":"#bbb"}}>ENTREGA</span>
+                    <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
+                      fontSize:compact?"12px":"14px",letterSpacing:".04em",
+                      color:isLate?(dark?"#FF3344":"#DC2626"):isRisk?(dark?"#FFB200":"#B08D2E"):(dark?"#2BE564":"#16A34A"),
+                      textShadow:dark?`0 0 10px ${isLate?"#FF334488":isRisk?"#FFB20088":"#2BE56488"}`:"none"}}>
+                      {fmtDate(m.previsao_fim)}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
 
-        {/* Motivo pausa */}
+        {/* tasks — lista com checkbox visual, flex-1 para ocupar o espaço restante */}
+        {tasks.length>0&&(
+          <div style={{
+            flex:1,display:"flex",flexDirection:"column",
+            padding:"12px 0 10px",overflow:"hidden",
+            minHeight:0,
+          }}>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8,flexShrink:0}}>
+              <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,
+                fontSize:9,letterSpacing:".2em",
+                color:dark?"rgba(150,150,150,.6)":"#bbb"}}>TAREFAS</span>
+              <div style={{height:"1px",flex:1,
+                background:dark?"rgba(255,255,255,.06)":"rgba(0,0,0,.07)"}}/>
+              {allTasks.length>0&&(
+                <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:9,
+                  color:dark?"rgba(150,150,150,.5)":"#ccc"}}>
+                  {doneCount}/{allTasks.length}
+                </span>
+              )}
+            </div>
+            <div style={{flex:1,overflow:"hidden",display:"flex",flexDirection:"column",gap:6}}>
+              {tasks.map((t,i)=>(
+                <div key={i} style={{
+                  display:"flex",alignItems:"center",gap:10,
+                  padding:"7px 10px",
+                  background:dark?"rgba(255,255,255,.03)":"rgba(0,0,0,.03)",
+                  border:`1px solid ${dark?"rgba(255,255,255,.05)":"rgba(0,0,0,.06)"}`,
+                  borderLeft:`3px solid ${stColor}`,
+                  borderRadius:dark?"2px":"6px",
+                  flexShrink:0,
+                }}>
+                  {/* checkbox vazio */}
+                  <div style={{width:14,height:14,borderRadius:3,flexShrink:0,
+                    border:`1.5px solid ${stColor}44`,
+                    background:"transparent"}}/>
+                  <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
+                    fontSize:compact?"12px":"13px",letterSpacing:".03em",
+                    color:dark?"#d0d0d8":"#444",lineHeight:1.2,flex:1}}>
+                    {t.texto}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Motivo pausa — bloco destaque */}
         {motivo&&(
-          <div style={{display:"flex",alignItems:"center",gap:5,padding:"4px 7px",borderRadius:3,
-            flexShrink:0,marginBottom:6,
-            background:dark?"rgba(0,0,0,.2)":"rgba(0,0,0,.04)",
-            border:`1px solid ${mColor}44`}}>
-            <span style={{fontSize:11,lineHeight:1}}>{motivoLabel[motivo]?.split(" ")[0]||"💬"}</span>
-            <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,fontSize:9,
-              letterSpacing:".1em",color:mColor||"#F59E0B",textTransform:"uppercase"}}>
-              {motivoLabel[motivo]?.replace(/^.+ /,"")||"PAUSA"}
+          <div style={{
+            display:"flex",alignItems:"center",gap:8,
+            padding:"10px 12px",borderRadius:dark?"3px":"8px",
+            flexShrink:0,margin:"8px 0",
+            background:dark?`color-mix(in srgb,${mColor} 8%,transparent)`:`color-mix(in srgb,${mColor} 5%,#fff)`,
+            border:`1px solid ${mColor}44`,
+          }}>
+            <span style={{fontSize:16,lineHeight:1,flexShrink:0}}>{motivoLabel[motivo]?.split(" ")[0]||"💬"}</span>
+            <div>
+              <div style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,fontSize:9,
+                letterSpacing:".2em",color:dark?"rgba(150,150,150,.6)":"#bbb",marginBottom:2}}>MOTIVO DE PAUSA</div>
+              <div style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,fontSize:13,
+                letterSpacing:".06em",color:mColor||"#F59E0B"}}>
+                {motivoLabel[motivo]?.replace(/^.+ /,"")||"PAUSA"}
+              </div>
+            </div>
+          </div>
+        )}
+
+      </div>
+
+      {/* ══ RODAPÉ — técnico + hora meta ══ */}
+      <div style={{
+        padding:"10px 18px 12px 20px",
+        borderTop:`1px solid ${dark?"rgba(255,255,255,.05)":"rgba(0,0,0,.06)"}`,
+        display:"flex",alignItems:"center",justifyContent:"space-between",
+        flexShrink:0,
+      }}>
+        {/* técnico */}
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <div style={{width:10,height:10,borderRadius:"50%",
+            background:techClr,boxShadow:dark?`0 0 8px ${techClr}`:"none",flexShrink:0}}/>
+          <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,
+            fontSize:11,letterSpacing:".14em",
+            color:dark?"rgba(200,200,200,.6)":"#999",textTransform:"uppercase"}}>
+            {techName}
+          </span>
+        </div>
+
+        {/* meta horária */}
+        {meta>0&&(
+          <div style={{display:"flex",alignItems:"center",gap:6}}>
+            <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,fontSize:9,
+              letterSpacing:".18em",color:dark?"rgba(150,150,150,.5)":"#ccc"}}>META</span>
+            <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
+              fontSize:13,letterSpacing:".04em",
+              color:dark?"rgba(200,200,200,.8)":"#555"}}>
+              {fmtH(meta)}
             </span>
           </div>
         )}
-
-        {/* Rodapé: dot técnico + datas */}
-        <div style={{display:"flex",alignItems:"center",gap:7,fontFamily:"'JetBrains Mono',monospace",
-          fontSize:9.5,marginTop:"auto",flexShrink:0}}>
-          <div style={{display:"flex",alignItems:"center",gap:4,color:dark?"rgba(150,150,150,.6)":"#999"}}>
-            <div style={{width:7,height:7,borderRadius:"50%",background:techClr,boxShadow:`0 0 5px ${techClr}`,flexShrink:0}}/>
-            TÉC
-          </div>
-          {(m.previsao_inicio||m.dataEntrada||m.data_entrada)&&(
-            <div style={{marginLeft:"auto",display:"flex",gap:10,color:dark?"#b0b0ba":"#777",fontSize:9.5}}>
-              {(m.previsao_inicio||m.dataEntrada)&&(
-                <span>► <b style={{color:dark?"#6FC3FF":"#0A6EBF",fontWeight:600}}>
-                  {fmtDate(m.previsao_inicio||m.dataEntrada)}
-                </b></span>
-              )}
-              {m.previsao_fim&&(
-                <span>✓ <b style={{color:isLate?(dark?"#FF3344":"#DC2626"):isRisk?(dark?"#FFB200":"#B08D2E"):(dark?"#2BE564":"#16A34A"),fontWeight:600}}>
-                  {fmtDate(m.previsao_fim)}
-                </b></span>
-              )}
-            </div>
-          )}
-        </div>
-
       </div>
+
     </div>
   );
 }
 
 function BadgePillV2({color,bg,border,children}){
   return(
-    <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,fontSize:9,
-      letterSpacing:".1em",padding:"2px 6px",borderRadius:3,
+    <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,fontSize:10,
+      letterSpacing:".1em",padding:"3px 8px",borderRadius:3,
       color,background:bg,border:`1px solid ${border}`,
       display:"inline-flex",alignItems:"center",gap:3,whiteSpace:"nowrap"}}>
       {children}

@@ -279,353 +279,333 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
   const tasks    = allTasks.filter(t=>!t.concluida);
   const doneCount= allTasks.length - tasks.length;
 
-  const catKey   = forceCategory || getMachineCategory(m);
-  const cat      = CAT[catKey] || CAT.andamento;
+  const catKey   = forceCategory||getMachineCategory(m);
+  const cat      = CAT[catKey]||CAT.andamento;
 
-  const modoTimer = getModoTimer(m);
-  const isCD      = modoTimer==="countdown";
-  const meta      = Number(m.tempo_estimado_segundos)||0;
-  const restante  = isCD ? calcRestanteAoVivo(m,elapsed) : null;
-  const isLate    = isCD && restante!==null && restante<0;
-  const isRisk    = isCD && !isLate && restante!==null && (restante/meta)<0.20;
+  const modoTimer= getModoTimer(m);
+  const isCD     = modoTimer==="countdown";
+  const meta     = Number(m.tempo_estimado_segundos)||0;
+  const restante = isCD?calcRestanteAoVivo(m,elapsed):null;
+  const isLate   = isCD&&restante!==null&&restante<0;
+  const isRisk   = isCD&&!isLate&&restante!==null&&(restante/meta)<0.20;
 
-  const stColor = isLate  ? (dark?"#FF3344":"#DC2626")
-               : isRisk   ? (dark?"#FFB200":"#B08D2E")
-               : run      ? (dark?"#2BE564":"#16A34A")
-               : paused   ? (dark?"#FFB200":"#B08D2E")
-               :             cat.accent;
+  const st = isLate ?(dark?"#FF3344":"#DC2626")
+           : isRisk ?(dark?"#FFB200":"#B08D2E")
+           : run    ?(dark?"#2BE564":"#16A34A")
+           : paused ?(dark?"#FFB200":"#B08D2E")
+           :          cat.accent;
 
-  const TECH_CLR={raphael:"#FFD166",nuno:"#B68BFF",rogerio:"#FF8C69",yano:"#5CFFFF",patrick:"#90EE90"};
-  const techId  =(()=>{const e=m.estado||"";const x=e.match(/(?:em-preparacao|concluida)-(.+)/);return x?x[1]:(m.tecnico||null);})();
-  const techClr = TECH_CLR[techId]||"rgba(130,130,130,0.4)";
+  const TCLR={raphael:"#FFD166",nuno:"#B68BFF",rogerio:"#FF8C69",yano:"#5CFFFF",patrick:"#90EE90"};
+  const tid =(()=>{const e=m.estado||"";const x=e.match(/(?:em-preparacao|concluida)-(.+)/);return x?x[1]:(m.tecnico||null);})();
+  const tc  = TCLR[tid]||"rgba(130,130,130,0.4)";
 
-  const TIPO_BADGE={
-    nova:   {label:"NTS",  color:dark?"#FF3344":"#DC2626", bg:"rgba(255,51,68,.08)",   border:"rgba(255,51,68,.28)"},
-    usada:  {label:"RECON",color:dark?"#9B7BFF":"#7C3AED", bg:"rgba(155,123,255,.08)", border:"rgba(155,123,255,.28)"},
-    aluguer:{label:"ACP",  color:dark?"#4D9FFF":"#0A6EBF", bg:"rgba(77,159,255,.08)",  border:"rgba(77,159,255,.28)"},
+  const TB={
+    nova:   {l:"NTS",  c:dark?"#FF3344":"#DC2626", b:"rgba(255,51,68,.08)",   br:"rgba(255,51,68,.28)"},
+    usada:  {l:"RECON",c:dark?"#9B7BFF":"#7C3AED", b:"rgba(155,123,255,.08)", br:"rgba(155,123,255,.28)"},
+    aluguer:{l:"ACP",  c:dark?"#4D9FFF":"#0A6EBF", b:"rgba(77,159,255,.08)",  br:"rgba(77,159,255,.28)"},
   };
-  const tipoBadge=TIPO_BADGE[m.tipo||m.tipo_origem||m.tipoOrigem||""]||null;
-  const isPrio   =!!m.prioridade;
+  const tb = TB[m.tipo||m.tipo_origem||m.tipoOrigem||""]||null;
+  const prio=!!m.prioridade;
 
-  const motivo      =paused?getPausaMotivo(m):null;
-  const motivoLabel ={aguarda_pecas:"📦 PEÇAS",prioritaria:"🚨 PRIO",aguarda_decisao:"⏳ DECISÃO",outros:"💬"};
-  const motivoColor ={aguarda_pecas:"#F59E0B",prioritaria:"#EF4444",aguarda_decisao:"#8B5CF6",outros:"#6B7280"};
-  const mColor      =motivo?(motivoColor[motivo]||"#F59E0B"):null;
+  const pct  = meta>0?Math.min((elapsed/meta)*100,100):0;
+  const rsec = Math.max(meta-elapsed,0);
+  const asec = elapsed-meta;
+  const fd   = d=>d?new Date(d+"T12:00:00").toLocaleDateString("pt-PT",{day:"2-digit",month:"2-digit"}):null;
+  const fh   = s=>{const h=Math.floor(s/3600),mn=Math.floor((s%3600)/60);return mn===0?`${h}h`:`${h}h${String(mn).padStart(2,"0")}`;};
 
-  const pct      =meta>0?Math.min((elapsed/meta)*100,100):0;
-  const restamSec=Math.max(meta-elapsed,0);
-  const atrasoSec=elapsed-meta;
-  const fmtDate  =d=>d?new Date(d+"T12:00:00").toLocaleDateString("pt-PT",{day:"2-digit",month:"2-digit"}):null;
-  const fmtH     =s=>{const h=Math.floor(s/3600),mn=Math.floor((s%3600)/60);return mn===0?`${h}h`:`${h}h${String(mn).padStart(2,"0")}`;};
+  // escala de padding/font baseada em scale — tudo proporcional, sem clamp fixo
+  const P  = s => `${Math.round(s*scale)}px`;   // padding proporcional
+  const FS = s => `${Math.round(s*scale)}px`;    // font-size proporcional
+  const pad = Math.round(10*scale);              // padding base
 
-  // modo por scale
-  const mode=scale>=0.88?"full":scale>=0.62?"compact":"micro";
-  // tasks visíveis
-  const MAX_T  =mode==="full"?4:mode==="compact"?2:0;
-  const visTasks=tasks.slice(0,MAX_T);
-  const hiddenN =tasks.length-visTasks.length;
+  // o que mostrar por density
+  const showDatas = scale>=0.62 && (m.previsao_inicio||m.dataEntrada||m.previsao_fim);
+  const showTasks = scale>=0.75 && tasks.length>0;
+  const maxTasks  = scale>=0.88?4:2;
+  const vis       = tasks.slice(0,maxTasks);
+  const hidden    = tasks.length-vis.length;
 
-  // wrapper
-  const W={
-    position:"relative",display:"flex",flexDirection:"column",
-    height:"100%",boxSizing:"border-box",overflow:"hidden",
-    borderRadius:dark?0:"10px",
-    background:dark
-      ?`linear-gradient(170deg,color-mix(in srgb,${stColor} 10%,#0e0e11) 0%,#0a0a0d 40%,#080808 100%)`
-      :`linear-gradient(170deg,color-mix(in srgb,${stColor} 6%,#fff) 0%,#fff 45%)`,
-    border:`1px solid color-mix(in srgb,${stColor} 26%,transparent)`,
-    boxShadow:`0 0 0 1px rgba(0,0,0,.5),0 12px 40px -16px color-mix(in srgb,${stColor} 55%,transparent)`,
-    animation:isLate?"pulseCard 1.4s ease-in-out infinite":"none",
-    clipPath:dark?"polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))":"none",
-  };
+  const barH      = Math.max(3, Math.round(5*scale)); // barra: 3-5px
 
-  // linha topo + spine + corners
-  const Decos=()=>(
-    <>
-      <div style={{position:"absolute",top:0,left:0,right:0,height:"2px",zIndex:3,
-        background:`linear-gradient(90deg,${stColor},transparent 75%)`,boxShadow:`0 0 12px ${stColor}`}}/>
-      <div style={{position:"absolute",top:10,bottom:10,left:0,width:"3px",zIndex:3,
-        borderRadius:"0 3px 3px 0",background:techClr,boxShadow:dark?`0 0 6px ${techClr}44`:"none"}}/>
-      {(isRisk||isLate)&&dark&&(<>
-        <div style={{position:"absolute",top:5,right:5,width:10,height:10,zIndex:4,
-          borderTop:`1.5px solid ${stColor}`,borderRight:`1.5px solid ${stColor}`,opacity:.7}}/>
-        <div style={{position:"absolute",bottom:5,left:5,width:10,height:10,zIndex:4,
-          borderBottom:`1.5px solid ${stColor}`,borderLeft:`1.5px solid ${stColor}`,opacity:.7}}/>
-      </>)}
-    </>
-  );
-
-  // ── TOPO: badges + timer + % ─────────────────────────────────────────────────
-  const Topo=({timerFontSize="clamp(16px,2vw,26px)"})=>(
-    <div style={{display:"flex",alignItems:"center",gap:5,flexShrink:0,flexWrap:"wrap",
-      padding:mode==="micro"?"8px 12px 6px 16px":"10px 16px 8px 18px",
-      borderBottom:`1px solid ${dark?"rgba(255,255,255,.05)":"rgba(0,0,0,.06)"}`}}>
-      {/* badges */}
-      {isLate&&<BadgePillV2 color={dark?"#FF3344":"#DC2626"} bg="rgba(255,51,68,.1)" border="rgba(255,51,68,.32)">{mode==="micro"?"✕":"✕ ATRASO"}</BadgePillV2>}
-      {isRisk&&!isLate&&<BadgePillV2 color={dark?"#FFB200":"#B08D2E"} bg="rgba(255,178,0,.1)" border="rgba(255,178,0,.28)">{mode==="micro"?"⚠":"⚠ RISCO"}</BadgePillV2>}
-      {!isRisk&&!isLate&&run&&(
-        <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,
-          fontSize:mode==="micro"?9:10,letterSpacing:".1em",
-          padding:mode==="micro"?"2px 5px":"3px 7px",borderRadius:3,
-          color:dark?"#2BE564":"#16A34A",background:"rgba(43,229,100,.1)",
-          border:"1px solid rgba(43,229,100,.3)",display:"inline-flex",alignItems:"center",gap:3}}>
-          <span style={{width:5,height:5,borderRadius:"50%",background:dark?"#2BE564":"#16A34A",
-            boxShadow:"0 0 5px #2BE564",animation:"blink 1.6s infinite"}}/>RUN
-        </span>
-      )}
-      {paused&&!run&&<BadgePillV2 color={dark?"#FFB200":"#B08D2E"} bg="rgba(255,178,0,.1)" border="rgba(255,178,0,.28)">⏸</BadgePillV2>}
-      {isPrio&&<span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:800,
-        fontSize:mode==="micro"?9:10,padding:mode==="micro"?"2px 5px":"3px 7px",
-        borderRadius:3,color:"#0a0a0a",background:"#FFB200"}}>⚡{mode!=="micro"&&" PRIO"}</span>}
-      {tipoBadge&&<BadgePillV2 color={tipoBadge.color} bg={tipoBadge.bg} border={tipoBadge.border}>{tipoBadge.label}</BadgePillV2>}
-      {/* % progress pill — substitui o gauge circular */}
-      {meta>0&&(
-        <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
-          fontSize:mode==="micro"?9:10,letterSpacing:".06em",
-          padding:mode==="micro"?"2px 5px":"2px 7px",borderRadius:3,
-          color:stColor,background:`color-mix(in srgb,${stColor} 12%,transparent)`,
-          border:`1px solid color-mix(in srgb,${stColor} 30%,transparent)`}}>
-          {Math.round(pct)}%
-        </span>
-      )}
-      {/* timer */}
-      <div style={{marginLeft:"auto",textAlign:"right",flexShrink:0}}>
-        <div style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:600,
-          fontSize:timerFontSize,letterSpacing:".02em",color:stColor,lineHeight:1,
-          textShadow:dark?`0 0 18px ${stColor}66`:"none"}}>
-          {fmtHMS(isCD&&restante!==null?restante:elapsed)}
-          {isLate&&<span style={{marginLeft:5,fontSize:"0.6em",animation:"blink 0.8s infinite"}}>⚠</span>}
-        </div>
-        {meta>0&&mode!=="micro"&&(
-          <div style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,fontSize:9,
-            color:dark?"rgba(200,200,200,.4)":"#bbb",letterSpacing:".1em",marginTop:2}}>
-            /{fmtH(meta)} meta
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
-  // ── NS PLATE: NS + modelo + barra integrada ──────────────────────────────────
-  // A barra fica aqui — sempre visível, nunca cortada
-  const NsPlate=({grow=false})=>(
-    <div style={{
-      flexShrink:0,flex:grow?1:undefined,
-      display:"flex",flexDirection:"column",
-      alignItems:"center",justifyContent:"center",
-      padding:mode==="micro"?"12px 8px 10px":mode==="compact"?"14px 8px 12px":"clamp(14px,3vh,28px) 8px",
-      background:dark?"rgba(0,0,0,.45)":"rgba(0,0,0,.03)",
-      border:`1px solid ${dark?"rgba(255,255,255,.06)":"rgba(0,0,0,.07)"}`,
-      borderRadius:dark?"3px":"10px",
-      margin:mode==="micro"?"10px 10px 8px":mode==="compact"?"10px 12px 8px":"12px 14px 8px",
-      position:"relative",overflow:"hidden",
-    }}>
-      {dark&&run&&<div style={{position:"absolute",inset:0,
-        background:`radial-gradient(ellipse 80% 60% at 50% 110%,${stColor}15,transparent)`,
-        pointerEvents:"none"}}/>}
-      {/* NS */}
-      <div style={{fontFamily:"'Orbitron',monospace",fontWeight:900,
-        letterSpacing:".04em",textAlign:"center",lineHeight:1,
-        fontSize:mode==="micro"?`clamp(11px,${1.5*scale}vw,18px)`:mode==="compact"?`clamp(14px,${1.8*scale}vw,22px)`:`clamp(18px,2.6vw,34px)`,
-        color:dark?"#fff":"#0D0D0F",
-        textShadow:dark?"0 0 20px rgba(255,255,255,.1)":"none",
-        position:"relative",zIndex:1}}>
-        {m.serie||"—"}
-      </div>
-      {/* modelo */}
-      <div style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
-        fontSize:mode==="micro"?`clamp(8px,${0.8*scale}vw,11px)`:mode==="compact"?`clamp(9px,${0.9*scale}vw,12px)`:"clamp(10px,1vw,14px)",
-        letterSpacing:".16em",color:dark?"rgba(180,180,180,.55)":"#888",
-        marginTop:mode==="micro"?3:5,position:"relative",zIndex:1}}>
-        {m.modelo||"—"}
-      </div>
-      {/* ── BARRA DE PROGRESSO — integrada no plate, sempre visível ── */}
-      {meta>0&&(
-        <div style={{width:"100%",marginTop:mode==="micro"?8:10,position:"relative",zIndex:1}}>
-          {/* label + valor */}
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",
-            marginBottom:4,padding:"0 2px"}}>
-            <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,
-              fontSize:mode==="micro"?8:9,letterSpacing:".16em",
-              color:dark?"rgba(150,150,150,.55)":"#bbb"}}>
-              {isLate?"+ ATRASO":"RESTAM"}
-            </span>
-            <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
-              fontSize:mode==="micro"?`clamp(10px,${1.1*scale}vw,13px)`:mode==="compact"?`clamp(11px,${1.2*scale}vw,14px)`:"clamp(13px,1.4vw,17px)",
-              letterSpacing:".03em",color:stColor,
-              textShadow:dark?`0 0 10px ${stColor}55`:"none"}}>
-              {fmtHMS(isLate?atrasoSec:restamSec)}
-            </span>
-          </div>
-          {/* barra */}
-          <div style={{height:mode==="micro"?4:5,
-            background:dark?"rgba(255,255,255,.08)":"rgba(0,0,0,.09)",
-            borderRadius:3,overflow:"hidden"}}>
-            <div style={{height:"100%",width:`${pct}%`,borderRadius:3,
-              background:isLate
-                ?"repeating-linear-gradient(45deg,#FF3344 0 4px,#7a0e1a 4px 8px)"
-                :stColor,
-              boxShadow:`0 0 7px ${stColor}`,transition:"width .8s ease"}}/>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-
-  // ── DATAS ROW ────────────────────────────────────────────────────────────────
-  const DatasRow=()=>(
-    <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap",
-      padding:"0 14px",marginBottom:6,flexShrink:0}}>
-      {(m.previsao_inicio||m.dataEntrada)&&(
-        <span style={{display:"flex",alignItems:"center",gap:5,fontFamily:"'JetBrains Mono',monospace",fontSize:11}}>
-          <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,fontSize:8.5,
-            letterSpacing:".14em",color:dark?"rgba(150,150,150,.55)":"#bbb"}}>ENT</span>
-          <span style={{fontWeight:700,color:dark?"#6FC3FF":"#0A6EBF",
-            textShadow:dark?"0 0 8px rgba(111,195,255,.35)":"none"}}>
-            {fmtDate(m.previsao_inicio||m.dataEntrada)}
-          </span>
-        </span>
-      )}
-      {(m.previsao_inicio||m.dataEntrada)&&m.previsao_fim&&
-        <span style={{color:dark?"rgba(255,255,255,.12)":"rgba(0,0,0,.15)",fontSize:11}}>→</span>}
-      {m.previsao_fim&&(
-        <span style={{display:"flex",alignItems:"center",gap:5,fontFamily:"'JetBrains Mono',monospace",fontSize:11}}>
-          <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,fontSize:8.5,
-            letterSpacing:".14em",color:dark?"rgba(150,150,150,.55)":"#bbb"}}>ENTREGA</span>
-          <span style={{fontWeight:700,
-            color:isLate?(dark?"#FF3344":"#DC2626"):isRisk?(dark?"#FFB200":"#B08D2E"):(dark?"#2BE564":"#16A34A"),
-            textShadow:dark?`0 0 8px ${isLate?"#FF334466":isRisk?"#FFB20066":"#2BE56466"}`:"none"}}>
-            {fmtDate(m.previsao_fim)}
-          </span>
-        </span>
-      )}
-    </div>
-  );
-
-  // ── TASKS LIST ───────────────────────────────────────────────────────────────
-  const TasksList=()=>(
-    <div style={{flexShrink:0,padding:"0 14px",marginBottom:6}}>
-      <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:5}}>
-        <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,fontSize:8.5,
-          letterSpacing:".2em",color:dark?"rgba(150,150,150,.55)":"#bbb"}}>TAREFAS</span>
-        <div style={{height:1,flex:1,background:dark?"rgba(255,255,255,.05)":"rgba(0,0,0,.06)"}}/>
-        <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:8.5,
-          color:dark?"rgba(150,150,150,.45)":"#ccc"}}>{doneCount}/{allTasks.length}</span>
-      </div>
-      <div style={{display:"flex",flexDirection:"column",gap:4}}>
-        {visTasks.map((t,i)=>(
-          <div key={i} style={{display:"flex",alignItems:"center",gap:8,
-            padding:"5px 9px",
-            background:dark?"rgba(255,255,255,.025)":"rgba(0,0,0,.025)",
-            border:`1px solid ${dark?"rgba(255,255,255,.04)":"rgba(0,0,0,.05)"}`,
-            borderLeft:`2px solid ${stColor}55`,
-            borderRadius:dark?"2px":"5px"}}>
-            <div style={{width:11,height:11,borderRadius:2,flexShrink:0,
-              border:`1.5px solid ${stColor}44`,background:"transparent"}}/>
-            <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
-              fontSize:mode==="compact"?11:12,letterSpacing:".03em",
-              color:dark?"#c8c8d0":"#555",lineHeight:1.2,flex:1,
-              overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-              {t.texto}
-            </span>
-          </div>
-        ))}
-        {hiddenN>0&&(
-          <div style={{textAlign:"center",padding:"3px 0",
-            fontFamily:"'Rajdhani',sans-serif",fontWeight:600,fontSize:9,
-            letterSpacing:".12em",color:dark?"rgba(150,150,150,.38)":"#ccc",
-            border:`1px dashed ${dark?"rgba(255,255,255,.07)":"rgba(0,0,0,.09)"}`,
-            borderRadius:dark?"2px":"4px"}}>
-            +{hiddenN} {hiddenN===1?"tarefa":"tarefas"} restantes
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
-  // ── RODAPÉ ───────────────────────────────────────────────────────────────────
-  const Rodape=()=>(
-    <div style={{flexShrink:0,display:"flex",alignItems:"center",justifyContent:"space-between",
-      padding:mode==="micro"?"6px 12px 8px 16px":"8px 14px 10px 18px",
-      borderTop:`1px solid ${dark?"rgba(255,255,255,.04)":"rgba(0,0,0,.05)"}`}}>
-      <div style={{display:"flex",alignItems:"center",gap:6}}>
-        <div style={{width:mode==="micro"?7:9,height:mode==="micro"?7:9,borderRadius:"50%",
-          background:techClr,boxShadow:dark?`0 0 6px ${techClr}`:"none"}}/>
-        <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
-          fontSize:mode==="micro"?8:9,letterSpacing:".16em",
-          color:dark?"rgba(150,150,150,.4)":"#ccc"}}>TÉC</span>
-      </div>
-      {meta>0&&(
-        <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
-          fontSize:mode==="micro"?10:11,color:dark?"rgba(200,200,200,.7)":"#666"}}>
-          <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
-            fontSize:mode==="micro"?8:9,letterSpacing:".14em",
-            color:dark?"rgba(150,150,150,.4)":"#ccc",marginRight:4}}>META</span>
-          {fmtH(meta)}
-        </span>
-      )}
-    </div>
-  );
-
-  // ══════════════════════════════════════════════════════════════════════════════
-  //  MICRO — topo + ns(com barra) + rodapé
-  // ══════════════════════════════════════════════════════════════════════════════
-  if(mode==="micro"){
-    return(
-      <div style={W}>
-        <Decos/>
-        <Topo timerFontSize={`clamp(11px,${1.3*scale}vw,17px)`}/>
-        <NsPlate grow/>
-        <Rodape/>
-      </div>
-    );
-  }
-
-  // ══════════════════════════════════════════════════════════════════════════════
-  //  COMPACT — topo + ns(com barra) + datas + tasks + rodapé
-  // ══════════════════════════════════════════════════════════════════════════════
-  if(mode==="compact"){
-    return(
-      <div style={W}>
-        <Decos/>
-        <Topo timerFontSize={`clamp(14px,${1.6*scale}vw,20px)`}/>
-        <NsPlate/>
-        {(m.previsao_inicio||m.dataEntrada||m.previsao_fim)&&<DatasRow/>}
-        {visTasks.length>0&&<TasksList/>}
-        <div style={{flex:1}}/>
-        <Rodape/>
-      </div>
-    );
-  }
-
-  // ══════════════════════════════════════════════════════════════════════════════
-  //  FULL — topo + ns(com barra) + datas + tasks + rodapé, com espaço a respirar
-  // ══════════════════════════════════════════════════════════════════════════════
   return(
-    <div style={W}>
-      <Decos/>
-      <Topo timerFontSize="clamp(18px,2.2vw,28px)"/>
-      <NsPlate grow/>
-      {(m.previsao_inicio||m.dataEntrada||m.previsao_fim)&&<DatasRow/>}
-      {visTasks.length>0&&<TasksList/>}
-      {motivo&&(
-        <div style={{flexShrink:0,display:"flex",alignItems:"center",gap:8,
-          margin:"0 14px 8px",padding:"9px 12px",borderRadius:dark?"3px":"8px",
-          background:dark?`color-mix(in srgb,${mColor} 8%,transparent)`:`color-mix(in srgb,${mColor} 5%,#fff)`,
-          border:`1px solid ${mColor}44`}}>
-          <span style={{fontSize:15,lineHeight:1,flexShrink:0}}>{motivoLabel[motivo]?.split(" ")[0]||"💬"}</span>
-          <div>
-            <div style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,fontSize:8.5,
-              letterSpacing:".2em",color:dark?"rgba(150,150,150,.55)":"#bbb",marginBottom:2}}>MOTIVO DE PAUSA</div>
-            <div style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,fontSize:12,
-              letterSpacing:".06em",color:mColor||"#F59E0B"}}>
-              {motivoLabel[motivo]?.replace(/^.+ /,"")||"PAUSA"}
+    <div style={{
+      position:"relative",
+      display:"flex",flexDirection:"column",
+      height:"100%",width:"100%",
+      boxSizing:"border-box",
+      overflow:"hidden",        // NUNCA expande
+      borderRadius:dark?0:"8px",
+      background:dark
+        ?`linear-gradient(160deg,color-mix(in srgb,${st} 9%,#0d0d10) 0%,#090909 45%)`
+        :`linear-gradient(160deg,color-mix(in srgb,${st} 5%,#fff) 0%,#fff 45%)`,
+      border:`1px solid color-mix(in srgb,${st} 25%,transparent)`,
+      boxShadow:`0 0 0 1px rgba(0,0,0,.45),0 8px 32px -12px color-mix(in srgb,${st} 50%,transparent)`,
+      animation:isLate?"pulseCard 1.4s ease-in-out infinite":"none",
+      clipPath:dark?"polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px))":"none",
+    }}>
+      {/* linha de topo = estado */}
+      <div style={{position:"absolute",top:0,left:0,right:0,height:2,zIndex:3,
+        background:`linear-gradient(90deg,${st},transparent 70%)`,boxShadow:`0 0 10px ${st}`}}/>
+      {/* spine = técnico */}
+      <div style={{position:"absolute",top:8,bottom:8,left:0,width:3,zIndex:3,
+        borderRadius:"0 3px 3px 0",background:tc,boxShadow:dark?`0 0 5px ${tc}44`:"none"}}/>
+      {/* HUD corners */}
+      {(isRisk||isLate)&&dark&&(<>
+        <div style={{position:"absolute",top:4,right:4,width:8,height:8,zIndex:4,
+          borderTop:`1.5px solid ${st}`,borderRight:`1.5px solid ${st}`,opacity:.65}}/>
+        <div style={{position:"absolute",bottom:4,left:4,width:8,height:8,zIndex:4,
+          borderBottom:`1.5px solid ${st}`,borderLeft:`1.5px solid ${st}`,opacity:.65}}/>
+      </>)}
+
+      {/* ── ROW 1: badges + timer ── */}
+      <div style={{
+        flexShrink:0,
+        display:"flex",alignItems:"center",gap:Math.round(4*scale),
+        padding:`${Math.round(8*scale)}px ${Math.round(14*scale)}px ${Math.round(6*scale)}px ${Math.round(16*scale)}px`,
+        borderBottom:`1px solid ${dark?"rgba(255,255,255,.05)":"rgba(0,0,0,.05)"}`,
+        flexWrap:"wrap",overflow:"hidden",
+      }}>
+        {/* estado badge */}
+        {isLate&&<Pill st={st} dark={dark} scale={scale}>✕</Pill>}
+        {isRisk&&!isLate&&<Pill st={st} dark={dark} scale={scale}>⚠</Pill>}
+        {!isRisk&&!isLate&&run&&(
+          <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,
+            fontSize:FS(9),letterSpacing:".09em",
+            padding:`${Math.round(2*scale)}px ${Math.round(6*scale)}px`,
+            borderRadius:2,color:dark?"#2BE564":"#16A34A",
+            background:"rgba(43,229,100,.1)",border:"1px solid rgba(43,229,100,.28)",
+            display:"inline-flex",alignItems:"center",gap:3,flexShrink:0}}>
+            <span style={{width:Math.round(5*scale),height:Math.round(5*scale),borderRadius:"50%",
+              background:dark?"#2BE564":"#16A34A",boxShadow:"0 0 5px #2BE564",
+              animation:"blink 1.6s infinite",flexShrink:0}}/>RUN
+          </span>
+        )}
+        {paused&&!run&&<Pill st={dark?"#FFB200":"#B08D2E"} dark={dark} scale={scale}>⏸</Pill>}
+        {prio&&<span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:800,
+          fontSize:FS(9),padding:`${Math.round(2*scale)}px ${Math.round(5*scale)}px`,
+          borderRadius:2,color:"#0a0a0a",background:"#FFB200",flexShrink:0}}>⚡</span>}
+        {tb&&<Pill st={tb.c} dark={dark} scale={scale}>{tb.l}</Pill>}
+        {/* % pill */}
+        {meta>0&&(
+          <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
+            fontSize:FS(9),letterSpacing:".05em",
+            padding:`${Math.round(2*scale)}px ${Math.round(5*scale)}px`,
+            borderRadius:2,color:st,
+            background:`color-mix(in srgb,${st} 10%,transparent)`,
+            border:`1px solid color-mix(in srgb,${st} 28%,transparent)`,
+            flexShrink:0}}>
+            {Math.round(pct)}%
+          </span>
+        )}
+        {/* timer */}
+        <div style={{marginLeft:"auto",textAlign:"right",flexShrink:0}}>
+          <div style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:600,
+            fontSize:FS(scale>=0.88?22:scale>=0.75?18:14),
+            letterSpacing:".02em",color:st,lineHeight:1,
+            textShadow:dark?`0 0 16px ${st}55`:"none"}}>
+            {fmtHMS(isCD&&restante!==null?restante:elapsed)}
+          </div>
+          {meta>0&&(
+            <div style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
+              fontSize:FS(8),color:dark?"rgba(200,200,200,.38)":"#bbb",
+              letterSpacing:".1em",marginTop:2}}>
+              /{fh(meta)} meta
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── ROW 2: NS plate (flex:1 — absorve espaço disponível) ── */}
+      <div style={{
+        flex:1,minHeight:0,overflow:"hidden",
+        display:"flex",flexDirection:"column",
+        alignItems:"center",justifyContent:"center",
+        padding:`${Math.round(10*scale)}px ${Math.round(10*scale)}px`,
+        margin:`${Math.round(8*scale)}px ${Math.round(10*scale)}px ${Math.round(4*scale)}px`,
+        background:dark?"rgba(0,0,0,.5)":"rgba(0,0,0,.03)",
+        border:`1px solid ${dark?"rgba(255,255,255,.06)":"rgba(0,0,0,.06)"}`,
+        borderRadius:dark?"2px":"8px",
+        position:"relative",
+      }}>
+        {dark&&run&&<div style={{position:"absolute",inset:0,pointerEvents:"none",
+          background:`radial-gradient(ellipse 80% 50% at 50% 110%,${st}12,transparent)`}}/>}
+        {/* NS */}
+        <div style={{fontFamily:"'Orbitron',monospace",fontWeight:900,
+          letterSpacing:".04em",textAlign:"center",lineHeight:1,
+          fontSize:FS(scale>=0.88?30:scale>=0.75?22:scale>=0.62?17:13),
+          color:dark?"#fff":"#0D0D0F",
+          textShadow:dark?"0 0 18px rgba(255,255,255,.1)":"none",
+          overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
+          maxWidth:"100%",position:"relative",zIndex:1}}>
+          {m.serie||"—"}
+        </div>
+        {/* modelo */}
+        <div style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
+          fontSize:FS(scale>=0.88?12:scale>=0.75?10:8),
+          letterSpacing:".15em",color:dark?"rgba(170,170,170,.55)":"#999",
+          marginTop:Math.round(4*scale),position:"relative",zIndex:1,
+          overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:"100%"}}>
+          {m.modelo||"—"}
+        </div>
+        {/* ── BARRA — sempre dentro do plate, nunca corta ── */}
+        {meta>0&&(
+          <div style={{width:"100%",marginTop:Math.round(8*scale),position:"relative",zIndex:1}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",
+              marginBottom:Math.round(3*scale)}}>
+              <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,
+                fontSize:FS(scale>=0.75?8.5:7.5),letterSpacing:".15em",
+                color:dark?"rgba(140,140,140,.55)":"#bbb"}}>
+                {isLate?"ATRASO":"RESTAM"}
+              </span>
+              <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
+                fontSize:FS(scale>=0.88?14:scale>=0.75?12:10),
+                color:st,textShadow:dark?`0 0 8px ${st}44`:"none"}}>
+                {fmtHMS(isLate?asec:rsec)}
+              </span>
+            </div>
+            <div style={{height:barH,
+              background:dark?"rgba(255,255,255,.08)":"rgba(0,0,0,.09)",
+              borderRadius:2,overflow:"hidden"}}>
+              <div style={{height:"100%",width:`${pct}%`,borderRadius:2,
+                background:isLate?"repeating-linear-gradient(45deg,#FF3344 0 3px,#7a0e1a 3px 6px)":st,
+                boxShadow:`0 0 6px ${st}`,transition:"width .8s ease"}}/>
             </div>
           </div>
+        )}
+      </div>
+
+      {/* ── ROW 3: datas (só se scale>=0.62) ── */}
+      {showDatas&&(
+        <div style={{flexShrink:0,overflow:"hidden",
+          display:"flex",alignItems:"center",gap:Math.round(8*scale),flexWrap:"wrap",
+          padding:`0 ${Math.round(12*scale)}px`,
+          marginBottom:Math.round(4*scale)}}>
+          {(m.previsao_inicio||m.dataEntrada)&&(
+            <span style={{display:"inline-flex",alignItems:"center",gap:4,
+              fontFamily:"'JetBrains Mono',monospace",
+              fontSize:FS(scale>=0.88?11:9),overflow:"hidden",flexShrink:0}}>
+              <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
+                fontSize:FS(7.5),letterSpacing:".12em",
+                color:dark?"rgba(140,140,140,.5)":"#bbb"}}>ENT</span>
+              <span style={{fontWeight:700,color:dark?"#6FC3FF":"#0A6EBF",
+                textShadow:dark?"0 0 8px rgba(111,195,255,.3)":"none"}}>
+                {fd(m.previsao_inicio||m.dataEntrada)}
+              </span>
+            </span>
+          )}
+          {(m.previsao_inicio||m.dataEntrada)&&m.previsao_fim&&
+            <span style={{color:dark?"rgba(255,255,255,.1)":"rgba(0,0,0,.14)",fontSize:FS(10)}}>→</span>}
+          {m.previsao_fim&&(
+            <span style={{display:"inline-flex",alignItems:"center",gap:4,
+              fontFamily:"'JetBrains Mono',monospace",
+              fontSize:FS(scale>=0.88?11:9),overflow:"hidden",flexShrink:0}}>
+              <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
+                fontSize:FS(7.5),letterSpacing:".12em",
+                color:dark?"rgba(140,140,140,.5)":"#bbb"}}>ENTREGA</span>
+              <span style={{fontWeight:700,
+                color:isLate?(dark?"#FF3344":"#DC2626"):isRisk?(dark?"#FFB200":"#B08D2E"):(dark?"#2BE564":"#16A34A"),
+                textShadow:dark?`0 0 8px ${isLate?"#FF334455":isRisk?"#FFB20055":"#2BE56455"}`:"none"}}>
+                {fd(m.previsao_fim)}
+              </span>
+            </span>
+          )}
         </div>
       )}
-      <Rodape/>
+
+      {/* ── ROW 4: tasks (só se scale>=0.75) ── */}
+      {showTasks&&(
+        <div style={{flexShrink:0,overflow:"hidden",
+          padding:`0 ${Math.round(12*scale)}px`,
+          marginBottom:Math.round(4*scale)}}>
+          <div style={{display:"flex",alignItems:"center",gap:6,
+            marginBottom:Math.round(4*scale)}}>
+            <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,
+              fontSize:FS(7.5),letterSpacing:".18em",
+              color:dark?"rgba(140,140,140,.5)":"#bbb"}}>TAREFAS</span>
+            <div style={{height:1,flex:1,background:dark?"rgba(255,255,255,.05)":"rgba(0,0,0,.06)"}}/>
+            <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:FS(7.5),
+              color:dark?"rgba(140,140,140,.4)":"#ccc"}}>
+              {doneCount}/{allTasks.length}
+            </span>
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:Math.round(3*scale)}}>
+            {vis.map((t,i)=>(
+              <div key={i} style={{display:"flex",alignItems:"center",
+                gap:Math.round(7*scale),
+                padding:`${Math.round(4*scale)}px ${Math.round(8*scale)}px`,
+                background:dark?"rgba(255,255,255,.025)":"rgba(0,0,0,.025)",
+                border:`1px solid ${dark?"rgba(255,255,255,.04)":"rgba(0,0,0,.05)"}`,
+                borderLeft:`2px solid ${st}44`,
+                borderRadius:dark?"2px":"4px",overflow:"hidden"}}>
+                <div style={{width:Math.round(9*scale),height:Math.round(9*scale),
+                  borderRadius:2,flexShrink:0,
+                  border:`1.5px solid ${st}3a`,background:"transparent"}}/>
+                <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
+                  fontSize:FS(scale>=0.88?12:10),letterSpacing:".03em",
+                  color:dark?"#c0c0c8":"#555",lineHeight:1.2,flex:1,
+                  overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                  {t.texto}
+                </span>
+              </div>
+            ))}
+            {hidden>0&&(
+              <div style={{textAlign:"center",
+                padding:`${Math.round(2*scale)}px 0`,
+                fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
+                fontSize:FS(8),letterSpacing:".1em",
+                color:dark?"rgba(140,140,140,.35)":"#ccc",
+                border:`1px dashed ${dark?"rgba(255,255,255,.06)":"rgba(0,0,0,.08)"}`,
+                borderRadius:2}}>
+                +{hidden} restantes
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── ROW 5: rodapé ── */}
+      <div style={{
+        flexShrink:0,
+        display:"flex",alignItems:"center",justifyContent:"space-between",
+        padding:`${Math.round(6*scale)}px ${Math.round(12*scale)}px ${Math.round(8*scale)}px ${Math.round(16*scale)}px`,
+        borderTop:`1px solid ${dark?"rgba(255,255,255,.04)":"rgba(0,0,0,.05)"}`,
+      }}>
+        <div style={{display:"flex",alignItems:"center",gap:Math.round(5*scale)}}>
+          <div style={{width:Math.round(7*scale),height:Math.round(7*scale),borderRadius:"50%",
+            background:tc,boxShadow:dark?`0 0 5px ${tc}`:"none",flexShrink:0}}/>
+          <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
+            fontSize:FS(8),letterSpacing:".14em",
+            color:dark?"rgba(140,140,140,.38)":"#ccc"}}>TÉC</span>
+        </div>
+        {meta>0&&(
+          <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
+            fontSize:FS(scale>=0.75?11:9),
+            color:dark?"rgba(190,190,190,.65)":"#666"}}>
+            <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
+              fontSize:FS(7.5),letterSpacing:".14em",
+              color:dark?"rgba(140,140,140,.4)":"#ccc",marginRight:3}}>META</span>
+            {fh(meta)}
+          </span>
+        )}
+      </div>
     </div>
+  );
+}
+
+// Pill auxiliar para badges no BoardCell v6
+function Pill({st, dark, scale, children}){
+  const s = scale||1;
+  return(
+    <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,
+      fontSize:`${Math.round(9*s)}px`,letterSpacing:".09em",
+      padding:`${Math.round(2*s)}px ${Math.round(6*s)}px`,
+      borderRadius:2,color:st,
+      background:`color-mix(in srgb,${st} 10%,transparent)`,
+      border:`1px solid color-mix(in srgb,${st} 28%,transparent)`,
+      display:"inline-flex",alignItems:"center",gap:2,
+      whiteSpace:"nowrap",flexShrink:0}}>
+      {children}
+    </span>
   );
 }
 

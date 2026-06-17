@@ -434,16 +434,26 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
       }}>
         {dark&&run&&<div style={{position:"absolute",inset:0,pointerEvents:"none",
           background:`radial-gradient(ellipse 80% 50% at 50% 110%,${st}12,transparent)`}}/>}
-        {/* NS */}
-        <div style={{fontFamily:"'Orbitron',monospace",fontWeight:900,
-          letterSpacing:".04em",textAlign:"center",lineHeight:1,
-          fontSize:FS(scale>=0.88?36:scale>=0.75?27:scale>=0.62?21:16),
-          color:dark?"#fff":"#0D0D0F",
-          textShadow:dark?"0 0 18px rgba(255,255,255,.1)":"none",
-          overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
-          maxWidth:"100%",position:"relative",zIndex:1}}>
-          {m.serie||"—"}
-        </div>
+        {/* NS — font-size adaptativo ao comprimento do série */}
+        {(()=>{
+          const ns = m.serie||"—";
+          const len = ns.length;
+          // base por scale, depois reduz proporcionalmente ao comprimento
+          const base = scale>=0.88?36:scale>=0.75?27:scale>=0.62?21:16;
+          // a partir de 10 chars começa a comprimir; cada char extra -1.5px
+          const fsSerie = len<=9 ? base : Math.max(base*0.55, base - (len-9)*2.2);
+          return (
+            <div style={{fontFamily:"'Orbitron',monospace",fontWeight:900,
+              letterSpacing:len>11?".02em":".04em",textAlign:"center",lineHeight:1,
+              fontSize:`${Math.round(fsSerie*scale)}px`,
+              color:dark?"#fff":"#0D0D0F",
+              textShadow:dark?"0 0 18px rgba(255,255,255,.1)":"none",
+              overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
+              maxWidth:"100%",position:"relative",zIndex:1}}>
+              {ns}
+            </div>
+          );
+        })()}
         {/* modelo */}
         <div style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
           fontSize:FS(scale>=0.88?12:scale>=0.75?10:8),

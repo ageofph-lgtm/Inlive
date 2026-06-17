@@ -563,7 +563,60 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
         </div>
       )}
 
-      {/* ── ROW 5: rodapé ── */}
+      {/* ── ROW 5: imprevistos (só se existirem e scale>=0.62) ── */}
+      {(()=>{
+        const imp=Array.isArray(m.imprevistos)?m.imprevistos:[];
+        if(imp.length===0||scale<0.62) return null;
+        return(
+          <div style={{flexShrink:0,overflow:"hidden",
+            padding:`0 ${Math.round(12*scale)}px`,
+            marginBottom:Math.round(4*scale)}}>
+            <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:Math.round(3*scale)}}>
+              <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,
+                fontSize:FS(7.5),letterSpacing:".18em",
+                color:dark?"rgba(251,146,60,.7)":"#D97706"}}>⚡ IMPREVISTOS</span>
+              <div style={{height:1,flex:1,background:dark?"rgba(251,146,60,.12)":"rgba(251,146,60,.2)"}}/>
+              <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:FS(7.5),
+                color:dark?"rgba(251,146,60,.5)":"#D97706",fontWeight:700}}>
+                +{imp.reduce((s,iv)=>s+Number(iv.horas_extra||0),0)}h
+              </span>
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:Math.round(3*scale)}}>
+              {imp.slice(0,scale>=0.88?3:2).map((iv,i)=>(
+                <div key={i} style={{display:"flex",alignItems:"flex-start",
+                  gap:Math.round(6*scale),
+                  padding:`${Math.round(3*scale)}px ${Math.round(8*scale)}px`,
+                  background:dark?"rgba(251,146,60,.05)":"rgba(251,146,60,.06)",
+                  border:`1px solid ${dark?"rgba(251,146,60,.18)":"rgba(251,146,60,.25)"}`,
+                  borderLeft:`2px solid rgba(251,146,60,.5)`,
+                  borderRadius:dark?"2px":"4px",overflow:"hidden"}}>
+                  <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,
+                    fontSize:FS(scale>=0.88?12:10),
+                    color:dark?"#FB923C":"#D97706",letterSpacing:".02em",flex:1,
+                    overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",lineHeight:1.3}}>
+                    {iv.descricao}
+                  </span>
+                  <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
+                    fontSize:FS(scale>=0.88?10:9),
+                    color:dark?"rgba(251,146,60,.6)":"#D97706",flexShrink:0}}>
+                    +{iv.horas_extra}h
+                  </span>
+                </div>
+              ))}
+              {imp.length>(scale>=0.88?3:2)&&(
+                <div style={{textAlign:"center",
+                  fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
+                  fontSize:FS(8),letterSpacing:".1em",
+                  color:dark?"rgba(251,146,60,.35)":"#D97706"}}>
+                  +{imp.length-(scale>=0.88?3:2)} mais
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* ── ROW 6: rodapé ── */}
       <div style={{
         flexShrink:0,
         display:"flex",alignItems:"center",justifyContent:"space-between",

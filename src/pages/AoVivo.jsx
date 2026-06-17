@@ -2420,6 +2420,23 @@ export default function AoVivo(){
     {l:"TOTAL 2026",  v:totalCon.length,              c:"#FF2D78"},
   ];
 
+
+  const SHARED_STYLE = (
+    <style>{`
+      @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&family=Bricolage+Grotesque:opsz,wght@12..96,300;400;500;600;700;800&display=swap');
+      @keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+      @keyframes hudScan{0%{background-position:200% 0}100%{background-position:-200% 0}}
+      @keyframes cardSweep{0%{left:-60%}100%{left:130%}}
+      @keyframes hudPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.08);opacity:0.7}}
+      @keyframes hudFadeIn{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
+      @keyframes helmetPulse{0%,100%{box-shadow:0 0 10px #5cffff,0 0 20px #5cffff}50%{box-shadow:0 0 4px #5cffff}}
+      @keyframes armorSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+      ::-webkit-scrollbar{width:4px;height:4px}
+      ::-webkit-scrollbar-track{background:rgba(210,210,210,0.04)}
+      ::-webkit-scrollbar-thumb{background:rgba(210,210,210,0.2);border-radius:2px}
+      *{box-sizing:border-box}
+    `}</style>
+  );
   // ── Tela de almoço 12:30–13:30 ──────────────────────────────────────────────
   if(isAlmoco) return(
     <div style={{
@@ -2428,20 +2445,7 @@ export default function AoVivo(){
       display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
       fontFamily:"'Orbitron',monospace",gap:20,overflow:"hidden",
     }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&family=Bricolage+Grotesque:opsz,wght@12..96,300;400;500;600;700;800&display=swap');
-        @keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
-        @keyframes hudScan{0%{background-position:200% 0}100%{background-position:-200% 0}}
-        @keyframes cardSweep{0%{left:-60%}100%{left:130%}}
-        @keyframes hudPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.08);opacity:0.7}}
-        @keyframes hudFadeIn{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
-        @keyframes helmetPulse{0%,100%{box-shadow:0 0 10px #5cffff,0 0 20px #5cffff}50%{box-shadow:0 0 4px #5cffff}}
-        @keyframes armorSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-        ::-webkit-scrollbar{width:4px;height:4px}
-        ::-webkit-scrollbar-track{background:rgba(210,210,210,0.04)}
-        ::-webkit-scrollbar-thumb{background:rgba(210,210,210,0.2);border-radius:2px}
-        *{box-sizing:border-box}
-      `}</style>
+      {SHARED_STYLE}
       {/* scanlines */}
       <div style={{position:"absolute",inset:0,pointerEvents:"none",
         backgroundImage:"repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,45,120,0.012) 2px,rgba(255,45,120,0.012) 4px)",

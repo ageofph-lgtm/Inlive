@@ -276,8 +276,13 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
   const run      = m.timer_status==="running";
   const paused   = m.timer_status?.startsWith("paused");
   const allTasks = m.tarefas||[];
-  const tasks    = allTasks.filter(t=>!t.concluida);
-  const doneCount= allTasks.length - tasks.length;
+  const realTasks = allTasks.filter(t=>!t.concluida);
+  const doneCount = allTasks.length - realTasks.length;
+  // Injectar badges EXPRESS e VPS como tasks virtuais no topo
+  const virtualTasks = [];
+  if (m.isExpress || allTasks.some(t=>t.texto==="EXPRESS")) virtualTasks.push({texto:"EXPRESS", _virtual:true, _color:"#F59E0B"});
+  if (m.isVps) virtualTasks.push({texto:"VPS", _virtual:true, _color:"#4D9FFF"});
+  const tasks = [...virtualTasks, ...realTasks];
 
   const catKey   = forceCategory||getMachineCategory(m);
   const cat      = CAT[catKey]||CAT.andamento;
@@ -533,16 +538,26 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
               <div key={i} style={{display:"flex",alignItems:"center",
                 gap:Math.round(7*scale),
                 padding:`${Math.round(4*scale)}px ${Math.round(8*scale)}px`,
-                background:dark?"rgba(255,255,255,.025)":"rgba(0,0,0,.025)",
-                border:`1px solid ${dark?"rgba(255,255,255,.04)":"rgba(0,0,0,.05)"}`,
-                borderLeft:`2px solid ${st}44`,
+                background:t._virtual
+                  ?(dark?`rgba(${t._color==='#F59E0B'?'245,158,11':'77,159,255'},.07)`:`rgba(${t._color==='#F59E0B'?'245,158,11':'77,159,255'},.06)`)
+                  :(dark?"rgba(255,255,255,.025)":"rgba(0,0,0,.025)"),
+                border:`1px solid ${t._virtual?(dark?`${t._color}33`:`${t._color}44`):(dark?"rgba(255,255,255,.04)":"rgba(0,0,0,.05)")}`,
+                borderLeft:`2px solid ${t._virtual?(t._color||st):`${st}44`}`,
                 borderRadius:dark?"2px":"4px",overflow:"hidden"}}>
-                <div style={{width:Math.round(9*scale),height:Math.round(9*scale),
-                  borderRadius:2,flexShrink:0,
-                  border:`1.5px solid ${st}3a`,background:"transparent"}}/>
-                <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
-                  fontSize:FS(scale>=0.88?14:12),letterSpacing:".03em",
-                  color:dark?"#c0c0c8":"#555",lineHeight:1.2,flex:1,
+                {t._virtual
+                  ? <span style={{fontSize:FS(11),flexShrink:0,lineHeight:1}}>
+                      {t.texto==="EXPRESS"?"⚡":"🔵"}
+                    </span>
+                  : <div style={{width:Math.round(9*scale),height:Math.round(9*scale),
+                      borderRadius:2,flexShrink:0,
+                      border:`1.5px solid ${st}3a`,background:"transparent"}}/>
+                }
+                <span style={{fontFamily:"'Rajdhani',sans-serif",
+                  fontWeight:t._virtual?800:600,
+                  fontSize:FS(scale>=0.88?14:12),
+                  letterSpacing:t._virtual?".12em":".03em",
+                  color:t._virtual?(dark?t._color:"#0A6EBF"):(dark?"#c0c0c8":"#555"),
+                  lineHeight:1.2,flex:1,
                   overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
                   {t.texto}
                 </span>

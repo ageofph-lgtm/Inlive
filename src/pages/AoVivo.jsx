@@ -97,7 +97,7 @@ const CAT = {
   prio:     { accent:"#F59E0B", rgb:"245,158,11",   bg:"rgba(245,158,11,0.08)",  label:"PRIORITÁRIA" },
   recon:    { accent:"#a78bfa", rgb:"167,139,250",  bg:"rgba(167,139,250,0.08)", label:"RECOND." },
   nts:      { accent:"#c8102e", rgb:"200,16,46",    bg:"rgba(200,16,46,0.08)",   label:"NTS" },
-  concluida:{ accent:"#22C55E", rgb:"34,197,94",    bg:"rgba(34,197,94,0.08)",   label:"CONCLUÍDA" },
+  concluida:{ accent:"#38BDF8", rgb:"56,189,248",   bg:"rgba(56,189,248,0.08)",  label:"CONCLUÍDA" },
   fila:     { accent:"#6b7280", rgb:"107,114,128",  bg:"rgba(107,114,128,0.05)", label:"FILA ACP" },
   express:  { accent:"#c8102e", rgb:"200,16,46",    bg:"rgba(200,16,46,0.08)",   label:"EXPRESS" },
   andamento:{ accent:"#6b7280", rgb:"107,114,128",  bg:"rgba(107,114,128,0.05)", label:"EM ANDAMENTO" },
@@ -385,24 +385,50 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
               animation:"blink 1.6s infinite",flexShrink:0}}/>RUN
           </span>
         )}
-        {paused&&!run&&<Pill st={dark?"#FFB200":"#B08D2E"} dark={dark} scale={scale}>⏸</Pill>}
+        {paused&&!run&&(<>
+          <Pill st={dark?"#FFB200":"#B08D2E"} dark={dark} scale={scale}>⏸</Pill>
+          {(()=>{
+            const reason = m.timer_status?.replace?.(/^paused[-_]?/i,"")?.replace(/_/g," ")?.trim?.();
+            const label = reason && reason.length>2 && reason.toLowerCase()!=="true" ? reason.toUpperCase() : null;
+            return label ? (
+              <span style={{
+                fontFamily:"'Oxanium',sans-serif",fontWeight:600,
+                fontSize:FS(8),letterSpacing:".1em",
+                padding:`${Math.round(2*scale)}px ${Math.round(6*scale)}px`,
+                borderRadius:2,color:dark?"#FFB200":"#B08D2E",
+                background:"rgba(251,191,36,.08)",
+                border:"1px solid rgba(251,191,36,.22)",
+                flexShrink:0,maxWidth:`${Math.round(90*scale)}px`,
+                overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
+              }}>{label}</span>
+            ) : null;
+          })()}
+        </>)}
         {prio&&<span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:800,
           fontSize:FS(9),padding:`${Math.round(2*scale)}px ${Math.round(5*scale)}px`,
           borderRadius:2,color:"#0a0a0a",background:"#FFB200",flexShrink:0}}>⚡</span>}
         {tb&&<Pill st={tb.c} dark={dark} scale={scale}>{tb.l}</Pill>}
         {/* % pill removido — percentagem vai dentro do arco circular */}
-        {/* timer */}
+        {/* timer — fonte LCD digital */}
         <div style={{marginLeft:"auto",textAlign:"right",flexShrink:0}}>
-          <div style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:600,
-            fontSize:FS(scale>=0.88?22:scale>=0.75?18:14),
-            letterSpacing:".02em",color:st,lineHeight:1,
-            textShadow:dark?`0 0 16px ${st}55`:"none"}}>
+          <div style={{
+            fontFamily:"'Share Tech Mono','VT323','JetBrains Mono',monospace",
+            fontWeight:400,
+            fontSize:FS(scale>=0.88?24:scale>=0.75?20:15),
+            letterSpacing:".06em",color:st,lineHeight:1,
+            textShadow:dark?`0 0 12px ${st},0 0 24px ${st}66`:"none",
+            animation:run&&dark?"timerPulse 2s ease-in-out infinite":"none",
+          }}>
             {fmtHMS(isCD&&restante!==null?restante:elapsed)}
           </div>
           {meta>0&&(
-            <div style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
-              fontSize:FS(8),color:dark?"rgba(255,255,255,0.85)":"rgba(0,0,0,0.75)",
-              letterSpacing:".1em",marginTop:2}}>
+            <div style={{
+              fontFamily:"'Oxanium','Exo 2',sans-serif",
+              fontWeight:600,
+              fontSize:FS(8),
+              color:dark?"rgba(255,255,255,0.85)":"rgba(0,0,0,0.75)",
+              letterSpacing:".12em",marginTop:2,
+            }}>
               /{fh(meta)} meta
             </div>
           )}
@@ -432,11 +458,14 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
           // a partir de 10 chars começa a comprimir; cada char extra -1.5px
           const fsSerie = len<=9 ? base : Math.max(base*0.55, base - (len-9)*2.2);
           return (
-            <div style={{fontFamily:"'Orbitron',monospace",fontWeight:900,
-              letterSpacing:len>11?".02em":".04em",textAlign:"center",lineHeight:1,
+            <div style={{
+              fontFamily:"'Oxanium','Orbitron',monospace",
+              fontWeight:800,
+              letterSpacing:len>11?".01em":".06em",
+              textAlign:"center",lineHeight:1,
               fontSize:`${Math.round(fsSerie*scale)}px`,
               color:dark?"#fff":"#0D0D0F",
-              textShadow:dark?"0 0 18px rgba(255,255,255,.1)":"none",
+              textShadow:dark?"0 0 20px rgba(255,255,255,.15),0 0 40px rgba(255,255,255,.06)":"none",
               overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
               maxWidth:"100%",position:"relative",zIndex:1}}>
               {ns}
@@ -444,9 +473,12 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
           );
         })()}
         {/* modelo */}
-        <div style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
+        <div style={{
+          fontFamily:"'Exo 2','Rajdhani',sans-serif",
+          fontWeight:500,
           fontSize:FS(scale>=0.88?12:scale>=0.75?10:8),
-          letterSpacing:".15em",color:dark?"rgba(170,170,170,.55)":"#999",
+          letterSpacing:".2em",
+          color:dark?"rgba(180,180,190,.6)":"#888",
           marginTop:Math.round(4*scale),position:"relative",zIndex:1,
           overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:"100%"}}>
           {m.modelo||"—"}
@@ -483,16 +515,29 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
                     filter:dark?`drop-shadow(0 0 4px ${st}88)`:"none",
                     transition:"stroke-dasharray .8s ease",
                   }}/>
-                {/* % texto no centro */}
+                {/* % texto no centro — fonte digital */}
                 <text x={sz/2} y={sz/2}
                   textAnchor="middle" dominantBaseline="central"
-                  fontFamily="'JetBrains Mono',monospace"
-                  fontWeight={800}
-                  fontSize={Math.round((scale>=0.75?11:9)*scale)}
+                  fontFamily="'Share Tech Mono','VT323',monospace"
+                  fontWeight={400}
+                  fontSize={Math.round((scale>=0.75?13:10)*scale)}
                   fill={isLate?"#FF3344":st}
-                  style={{filter:dark?`drop-shadow(0 0 4px ${st}66)`:"none"}}>
+                  style={{filter:dark?`drop-shadow(0 0 6px ${st})`:"none"}}>
                   {isLate?`+${Math.round(asec/60)}m`:Math.round(safePct)+"%"}
                 </text>
+                {/* ponto de ponta do arco — efeito neon running */}
+                {!isLate&&safePct>2&&safePct<99&&(()=>{
+                  const angle = (safePct/100)*360 - 90;
+                  const rad = angle*(Math.PI/180);
+                  const cx2 = sz/2 + r*Math.cos(rad);
+                  const cy2 = sz/2 + r*Math.sin(rad);
+                  return (
+                    <circle cx={cx2} cy={cy2} r={sw+1}
+                      fill={st}
+                      style={{filter:`drop-shadow(0 0 ${sw+2}px ${st}) drop-shadow(0 0 ${sw*2}px ${st}88)`}}
+                    />
+                  );
+                })()}
               </svg>
 
             </div>
@@ -2300,7 +2345,7 @@ export default function AoVivo(){
       const cols=n<=4?2:n<=9?3:n<=16?4:5;
       return(
         <div style={{display:"flex",flexDirection:"column",height:"100%",overflow:"hidden"}}>
-          <SlideHead title="CONCLUÍDAS — ESTA SEMANA" icon={<CheckCircle2 size={16}/>} color={D.green} D={D} count={n}/>
+          <SlideHead title="CONCLUÍDAS — ESTA SEMANA" icon={<CheckCircle2 size={16}/>} color="#38BDF8" D={D} count={n}/>
           {n===0?<Empty label="Nenhuma conclusão esta semana ainda" D={D}/>:
             <div style={{
               display:"grid",
@@ -2324,87 +2369,122 @@ export default function AoVivo(){
                   <div key={m.id} style={{
                     position:"relative",
                     display:"flex",flexDirection:"column",
-                    padding:"10px 12px 10px",
+                    padding:"8px 10px 8px",
                     background:D.dark
-                      ?`linear-gradient(135deg,rgba(34,197,94,0.12) 0%,rgba(8,4,6,0.97) 100%)`
-                      :`linear-gradient(135deg,rgba(34,197,94,0.1) 0%,rgba(255,255,255,0.97) 100%)`,
-                    border:`1px solid rgba(34,197,94,0.35)`,
-                    borderTop:`2px solid #22C55E`,
-                    boxShadow:D.dark?`0 0 14px rgba(34,197,94,0.18)`:`0 2px 8px rgba(34,197,94,0.12)`,
+                      ?`linear-gradient(135deg,rgba(56,189,248,0.10) 0%,rgba(8,4,6,0.97) 100%)`
+                      :`linear-gradient(135deg,rgba(56,189,248,0.08) 0%,rgba(255,255,255,0.97) 100%)`,
+                    border:`1px solid rgba(56,189,248,0.30)`,
+                    borderTop:`2px solid #38BDF8`,
+                    boxShadow:D.dark?`0 0 14px rgba(56,189,248,0.14)`:`0 2px 8px rgba(56,189,248,0.10)`,
                     overflow:"hidden",
                     clipPath:"polygon(0 0,calc(100% - 7px) 0,100% 7px,100% 100%,7px 100%,0 calc(100% - 7px))",
                   }}>
                     {/* nº de ordem */}
-                    <div style={{position:"absolute",top:4,right:6,fontFamily:"'Orbitron',monospace",
-                      fontSize:"8px",fontWeight:700,color:`rgba(34,197,94,0.4)`,letterSpacing:"0.1em"}}>
+                    <div style={{position:"absolute",top:4,right:6,
+                      fontFamily:"'Share Tech Mono',monospace",
+                      fontSize:"8px",fontWeight:400,color:`rgba(56,189,248,0.35)`,letterSpacing:"0.1em"}}>
                       {String(i+1).padStart(2,"0")}
                     </div>
-                    {/* ícone ✓ */}
-                    <div style={{position:"absolute",bottom:5,right:7,opacity:0.12}}>
-                      <CheckCircle2 size={22} color="#22C55E"/>
-                    </div>
-                    {/* série + modelo */}
-                    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"6px 0",textAlign:"center"}}>
-                      <div style={{fontFamily:"'Orbitron',monospace",
-                        fontSize:"clamp(13px,1.4vw,20px)",fontWeight:900,
-                        color:D.dark?"#f5f5f5":"#0D0D0F",letterSpacing:"0.1em",lineHeight:1.1,
-                        textShadow:D.dark?"0 0 18px rgba(240,240,240,0.2)":"none",
+                    {/* série + modelo — protagonistas */}
+                    <div style={{display:"flex",flexDirection:"column",alignItems:"center",
+                      justifyContent:"center",padding:"4px 0 2px",textAlign:"center"}}>
+                      <div style={{
+                        fontFamily:"'Oxanium','Orbitron',monospace",
+                        fontWeight:800,
+                        fontSize:"clamp(12px,1.3vw,18px)",
+                        color:D.dark?"#e0f2fe":"#0D0D0F",
+                        letterSpacing:"0.06em",lineHeight:1.1,
+                        textShadow:D.dark?"0 0 16px rgba(56,189,248,0.3)":"none",
                         whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
-                        textAlign:"center",maxWidth:"100%"}}>
+                        maxWidth:"100%"}}>
                         {m.serie||"—"}
                       </div>
-                      <div style={{fontFamily:"'Rajdhani',system-ui,sans-serif",fontSize:"clamp(11px,1vw,15px)",fontWeight:600,
-                        color:D.dark?"rgba(200,200,200,0.80)":"#555",
-                        marginTop:3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
-                        textAlign:"center",maxWidth:"100%"}}>
+                      <div style={{
+                        fontFamily:"'Exo 2','Rajdhani',sans-serif",
+                        fontWeight:500,fontSize:"clamp(9px,0.9vw,12px)",
+                        letterSpacing:".18em",
+                        color:D.dark?"rgba(148,209,242,0.65)":"#555",
+                        marginTop:2,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
+                        maxWidth:"100%"}}>
                         {m.modelo||"—"}
                       </div>
                     </div>
-                    {/* tarefas concluídas */}
-                    {tasks.length>0&&(
-                      <div style={{display:"flex",flexWrap:"wrap",gap:3,overflow:"hidden"}}>
-                        {tasks.map((t,j)=>(
+
+                    {/* timer acumulado — destaque */}
+                    {((m.timer_accumulated_seconds||0)>=MIN_TIMER_SECONDS)&&(
+                      <div style={{display:"flex",alignItems:"baseline",justifyContent:"center",
+                        gap:4,margin:"3px 0 2px"}}>
+                        <span style={{
+                          fontFamily:"'Share Tech Mono','VT323',monospace",
+                          fontWeight:400,
+                          fontSize:"clamp(14px,1.4vw,20px)",
+                          letterSpacing:".05em",
+                          color:"#38BDF8",
+                          textShadow:D.dark?"0 0 10px rgba(56,189,248,0.7),0 0 20px rgba(56,189,248,0.35)":"none",
+                        }}>
+                          {fmtHMS(m.timer_accumulated_seconds)}
+                        </span>
+                        {(()=>{
+                          const meta_s = Number(m.tempo_estimado_segundos)||0;
+                          if(meta_s<60) return null;
+                          const fh2=s=>{const h=Math.floor(s/3600),mn=Math.floor((s%3600)/60);return mn===0?`${h}h`:`${h}h${String(mn).padStart(2,"0")}`;};
+                          const diff = m.timer_accumulated_seconds - meta_s;
+                          const color = diff>0?"#FB923C":"rgba(56,189,248,0.5)";
+                          return (
+                            <span style={{fontFamily:"'Oxanium',sans-serif",fontSize:"9px",
+                              fontWeight:600,letterSpacing:".1em",color}}>
+                              {diff>0?"+":""}{fh2(Math.abs(diff))} meta
+                            </span>
+                          );
+                        })()}
+                      </div>
+                    )}
+
+                    {/* tarefas — chips riscados */}
+                    {tasks.filter(t=>!["EXPRESS","VPS","IMPREVISTOS"].includes(t.texto)).length>0&&(
+                      <div style={{display:"flex",flexWrap:"wrap",gap:"2px 3px",overflow:"hidden",
+                        maxHeight:"28px",marginBottom:2}}>
+                        {tasks.filter(t=>!["EXPRESS","VPS","IMPREVISTOS"].includes(t.texto))
+                          .slice(0,6).map((t,j)=>(
                           <span key={j} style={{
-                            fontFamily:"monospace",fontSize:"8px",padding:"1px 5px",
-                            background:`rgba(34,197,94,0.1)`,
-                            color:"#22C55E",
-                            border:`1px solid rgba(34,197,94,0.3)`,
+                            fontFamily:"'Exo 2',sans-serif",fontSize:"7px",padding:"1px 4px",
+                            background:`rgba(56,189,248,0.08)`,
+                            color:D.dark?"rgba(56,189,248,0.65)":"#0369a1",
+                            border:`1px solid rgba(56,189,248,0.22)`,
                             textDecoration:"line-through",
-                            clipPath:"polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)",
-                            fontWeight:600,letterSpacing:"0.03em",whiteSpace:"nowrap",
+                            fontWeight:500,letterSpacing:"0.02em",whiteSpace:"nowrap",
+                            borderRadius:2,
                           }}>
                             {t.texto}
                           </span>
                         ))}
+                        {tasks.filter(t=>!["EXPRESS","VPS","IMPREVISTOS"].includes(t.texto)).length>6&&(
+                          <span style={{fontFamily:"'Share Tech Mono',monospace",fontSize:"7px",
+                            color:"rgba(56,189,248,0.35)",alignSelf:"center"}}>
+                            +{tasks.filter(t=>!["EXPRESS","VPS","IMPREVISTOS"].includes(t.texto)).length-6}
+                          </span>
+                        )}
                       </div>
                     )}
-                    {/* rodapé: timer + tags + data */}
+
+                    {/* rodapé: badges + data conclusão */}
                     <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",
                       gap:4,marginTop:"auto",flexWrap:"nowrap",overflow:"hidden"}}>
                       <div style={{display:"flex",gap:3,alignItems:"center",overflow:"hidden"}}>
-                        {((m.timer_accumulated_seconds||0)>=MIN_TIMER_SECONDS)&&(
-                          <div style={{display:"flex",alignItems:"center",gap:3,flexShrink:0}}>
-                            <span style={{fontFamily:"monospace",fontSize:"7px",color:"rgba(34,197,94,0.6)"}}>⏱</span>
-                            <span style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(13px,1.2vw,17px)",fontWeight:900,
-                              color:"#22C55E",letterSpacing:"0.06em",
-                              textShadow:D.dark?"0 0 10px rgba(34,197,94,0.6)":"none"}}>
-                              {fmtHMS(m.timer_accumulated_seconds)}
-                            </span>
-                          </div>
-                        )}
-                        {rLabel&&<span style={{fontFamily:"'Orbitron',monospace",fontSize:"7px",fontWeight:700,
+                        {rLabel&&<span style={{fontFamily:"'Oxanium',monospace",fontSize:"7px",fontWeight:600,
                           padding:"1px 4px",color:CAT.recon.accent,
                           background:`rgba(155,92,246,0.15)`,border:`1px solid rgba(155,92,246,0.35)`,
-                          clipPath:"polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)",
-                          whiteSpace:"nowrap",flexShrink:0}}>{rLabel}</span>}
-                        {m.prioridade&&<span style={{fontFamily:"'Orbitron',monospace",fontSize:"7px",fontWeight:700,
+                          whiteSpace:"nowrap",flexShrink:0,borderRadius:2}}>{rLabel}</span>}
+                        {m.prioridade&&<span style={{fontFamily:"'Oxanium',monospace",fontSize:"7px",fontWeight:600,
                           padding:"1px 4px",color:"#F59E0B",
                           background:`rgba(245,158,11,0.15)`,border:`1px solid rgba(245,158,11,0.35)`,
-                          clipPath:"polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)",
-                          whiteSpace:"nowrap",flexShrink:0}}>⚑</span>}
+                          whiteSpace:"nowrap",flexShrink:0,borderRadius:2}}>⚑</span>}
                       </div>
-                      <div style={{fontFamily:"monospace",fontSize:"8px",fontWeight:700,
-                        color:"#22C55E",letterSpacing:"0.04em",flexShrink:0,whiteSpace:"nowrap"}}>
+                      <div style={{
+                        fontFamily:"'Share Tech Mono',monospace",
+                        fontSize:"8px",fontWeight:400,
+                        color:D.dark?"rgba(56,189,248,0.55)":"#0284c7",
+                        letterSpacing:"0.04em",flexShrink:0,whiteSpace:"nowrap"}}>
                         {dateStr}
                       </div>
                     </div>
@@ -2447,12 +2527,17 @@ export default function AoVivo(){
 
   const SHARED_STYLE = (
     <style>{`
-      @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&family=Bricolage+Grotesque:opsz,wght@12..96,300;400;500;600;700;800&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&family=Share+Tech+Mono&family=Black+Han+Sans&family=Exo+2:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&family=Oxanium:wght@400;600;700;800&display=swap');
+      /* LCD/digital para timer */
+      @import url('https://fonts.googleapis.com/css2?family=VT323&family=Digital-7&display=swap');
       @keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
       @keyframes hudScan{0%{background-position:200% 0}100%{background-position:-200% 0}}
       @keyframes cardSweep{0%{left:-60%}100%{left:130%}}
       @keyframes hudPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.08);opacity:0.7}}
       @keyframes hudFadeIn{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
+      @keyframes arcNeon{0%{stroke-dashoffset:0;opacity:1}50%{opacity:0.7}100%{stroke-dashoffset:0;opacity:1}}
+      @keyframes neonDot{0%,100%{opacity:0;transform:rotate(0deg)}25%{opacity:1}75%{opacity:0.5}}
+      @keyframes timerPulse{0%,100%{text-shadow:0 0 8px currentColor,0 0 16px currentColor}50%{text-shadow:0 0 4px currentColor}}
       @keyframes helmetPulse{0%,100%{box-shadow:0 0 10px #5cffff,0 0 20px #5cffff}50%{box-shadow:0 0 4px #5cffff}}
       @keyframes armorSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
       ::-webkit-scrollbar{width:4px;height:4px}
@@ -2462,13 +2547,9 @@ export default function AoVivo(){
     `}</style>
   );
   // ── Tela de almoço 12:30–13:30 ──────────────────────────────────────────────
-  // key força remount limpo na transição normal→almoço; width/height em vw/vh
-  // (em vez de inset:0) garante ancoragem ao viewport mesmo se algum ancestor
-  // ficar com transform/filter/will-change residual de animações em curso.
   if(isAlmoco) return(
-    <div key="almoco-screen" style={{
-      position:"fixed",top:0,left:0,
-      width:"100vw",height:"100vh",
+    <div style={{
+      position:"fixed",inset:0,
       background:"linear-gradient(135deg,#030803 0%,#061006 50%,#030803 100%)",
       display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
       fontFamily:"'Orbitron',monospace",gap:20,overflow:"hidden",
@@ -2532,7 +2613,9 @@ export default function AoVivo(){
         backgroundImage:`linear-gradient(60deg,transparent 49%,rgba(210,210,210,0.015) 49%,rgba(210,210,210,0.015) 51%,transparent 51%),linear-gradient(-60deg,transparent 49%,rgba(210,210,210,0.015) 49%,rgba(210,210,210,0.015) 51%,transparent 51%)`,
         backgroundSize:"40px 70px"}}/>}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&family=Bricolage+Grotesque:opsz,wght@12..96,300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&family=Share+Tech+Mono&family=Black+Han+Sans&family=Exo+2:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&family=Oxanium:wght@400;600;700;800&display=swap');
+      /* LCD/digital para timer */
+      @import url('https://fonts.googleapis.com/css2?family=VT323&family=Digital-7&display=swap');
         @keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
         @keyframes hudScan{0%{background-position:200% 0}100%{background-position:-200% 0}}
         @keyframes cardSweep{0%{left:-60%}100%{left:130%}}

@@ -2355,9 +2355,13 @@ export default function AoVivo(){
   ];
 
   // ── Tela de almoço 12:30–13:30 ──────────────────────────────────────────────
+  // key força remount limpo na transição normal→almoço; width/height em vw/vh
+  // (em vez de inset:0) garante ancoragem ao viewport mesmo se algum ancestor
+  // ficar com transform/filter/will-change residual de animações em curso.
   if(isAlmoco) return(
-    <div style={{
-      position:"fixed",inset:0,
+    <div key="almoco-screen" style={{
+      position:"fixed",top:0,left:0,
+      width:"100vw",height:"100vh",
       background:"linear-gradient(135deg,#030803 0%,#061006 50%,#030803 100%)",
       display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
       fontFamily:"'Orbitron',monospace",gap:20,overflow:"hidden",

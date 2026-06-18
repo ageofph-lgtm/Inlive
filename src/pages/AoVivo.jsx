@@ -411,15 +411,29 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
         {/* % pill removido — percentagem vai dentro do arco circular */}
         {/* timer — fonte LCD digital */}
         <div style={{marginLeft:"auto",textAlign:"right",flexShrink:0}}>
-          <div style={{
-            fontFamily:"'Share Tech Mono','VT323','JetBrains Mono',monospace",
-            fontWeight:400,
-            fontSize:FS(scale>=0.88?24:scale>=0.75?20:15),
-            letterSpacing:".06em",color:st,lineHeight:1,
-            textShadow:dark?`0 0 12px ${st},0 0 24px ${st}66`:"none",
-            animation:run&&dark?"timerPulse 2s ease-in-out infinite":"none",
-          }}>
-            {fmtHMS(isCD&&restante!==null?restante:elapsed)}
+          {/* Timer 7-segment LCD */}
+          <div style={{position:"relative",display:"inline-block"}}>
+            {/* ghost — dígitos apagados para dar efeito LCD */}
+            <div style={{
+              fontFamily:"'DSEG7','Share Tech Mono',monospace",
+              fontWeight:400,
+              fontSize:FS(scale>=0.88?22:scale>=0.75?18:14),
+              letterSpacing:".04em",lineHeight:1,
+              color:dark?`${st}18`:"rgba(0,0,0,0.07)",
+              userSelect:"none",position:"absolute",top:0,right:0,
+            }}>{"88:88:88"}</div>
+            {/* valor real */}
+            <div style={{
+              fontFamily:"'DSEG7','Share Tech Mono',monospace",
+              fontWeight:400,
+              fontSize:FS(scale>=0.88?22:scale>=0.75?18:14),
+              letterSpacing:".04em",color:st,lineHeight:1,
+              textShadow:dark?`0 0 10px ${st},0 0 20px ${st}55`:"none",
+              animation:run&&dark?"timerPulse 2s ease-in-out infinite":"none",
+              position:"relative",zIndex:1,
+            }}>
+              {fmtHMS(isCD&&restante!==null?restante:elapsed)}
+            </div>
           </div>
           {meta>0&&(
             <div style={{
@@ -459,9 +473,9 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
           const fsSerie = len<=9 ? base : Math.max(base*0.55, base - (len-9)*2.2);
           return (
             <div style={{
-              fontFamily:"'Oxanium','Orbitron',monospace",
-              fontWeight:800,
-              letterSpacing:len>11?".01em":".06em",
+              fontFamily:"'Russo One','Orbitron',sans-serif",
+              fontWeight:400,
+              letterSpacing:len>11?"0em":".04em",
               textAlign:"center",lineHeight:1,
               fontSize:`${Math.round(fsSerie*scale)}px`,
               color:dark?"#fff":"#0D0D0F",
@@ -474,72 +488,88 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
         })()}
         {/* modelo */}
         <div style={{
-          fontFamily:"'Exo 2','Rajdhani',sans-serif",
-          fontWeight:500,
-          fontSize:FS(scale>=0.88?12:scale>=0.75?10:8),
-          letterSpacing:".2em",
-          color:dark?"rgba(180,180,190,.6)":"#888",
-          marginTop:Math.round(4*scale),position:"relative",zIndex:1,
+          fontFamily:"'Exo 2',sans-serif",
+          fontWeight:400,
+          fontSize:FS(scale>=0.88?11:scale>=0.75?9:7.5),
+          letterSpacing:".22em",
+          textTransform:"uppercase",
+          color:dark?"rgba(180,180,190,.55)":"#999",
+          marginTop:Math.round(3*scale),position:"relative",zIndex:1,
           overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:"100%"}}>
           {m.modelo||"—"}
         </div>
-        {/* ── ARCO CIRCULAR de progresso com % dentro ── */}
+        {/* ── REATOR ARC — segmentos estilo Arc Reactor ── */}
         {meta>0&&(()=>{
-          const sz   = Math.round((scale>=0.88?52:scale>=0.75?44:scale>=0.62?36:30)*scale);
-          const sw   = Math.max(3, Math.round(4*scale)); // stroke-width
-          const r    = (sz/2) - sw - 1;
-          const circ = 2*Math.PI*r;
+          const sz      = Math.round((scale>=0.88?60:scale>=0.75?50:scale>=0.62?42:34)*scale);
+          const cx      = sz/2, cy = sz/2;
           const safePct = Math.min(pct, 100);
-          const dash = isLate ? circ : (safePct/100)*circ;
-          const gap  = circ - dash;
-          // rotação: começa em cima (-90°)
+          // outer ring: segmentos grandes (progress)
+          const SEGS_OUT = 40;
+          const rOut  = sz*0.44;
+          const segW  = 3.2*scale, segH = Math.max(5, 7*scale);
+          // inner ring: segmentos pequenos decorativos
+          const SEGS_IN = 32;
+          const rIn   = sz*0.33;
+          const segW2 = 2*scale, segH2 = Math.max(3, 5*scale);
+          const activeSeg = Math.round((safePct/100)*SEGS_OUT);
+          const color = isLate?"#FF3344":st;
+          const dimColor = dark?"rgba(255,255,255,0.07)":"rgba(0,0,0,0.07)";
           return (
-            <div style={{marginTop:Math.round(10*scale),position:"relative",zIndex:1,
-              display:"flex",flexDirection:"column",alignItems:"center",gap:Math.round(3*scale)}}>
+            <div style={{marginTop:Math.round(8*scale),position:"relative",zIndex:1,
+              display:"flex",alignItems:"center",justifyContent:"center"}}>
               <svg width={sz} height={sz} style={{overflow:"visible"}}>
-                {/* track */}
-                <circle cx={sz/2} cy={sz/2} r={r}
-                  fill="none"
-                  stroke={dark?"rgba(255,255,255,.08)":"rgba(0,0,0,.09)"}
-                  strokeWidth={sw}/>
-                {/* progress arc */}
-                <circle cx={sz/2} cy={sz/2} r={r}
-                  fill="none"
-                  stroke={isLate?"#FF3344":st}
-                  strokeWidth={sw}
-                  strokeLinecap="round"
-                  strokeDasharray={`${dash} ${gap}`}
-                  strokeDashoffset={0}
-                  transform={`rotate(-90 ${sz/2} ${sz/2})`}
-                  style={{
-                    filter:dark?`drop-shadow(0 0 4px ${st}88)`:"none",
-                    transition:"stroke-dasharray .8s ease",
-                  }}/>
-                {/* % texto no centro — fonte digital */}
-                <text x={sz/2} y={sz/2}
-                  textAnchor="middle" dominantBaseline="central"
-                  fontFamily="'Share Tech Mono','VT323',monospace"
-                  fontWeight={400}
-                  fontSize={Math.round((scale>=0.75?13:10)*scale)}
-                  fill={isLate?"#FF3344":st}
-                  style={{filter:dark?`drop-shadow(0 0 6px ${st})`:"none"}}>
-                  {isLate?`+${Math.round(asec/60)}m`:Math.round(safePct)+"%"}
-                </text>
-                {/* ponto de ponta do arco — efeito neon running */}
-                {!isLate&&safePct>2&&safePct<99&&(()=>{
-                  const angle = (safePct/100)*360 - 90;
-                  const rad = angle*(Math.PI/180);
-                  const cx2 = sz/2 + r*Math.cos(rad);
-                  const cy2 = sz/2 + r*Math.sin(rad);
+                {/* outer ring — segmentos de progresso */}
+                {Array.from({length:SEGS_OUT},(_,i)=>{
+                  const angle = (i/SEGS_OUT)*360 - 90;
+                  const rad   = angle*(Math.PI/180);
+                  const x     = cx + rOut*Math.cos(rad);
+                  const y     = cy + rOut*Math.sin(rad);
+                  const isActive = i < activeSeg;
+                  const isEdge   = i === activeSeg-1 && !isLate;
                   return (
-                    <circle cx={cx2} cy={cy2} r={sw+1}
-                      fill={st}
-                      style={{filter:`drop-shadow(0 0 ${sw+2}px ${st}) drop-shadow(0 0 ${sw*2}px ${st}88)`}}
+                    <rect key={`o${i}`}
+                      x={-segW/2} y={-segH/2}
+                      width={segW} height={segH}
+                      rx={segW*0.3}
+                      fill={isActive ? color : dimColor}
+                      transform={`translate(${x},${y}) rotate(${angle+90})`}
+                      style={{
+                        filter: isEdge&&dark ? `drop-shadow(0 0 4px ${color}) drop-shadow(0 0 8px ${color}88)` :
+                                isActive&&dark ? `drop-shadow(0 0 2px ${color}66)` : "none",
+                        transition:"fill .3s",
+                      }}
                     />
                   );
-                })()}
+                })}
+                {/* inner ring — decorativo, intensidade proporcional */}
+                {Array.from({length:SEGS_IN},(_,i)=>{
+                  const angle  = (i/SEGS_IN)*360 - 90;
+                  const rad    = angle*(Math.PI/180);
+                  const x      = cx + rIn*Math.cos(rad);
+                  const y      = cy + rIn*Math.sin(rad);
+                  const frac   = i/SEGS_IN;
+                  const active = frac < safePct/100;
+                  return (
+                    <rect key={`i${i}`}
+                      x={-segW2/2} y={-segH2/2}
+                      width={segW2} height={segH2}
+                      rx={1}
+                      fill={active ? `${color}55` : dimColor}
+                      transform={`translate(${x},${y}) rotate(${angle+90})`}
+                    />
+                  );
+                })}
+                {/* % no centro */}
+                <text x={cx} y={cy}
+                  textAnchor="middle" dominantBaseline="central"
+                  fontFamily="'DSEG7','Share Tech Mono',monospace"
+                  fontWeight={400}
+                  fontSize={Math.round((scale>=0.75?12:9)*scale)}
+                  fill={isLate?"#FF3344":st}
+                  style={{filter:dark?`drop-shadow(0 0 6px ${color})`:"none"}}>
+                  {isLate?`+${Math.round(asec/60)}m`:Math.round(safePct)+"%"}
+                </text>
               </svg>
-
             </div>
           );
         })()}
@@ -2389,21 +2419,21 @@ export default function AoVivo(){
                     <div style={{display:"flex",flexDirection:"column",alignItems:"center",
                       justifyContent:"center",padding:"4px 0 2px",textAlign:"center"}}>
                       <div style={{
-                        fontFamily:"'Oxanium','Orbitron',monospace",
-                        fontWeight:800,
+                        fontFamily:"'Russo One',sans-serif",
+                        fontWeight:400,
                         fontSize:"clamp(12px,1.3vw,18px)",
                         color:D.dark?"#e0f2fe":"#0D0D0F",
-                        letterSpacing:"0.06em",lineHeight:1.1,
-                        textShadow:D.dark?"0 0 16px rgba(56,189,248,0.3)":"none",
+                        letterSpacing:"0.03em",lineHeight:1.1,
+                        textShadow:D.dark?"0 0 16px rgba(56,189,248,0.25)":"none",
                         whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
                         maxWidth:"100%"}}>
                         {m.serie||"—"}
                       </div>
                       <div style={{
-                        fontFamily:"'Exo 2','Rajdhani',sans-serif",
-                        fontWeight:500,fontSize:"clamp(9px,0.9vw,12px)",
-                        letterSpacing:".18em",
-                        color:D.dark?"rgba(148,209,242,0.65)":"#555",
+                        fontFamily:"'Exo 2',sans-serif",
+                        fontWeight:400,fontSize:"clamp(8px,0.8vw,11px)",
+                        letterSpacing:".22em",textTransform:"uppercase",
+                        color:D.dark?"rgba(148,209,242,0.55)":"#555",
                         marginTop:2,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
                         maxWidth:"100%"}}>
                         {m.modelo||"—"}
@@ -2415,10 +2445,10 @@ export default function AoVivo(){
                       <div style={{display:"flex",alignItems:"baseline",justifyContent:"center",
                         gap:4,margin:"3px 0 2px"}}>
                         <span style={{
-                          fontFamily:"'Share Tech Mono','VT323',monospace",
+                          fontFamily:"'DSEG7','Share Tech Mono',monospace",
                           fontWeight:400,
                           fontSize:"clamp(14px,1.4vw,20px)",
-                          letterSpacing:".05em",
+                          letterSpacing:".04em",
                           color:"#38BDF8",
                           textShadow:D.dark?"0 0 10px rgba(56,189,248,0.7),0 0 20px rgba(56,189,248,0.35)":"none",
                         }}>
@@ -2440,32 +2470,41 @@ export default function AoVivo(){
                       </div>
                     )}
 
-                    {/* tarefas — chips riscados */}
-                    {tasks.filter(t=>!["EXPRESS","VPS","IMPREVISTOS"].includes(t.texto)).length>0&&(
-                      <div style={{display:"flex",flexWrap:"wrap",gap:"2px 3px",overflow:"hidden",
-                        maxHeight:"28px",marginBottom:2}}>
-                        {tasks.filter(t=>!["EXPRESS","VPS","IMPREVISTOS"].includes(t.texto))
-                          .slice(0,6).map((t,j)=>(
-                          <span key={j} style={{
-                            fontFamily:"'Exo 2',sans-serif",fontSize:"7px",padding:"1px 4px",
-                            background:`rgba(56,189,248,0.08)`,
-                            color:D.dark?"rgba(56,189,248,0.65)":"#0369a1",
-                            border:`1px solid rgba(56,189,248,0.22)`,
-                            textDecoration:"line-through",
-                            fontWeight:500,letterSpacing:"0.02em",whiteSpace:"nowrap",
-                            borderRadius:2,
-                          }}>
-                            {t.texto}
-                          </span>
-                        ))}
-                        {tasks.filter(t=>!["EXPRESS","VPS","IMPREVISTOS"].includes(t.texto)).length>6&&(
-                          <span style={{fontFamily:"'Share Tech Mono',monospace",fontSize:"7px",
-                            color:"rgba(56,189,248,0.35)",alignSelf:"center"}}>
-                            +{tasks.filter(t=>!["EXPRESS","VPS","IMPREVISTOS"].includes(t.texto)).length-6}
-                          </span>
-                        )}
-                      </div>
-                    )}
+                    {/* tarefas — lista com check ✓ */}
+                    {(()=>{
+                      const doneTasks = tasks.filter(t=>!["EXPRESS","VPS","IMPREVISTOS","⚡ IMPREVISTOS"].includes(t.texto?.trim()));
+                      if(doneTasks.length===0) return null;
+                      const show = doneTasks.slice(0,4);
+                      const more = doneTasks.length - show.length;
+                      return (
+                        <div style={{display:"flex",flexDirection:"column",gap:"2px",
+                          margin:"4px 0 2px",overflow:"hidden"}}>
+                          {show.map((t,j)=>(
+                            <div key={j} style={{display:"flex",alignItems:"center",gap:4,overflow:"hidden"}}>
+                              <span style={{color:"#38BDF8",fontSize:"9px",flexShrink:0,lineHeight:1}}>✓</span>
+                              <span style={{
+                                fontFamily:"'Exo 2',sans-serif",
+                                fontSize:"clamp(8px,0.75vw,10px)",
+                                fontWeight:500,
+                                letterSpacing:".04em",
+                                color:D.dark?"rgba(148,209,242,0.80)":"#0369a1",
+                                whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
+                                textDecoration:"line-through",
+                                textDecorationColor:"rgba(56,189,248,0.35)",
+                              }}>
+                                {t.texto}
+                              </span>
+                            </div>
+                          ))}
+                          {more>0&&(
+                            <span style={{fontFamily:"'DSEG7','Share Tech Mono',monospace",
+                              fontSize:"8px",color:"rgba(56,189,248,0.35)",paddingLeft:13}}>
+                              +{more}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })()}
 
                     {/* rodapé: badges + data conclusão */}
                     <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",
@@ -2527,9 +2566,10 @@ export default function AoVivo(){
 
   const SHARED_STYLE = (
     <style>{`
-      @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&family=Share+Tech+Mono&family=Black+Han+Sans&family=Exo+2:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&family=Oxanium:wght@400;600;700;800&display=swap');
-      /* LCD/digital para timer */
-      @import url('https://fonts.googleapis.com/css2?family=VT323&family=Digital-7&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Russo+One&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Share+Tech+Mono&family=Orbitron:wght@600;700;800;900&display=swap');
+      /* DSEG7 — timer LCD 7-segment */
+      @font-face{font-family:'DSEG7';src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7Classic/DSEG7Classic-Regular.woff2') format('woff2');font-weight:400;}
+      @font-face{font-family:'DSEG7';src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7Classic/DSEG7Classic-Bold.woff2') format('woff2');font-weight:700;}
       @keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
       @keyframes hudScan{0%{background-position:200% 0}100%{background-position:-200% 0}}
       @keyframes cardSweep{0%{left:-60%}100%{left:130%}}
@@ -2613,9 +2653,10 @@ export default function AoVivo(){
         backgroundImage:`linear-gradient(60deg,transparent 49%,rgba(210,210,210,0.015) 49%,rgba(210,210,210,0.015) 51%,transparent 51%),linear-gradient(-60deg,transparent 49%,rgba(210,210,210,0.015) 49%,rgba(210,210,210,0.015) 51%,transparent 51%)`,
         backgroundSize:"40px 70px"}}/>}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&family=Share+Tech+Mono&family=Black+Han+Sans&family=Exo+2:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&family=Oxanium:wght@400;600;700;800&display=swap');
-      /* LCD/digital para timer */
-      @import url('https://fonts.googleapis.com/css2?family=VT323&family=Digital-7&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Russo+One&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Share+Tech+Mono&family=Orbitron:wght@600;700;800;900&display=swap');
+      /* DSEG7 — timer LCD 7-segment */
+      @font-face{font-family:'DSEG7';src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7Classic/DSEG7Classic-Regular.woff2') format('woff2');font-weight:400;}
+      @font-face{font-family:'DSEG7';src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7Classic/DSEG7Classic-Bold.woff2') format('woff2');font-weight:700;}
         @keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
         @keyframes hudScan{0%{background-position:200% 0}100%{background-position:-200% 0}}
         @keyframes cardSweep{0%{left:-60%}100%{left:130%}}

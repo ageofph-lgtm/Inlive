@@ -326,14 +326,11 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
   const FS = s => `${Math.round(s*scale)}px`;    // font-size proporcional
   const pad = Math.round(10*scale);              // padding base
 
-  // o que mostrar por density
-  const showDatas = scale>=0.62 && (m.previsao_inicio||m.dataEntrada||m.previsao_fim);
-  const showTasks = scale>=0.75 && tasks.length>0;
-  const maxTasks  = scale>=0.88?4:2;
-  const vis       = tasks.slice(0,maxTasks);
-  const hidden    = tasks.length-vis.length;
-
-  const barH      = Math.max(3, Math.round(5*scale)); // barra: 3-5px
+  const showDatas = scale>=0.55 && (m.previsao_inicio||m.dataEntrada||m.previsao_fim);
+  const barH      = Math.max(3, Math.round(5*scale));
+  // tasks + imprevistos — serão mostrados como chips no rodapé, nunca como bloco separado
+  const imp        = Array.isArray(m.imprevistos)?m.imprevistos:[];
+  const totalImpH  = imp.reduce((s,iv)=>s+Number(iv.horas_extra||0),0);
 
   return(
     <div style={{
@@ -492,37 +489,39 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
         )}
       </div>
 
-      {/* ── ROW 3: datas (só se scale>=0.62) ── */}
+      {/* ── ROW 3: datas inline (só se scale>=0.55) ── */}
       {showDatas&&(
-        <div style={{flexShrink:0,overflow:"hidden",
-          display:"flex",alignItems:"center",justifyContent:"center",gap:Math.round(8*scale),flexWrap:"wrap",
-          padding:`0 ${Math.round(12*scale)}px`,
-          marginBottom:Math.round(4*scale)}}>
+        <div style={{
+          flexShrink:0,overflow:"hidden",
+          display:"flex",alignItems:"center",justifyContent:"center",
+          gap:Math.round(6*scale),flexWrap:"nowrap",
+          padding:`0 ${Math.round(14*scale)}px`,
+          marginBottom:Math.round(5*scale),
+        }}>
           {(m.previsao_inicio||m.dataEntrada)&&(
-            <span style={{display:"inline-flex",alignItems:"center",gap:4,
-              fontFamily:"'JetBrains Mono',monospace",
-              fontSize:FS(scale>=0.88?13:11),overflow:"hidden",flexShrink:0}}>
+            <span style={{display:"inline-flex",alignItems:"center",gap:Math.round(3*scale),flexShrink:0}}>
               <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
-                fontSize:FS(7.5),letterSpacing:".12em",
-                color:dark?"rgba(140,140,140,.5)":"#bbb"}}>ENT</span>
-              <span style={{fontWeight:700,color:dark?"#6FC3FF":"#0A6EBF",
-                textShadow:dark?"0 0 8px rgba(111,195,255,.3)":"none"}}>
+                fontSize:FS(7),letterSpacing:".14em",
+                color:dark?"rgba(140,140,140,.4)":"#bbb"}}>ENT</span>
+              <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
+                fontSize:FS(scale>=0.75?12:10),
+                color:dark?"#6FC3FF":"#0A6EBF"}}>
                 {fd(m.previsao_inicio||m.dataEntrada)}
               </span>
             </span>
           )}
-          {(m.previsao_inicio||m.dataEntrada)&&m.previsao_fim&&
-            <span style={{color:dark?"rgba(255,255,255,.1)":"rgba(0,0,0,.14)",fontSize:FS(10)}}>→</span>}
+          {(m.previsao_inicio||m.dataEntrada)&&m.previsao_fim&&(
+            <span style={{color:dark?"rgba(255,255,255,.12)":"rgba(0,0,0,.12)",
+              fontSize:FS(9),fontFamily:"'Rajdhani',sans-serif"}}>→</span>
+          )}
           {m.previsao_fim&&(
-            <span style={{display:"inline-flex",alignItems:"center",gap:4,
-              fontFamily:"'JetBrains Mono',monospace",
-              fontSize:FS(scale>=0.88?13:11),overflow:"hidden",flexShrink:0}}>
+            <span style={{display:"inline-flex",alignItems:"center",gap:Math.round(3*scale),flexShrink:0}}>
               <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
-                fontSize:FS(7.5),letterSpacing:".12em",
-                color:dark?"rgba(140,140,140,.5)":"#bbb"}}>ENTREGA</span>
-              <span style={{fontWeight:700,
-                color:isLate?(dark?"#FF3344":"#DC2626"):isRisk?(dark?"#FFB200":"#B08D2E"):(dark?"#2BE564":"#16A34A"),
-                textShadow:dark?`0 0 8px ${isLate?"#FF334455":isRisk?"#FFB20055":"#2BE56455"}`:"none"}}>
+                fontSize:FS(7),letterSpacing:".14em",
+                color:dark?"rgba(140,140,140,.4)":"#bbb"}}>ENTREGA</span>
+              <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
+                fontSize:FS(scale>=0.75?12:10),
+                color:isLate?(dark?"#FF3344":"#DC2626"):isRisk?(dark?"#FFB200":"#B08D2E"):(dark?"#2BE564":"#16A34A")}}>
                 {fd(m.previsao_fim)}
               </span>
             </span>
@@ -530,143 +529,85 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
         </div>
       )}
 
-      {/* ── ROW 4: tasks (só se scale>=0.75) ── */}
-      {showTasks&&(
-        <div style={{flexShrink:0,overflow:"hidden",
-          padding:`0 ${Math.round(12*scale)}px`,
-          marginBottom:Math.round(4*scale)}}>
-          <div style={{display:"flex",alignItems:"center",gap:6,
-            marginBottom:Math.round(4*scale)}}>
-            <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,
-              fontSize:FS(7.5),letterSpacing:".18em",
-              color:dark?"rgba(140,140,140,.5)":"#bbb"}}>TAREFAS</span>
-            <div style={{height:1,flex:1,background:dark?"rgba(255,255,255,.05)":"rgba(0,0,0,.06)"}}/>
-            <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:FS(7.5),
-              color:dark?"rgba(140,140,140,.4)":"#ccc"}}>
-              {doneCount}/{allTasks.length}
-            </span>
-          </div>
-          <div style={{display:"flex",flexDirection:"column",gap:Math.round(3*scale)}}>
-            {vis.map((t,i)=>(
-              <div key={i} style={{display:"flex",alignItems:"center",
-                gap:Math.round(7*scale),
-                padding:`${Math.round(4*scale)}px ${Math.round(8*scale)}px`,
-                background:t._virtual
-                  ?(dark?`rgba(${t._color==='#F59E0B'?'245,158,11':'77,159,255'},.07)`:`rgba(${t._color==='#F59E0B'?'245,158,11':'77,159,255'},.06)`)
-                  :(dark?"rgba(255,255,255,.025)":"rgba(0,0,0,.025)"),
-                border:`1px solid ${t._virtual?(dark?`${t._color}33`:`${t._color}44`):(dark?"rgba(255,255,255,.04)":"rgba(0,0,0,.05)")}`,
-                borderLeft:`2px solid ${t._virtual?(t._color||st):`${st}44`}`,
-                borderRadius:dark?"2px":"4px",overflow:"hidden"}}>
-                {t._virtual
-                  ? <span style={{fontSize:FS(11),flexShrink:0,lineHeight:1}}>
-                      {t.texto==="EXPRESS"?"⚡":"🔵"}
-                    </span>
-                  : <div style={{width:Math.round(9*scale),height:Math.round(9*scale),
-                      borderRadius:2,flexShrink:0,
-                      border:`1.5px solid ${st}3a`,background:"transparent"}}/>
-                }
-                <span style={{fontFamily:"'Rajdhani',sans-serif",
-                  fontWeight:t._virtual?800:600,
-                  fontSize:FS(scale>=0.88?14:12),
-                  letterSpacing:t._virtual?".12em":".03em",
-                  color:t._virtual?(dark?t._color:"#0A6EBF"):(dark?"#c0c0c8":"#555"),
-                  lineHeight:1.2,flex:1,
-                  overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-                  {t.texto}
-                </span>
-              </div>
-            ))}
-            {hidden>0&&(
-              <div style={{textAlign:"center",
-                padding:`${Math.round(2*scale)}px 0`,
-                fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
-                fontSize:FS(8),letterSpacing:".1em",
-                color:dark?"rgba(140,140,140,.35)":"#ccc",
-                border:`1px dashed ${dark?"rgba(255,255,255,.06)":"rgba(0,0,0,.08)"}`,
-                borderRadius:2}}>
-                +{hidden} restantes
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ── ROW 5: imprevistos (só se existirem e scale>=0.62) ── */}
-      {(()=>{
-        const imp=Array.isArray(m.imprevistos)?m.imprevistos:[];
-        if(imp.length===0||scale<0.62) return null;
-        return(
-          <div style={{flexShrink:0,overflow:"hidden",
-            padding:`0 ${Math.round(12*scale)}px`,
-            marginBottom:Math.round(4*scale)}}>
-            <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:Math.round(3*scale)}}>
-              <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,
-                fontSize:FS(7.5),letterSpacing:".18em",
-                color:dark?"rgba(251,146,60,.7)":"#D97706"}}>⚡ IMPREVISTOS</span>
-              <div style={{height:1,flex:1,background:dark?"rgba(251,146,60,.12)":"rgba(251,146,60,.2)"}}/>
-              <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:FS(7.5),
-                color:dark?"rgba(251,146,60,.5)":"#D97706",fontWeight:700}}>
-                +{imp.reduce((s,iv)=>s+Number(iv.horas_extra||0),0)}h
-              </span>
-            </div>
-            <div style={{display:"flex",flexDirection:"column",gap:Math.round(3*scale)}}>
-              {imp.slice(0,scale>=0.88?3:2).map((iv,i)=>(
-                <div key={i} style={{display:"flex",alignItems:"flex-start",
-                  gap:Math.round(6*scale),
-                  padding:`${Math.round(3*scale)}px ${Math.round(8*scale)}px`,
-                  background:dark?"rgba(251,146,60,.05)":"rgba(251,146,60,.06)",
-                  border:`1px solid ${dark?"rgba(251,146,60,.18)":"rgba(251,146,60,.25)"}`,
-                  borderLeft:`2px solid rgba(251,146,60,.5)`,
-                  borderRadius:dark?"2px":"4px",overflow:"hidden"}}>
-                  <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,
-                    fontSize:FS(scale>=0.88?12:10),
-                    color:dark?"#FB923C":"#D97706",letterSpacing:".02em",flex:1,
-                    overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",lineHeight:1.3}}>
-                    {iv.descricao}
-                  </span>
-                  <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
-                    fontSize:FS(scale>=0.88?10:9),
-                    color:dark?"rgba(251,146,60,.6)":"#D97706",flexShrink:0}}>
-                    +{iv.horas_extra}h
-                  </span>
-                </div>
-              ))}
-              {imp.length>(scale>=0.88?3:2)&&(
-                <div style={{textAlign:"center",
-                  fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
-                  fontSize:FS(8),letterSpacing:".1em",
-                  color:dark?"rgba(251,146,60,.35)":"#D97706"}}>
-                  +{imp.length-(scale>=0.88?3:2)} mais
-                </div>
-              )}
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* ── ROW 6: rodapé ── */}
+      {/* ── RODAPÉ: técnico (dot) + tasks/imprevistos como chips + meta ── */}
       <div style={{
         flexShrink:0,
-        display:"flex",alignItems:"center",justifyContent:"space-between",
-        padding:`${Math.round(6*scale)}px ${Math.round(12*scale)}px ${Math.round(8*scale)}px ${Math.round(16*scale)}px`,
+        display:"flex",flexDirection:"column",
+        gap:Math.round(3*scale),
+        padding:`${Math.round(5*scale)}px ${Math.round(12*scale)}px ${Math.round(7*scale)}px ${Math.round(14*scale)}px`,
         borderTop:`1px solid ${dark?"rgba(255,255,255,.04)":"rgba(0,0,0,.05)"}`,
       }}>
-        <div style={{display:"flex",alignItems:"center",gap:Math.round(5*scale)}}>
+        {/* linha 1: técnico dot + chips de tasks + meta */}
+        <div style={{display:"flex",alignItems:"center",gap:Math.round(5*scale),flexWrap:"wrap",overflow:"hidden"}}>
+          {/* dot técnico */}
           <div style={{width:Math.round(7*scale),height:Math.round(7*scale),borderRadius:"50%",
             background:tc,boxShadow:dark?`0 0 5px ${tc}`:"none",flexShrink:0}}/>
-          <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
-            fontSize:FS(8),letterSpacing:".14em",
-            color:dark?"rgba(140,140,140,.38)":"#ccc"}}>TÉC</span>
+
+          {/* chips de tasks e badges (EXPRESS, VPS, tarefas reais) */}
+          {tasks.length>0&&tasks.slice(0,scale>=0.75?5:3).map((t,i)=>(
+            <span key={i} style={{
+              fontFamily:"'Rajdhani',sans-serif",fontWeight:700,
+              fontSize:FS(scale>=0.75?9:8),letterSpacing:".07em",
+              padding:`${Math.round(1.5*scale)}px ${Math.round(5*scale)}px`,
+              borderRadius:2,flexShrink:0,maxWidth:`${Math.round(120*scale)}px`,
+              overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
+              background:t._virtual
+                ?(dark?`rgba(${t._color==='#F59E0B'?'245,158,11':'77,159,255'},.12)`:`rgba(${t._color==='#F59E0B'?'245,158,11':'77,159,255'},.1)`)
+                :(dark?"rgba(255,255,255,.06)":"rgba(0,0,0,.06)"),
+              color:t._virtual?(t._color):(dark?"rgba(200,200,200,.7)":"#555"),
+              border:`1px solid ${t._virtual?(dark?`${t._color}40`:`${t._color}50`):(dark?"rgba(255,255,255,.08)":"rgba(0,0,0,.1)")}`,
+            }}>
+              {t._virtual&&t.texto==="EXPRESS"?"⚡ ":t._virtual&&t.texto==="VPS"?"● ":""}{t.texto}
+            </span>
+          ))}
+          {tasks.length>(scale>=0.75?5:3)&&(
+            <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:FS(7.5),
+              color:dark?"rgba(140,140,140,.35)":"#bbb",flexShrink:0}}>
+              +{tasks.length-(scale>=0.75?5:3)}
+            </span>
+          )}
+
+          {/* meta — empurrado para a direita */}
+          {meta>0&&(
+            <span style={{marginLeft:"auto",fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
+              fontSize:FS(scale>=0.75?10:8.5),flexShrink:0,
+              color:dark?"rgba(190,190,190,.55)":"#888"}}>
+              <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
+                fontSize:FS(7),letterSpacing:".14em",
+                color:dark?"rgba(140,140,140,.35)":"#bbb",marginRight:2}}>META</span>
+              {fh(meta)}
+            </span>
+          )}
         </div>
-        {meta>0&&(
-          <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
-            fontSize:FS(scale>=0.75?11:9),
-            color:dark?"rgba(190,190,190,.65)":"#666"}}>
-            <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
-              fontSize:FS(7.5),letterSpacing:".14em",
-              color:dark?"rgba(140,140,140,.4)":"#ccc",marginRight:3}}>META</span>
-            {fh(meta)}
-          </span>
+
+        {/* linha 2: imprevistos como chips (só se existirem) */}
+        {imp.length>0&&(
+          <div style={{display:"flex",alignItems:"center",gap:Math.round(4*scale),flexWrap:"wrap",overflow:"hidden"}}>
+            <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,
+              fontSize:FS(7),letterSpacing:".12em",
+              color:dark?"rgba(251,146,60,.5)":"#D97706",flexShrink:0}}>+{totalImpH}h</span>
+            {imp.slice(0,scale>=0.75?3:2).map((iv,i)=>(
+              <span key={i} style={{
+                fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
+                fontSize:FS(scale>=0.75?8.5:7.5),letterSpacing:".04em",
+                padding:`${Math.round(1.5*scale)}px ${Math.round(5*scale)}px`,
+                borderRadius:2,flexShrink:0,
+                maxWidth:`${Math.round(140*scale)}px`,
+                overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
+                background:dark?"rgba(251,146,60,.07)":"rgba(251,146,60,.08)",
+                color:dark?"#FB923C":"#D97706",
+                border:`1px solid ${dark?"rgba(251,146,60,.2)":"rgba(251,146,60,.3)"}`,
+              }}>
+                ⚡ {iv.descricao}
+              </span>
+            ))}
+            {imp.length>(scale>=0.75?3:2)&&(
+              <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:FS(7.5),
+                color:dark?"rgba(251,146,60,.3)":"#D97706",flexShrink:0}}>
+                +{imp.length-(scale>=0.75?3:2)}
+              </span>
+            )}
+          </div>
         )}
       </div>
     </div>

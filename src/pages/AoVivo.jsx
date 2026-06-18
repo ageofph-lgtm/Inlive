@@ -276,12 +276,15 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
   const run      = m.timer_status==="running";
   const paused   = m.timer_status?.startsWith("paused");
   const allTasks = m.tarefas||[];
-  const realTasks = allTasks.filter(t=>!t.concluida);
-  const doneCount = allTasks.length - realTasks.length;
+  // Filtrar tasks reservadas (EXPRESS, VPS, IMPREVISTOS) para não duplicar com badges visuais
+  const RESERVED = new Set(["EXPRESS","VPS","IMPREVISTOS","⚡ IMPREVISTOS"]);
+  const realTasks = allTasks.filter(t=>!t.concluida && !RESERVED.has(t.texto?.trim?.()));
+  const doneCount = allTasks.filter(t=>t.concluida && !RESERVED.has(t.texto?.trim?.())).length;
   // Injectar badges EXPRESS e VPS como tasks virtuais no topo
   const virtualTasks = [];
-  if (m.isExpress || allTasks.some(t=>t.texto==="EXPRESS")) virtualTasks.push({texto:"EXPRESS", _virtual:true, _color:"#F59E0B"});
-  if (m.isVps) virtualTasks.push({texto:"VPS", _virtual:true, _color:"#4D9FFF"});
+  const hasExpress = m.isExpress || allTasks.some(t=>t.texto==="EXPRESS");
+  if (hasExpress) virtualTasks.push({texto:"EXPRESS", _virtual:true, _color:"#F59E0B"});
+  if (m.isVps)    virtualTasks.push({texto:"VPS",     _virtual:true, _color:"#4D9FFF"});
   const tasks = [...virtualTasks, ...realTasks];
 
   const catKey   = forceCategory||getMachineCategory(m);

@@ -494,12 +494,7 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
                   {isLate?`+${Math.round(asec/60)}m`:Math.round(safePct)+"%"}
                 </text>
               </svg>
-              {/* label RESTAM / ATRASO abaixo do arco */}
-              <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,
-                fontSize:FS(scale>=0.75?7.5:6.5),letterSpacing:".15em",
-                color:isLate?"#FF3344":(dark?"rgba(140,140,140,.5)":"#bbb")}}>
-                {isLate?"ATRASO":"RESTAM"}
-              </span>
+
             </div>
           );
         })()}
@@ -515,10 +510,10 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
           marginBottom:Math.round(5*scale),
         }}>
           {(m.previsao_inicio||m.dataEntrada)&&(
-            <span style={{display:"inline-flex",alignItems:"center",gap:Math.round(3*scale),flexShrink:0}}>
-              <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
-                fontSize:FS(7),letterSpacing:".14em",
-                color:dark?"rgba(140,140,140,.4)":"#bbb"}}>ENT</span>
+            <span style={{display:"inline-flex",alignItems:"center",gap:Math.round(2*scale),flexShrink:0}}>
+              <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,
+                fontSize:FS(scale>=0.75?10:8),
+                color:dark?"rgba(140,140,140,.4)":"#bbb"}}>{"<"}</span>
               <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
                 fontSize:FS(scale>=0.75?12:10),
                 color:dark?"#6FC3FF":"#0A6EBF"}}>
@@ -528,18 +523,18 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
           )}
           {(m.previsao_inicio||m.dataEntrada)&&m.previsao_fim&&(
             <span style={{color:dark?"rgba(255,255,255,.12)":"rgba(0,0,0,.12)",
-              fontSize:FS(9),fontFamily:"'Rajdhani',sans-serif"}}>→</span>
+              fontSize:FS(9),fontFamily:"'Rajdhani',sans-serif"}}>·</span>
           )}
           {m.previsao_fim&&(
-            <span style={{display:"inline-flex",alignItems:"center",gap:Math.round(3*scale),flexShrink:0}}>
-              <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
-                fontSize:FS(7),letterSpacing:".14em",
-                color:dark?"rgba(140,140,140,.4)":"#bbb"}}>ENTREGA</span>
+            <span style={{display:"inline-flex",alignItems:"center",gap:Math.round(2*scale),flexShrink:0}}>
               <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
                 fontSize:FS(scale>=0.75?12:10),
                 color:isLate?(dark?"#FF3344":"#DC2626"):isRisk?(dark?"#FFB200":"#B08D2E"):(dark?"#2BE564":"#16A34A")}}>
                 {fd(m.previsao_fim)}
               </span>
+              <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,
+                fontSize:FS(scale>=0.75?10:8),
+                color:isLate?(dark?"#FF3344":"#DC2626"):isRisk?(dark?"#FFB200":"#B08D2E"):(dark?"#2BE564":"#16A34A")}}>{">"}</span>
             </span>
           )}
         </div>

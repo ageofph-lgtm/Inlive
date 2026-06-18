@@ -390,18 +390,7 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
           fontSize:FS(9),padding:`${Math.round(2*scale)}px ${Math.round(5*scale)}px`,
           borderRadius:2,color:"#0a0a0a",background:"#FFB200",flexShrink:0}}>⚡</span>}
         {tb&&<Pill st={tb.c} dark={dark} scale={scale}>{tb.l}</Pill>}
-        {/* % pill */}
-        {meta>0&&(
-          <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
-            fontSize:FS(9),letterSpacing:".05em",
-            padding:`${Math.round(2*scale)}px ${Math.round(5*scale)}px`,
-            borderRadius:2,color:st,
-            background:`color-mix(in srgb,${st} 10%,transparent)`,
-            border:`1px solid color-mix(in srgb,${st} 28%,transparent)`,
-            flexShrink:0}}>
-            {Math.round(pct)}%
-          </span>
-        )}
+        {/* % pill removido — percentagem vai dentro do arco circular */}
         {/* timer */}
         <div style={{marginLeft:"auto",textAlign:"right",flexShrink:0}}>
           <div style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:600,
@@ -412,7 +401,7 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
           </div>
           {meta>0&&(
             <div style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
-              fontSize:FS(8),color:dark?"rgba(200,200,200,.38)":"#bbb",
+              fontSize:FS(8),color:dark?"rgba(255,255,255,0.85)":"rgba(0,0,0,0.75)",
               letterSpacing:".1em",marginTop:2}}>
               /{fh(meta)} meta
             </div>
@@ -462,31 +451,58 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
           overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:"100%"}}>
           {m.modelo||"—"}
         </div>
-        {/* ── BARRA — sempre dentro do plate, nunca corta ── */}
-        {meta>0&&(
-          <div style={{width:"100%",marginTop:Math.round(8*scale),position:"relative",zIndex:1}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",
-              marginBottom:Math.round(3*scale)}}>
+        {/* ── ARCO CIRCULAR de progresso com % dentro ── */}
+        {meta>0&&(()=>{
+          const sz   = Math.round((scale>=0.88?52:scale>=0.75?44:scale>=0.62?36:30)*scale);
+          const sw   = Math.max(3, Math.round(4*scale)); // stroke-width
+          const r    = (sz/2) - sw - 1;
+          const circ = 2*Math.PI*r;
+          const safePct = Math.min(pct, 100);
+          const dash = isLate ? circ : (safePct/100)*circ;
+          const gap  = circ - dash;
+          // rotação: começa em cima (-90°)
+          return (
+            <div style={{marginTop:Math.round(10*scale),position:"relative",zIndex:1,
+              display:"flex",flexDirection:"column",alignItems:"center",gap:Math.round(3*scale)}}>
+              <svg width={sz} height={sz} style={{overflow:"visible"}}>
+                {/* track */}
+                <circle cx={sz/2} cy={sz/2} r={r}
+                  fill="none"
+                  stroke={dark?"rgba(255,255,255,.08)":"rgba(0,0,0,.09)"}
+                  strokeWidth={sw}/>
+                {/* progress arc */}
+                <circle cx={sz/2} cy={sz/2} r={r}
+                  fill="none"
+                  stroke={isLate?"#FF3344":st}
+                  strokeWidth={sw}
+                  strokeLinecap="round"
+                  strokeDasharray={`${dash} ${gap}`}
+                  strokeDashoffset={0}
+                  transform={`rotate(-90 ${sz/2} ${sz/2})`}
+                  style={{
+                    filter:dark?`drop-shadow(0 0 4px ${st}88)`:"none",
+                    transition:"stroke-dasharray .8s ease",
+                  }}/>
+                {/* % texto no centro */}
+                <text x={sz/2} y={sz/2}
+                  textAnchor="middle" dominantBaseline="central"
+                  fontFamily="'JetBrains Mono',monospace"
+                  fontWeight={800}
+                  fontSize={Math.round((scale>=0.75?11:9)*scale)}
+                  fill={isLate?"#FF3344":st}
+                  style={{filter:dark?`drop-shadow(0 0 4px ${st}66)`:"none"}}>
+                  {isLate?`+${Math.round(asec/60)}m`:Math.round(safePct)+"%"}
+                </text>
+              </svg>
+              {/* label RESTAM / ATRASO abaixo do arco */}
               <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,
-                fontSize:FS(scale>=0.75?8.5:7.5),letterSpacing:".15em",
-                color:dark?"rgba(140,140,140,.55)":"#bbb"}}>
+                fontSize:FS(scale>=0.75?7.5:6.5),letterSpacing:".15em",
+                color:isLate?"#FF3344":(dark?"rgba(140,140,140,.5)":"#bbb")}}>
                 {isLate?"ATRASO":"RESTAM"}
               </span>
-              <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
-                fontSize:FS(scale>=0.88?14:scale>=0.75?12:10),
-                color:st,textShadow:dark?`0 0 8px ${st}44`:"none"}}>
-                {fmtHMS(isLate?asec:rsec)}
-              </span>
             </div>
-            <div style={{height:barH,
-              background:dark?"rgba(255,255,255,.08)":"rgba(0,0,0,.09)",
-              borderRadius:2,overflow:"hidden"}}>
-              <div style={{height:"100%",width:`${pct}%`,borderRadius:2,
-                background:isLate?"repeating-linear-gradient(45deg,#FF3344 0 3px,#7a0e1a 3px 6px)":st,
-                boxShadow:`0 0 6px ${st}`,transition:"width .8s ease"}}/>
-            </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
 
       {/* ── ROW 3: datas inline (só se scale>=0.55) ── */}
@@ -567,17 +583,8 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
             </span>
           )}
 
-          {/* meta — empurrado para a direita */}
-          {meta>0&&(
-            <span style={{marginLeft:"auto",fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
-              fontSize:FS(scale>=0.75?10:8.5),flexShrink:0,
-              color:dark?"rgba(190,190,190,.55)":"#888"}}>
-              <span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:600,
-                fontSize:FS(7),letterSpacing:".14em",
-                color:dark?"rgba(140,140,140,.35)":"#bbb",marginRight:2}}>META</span>
-              {fh(meta)}
-            </span>
-          )}
+          {/* META removido do rodapé — está no topo do card */}
+          <span style={{marginLeft:"auto"}}/>
         </div>
 
         {/* linha 2: imprevistos como chips (só se existirem) */}

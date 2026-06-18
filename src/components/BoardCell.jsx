@@ -128,7 +128,7 @@ export default function BoardCell({m, D, forceCategory=null, scale=1, compact=fa
         {paused&&!run&&(<>
           <Pill st={dark?"#FFB200":"#B08D2E"} dark={dark} scale={scale}>⏸</Pill>
           {(()=>{
-            const reason = m.timer_status?.replace?.(/^paused[-_]?/i,"")?.replace(/_/g," ")?.trim?.();
+            const reason = m.timer_status?.replace?.(/^paused:?/i,"")?.replace(/_/g," ")?.trim?.();
             const label = reason && reason.length>2 && reason.toLowerCase()!=="true" ? reason.toUpperCase() : null;
             return label ? (
               <span style={{

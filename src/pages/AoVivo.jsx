@@ -50,7 +50,7 @@ const getPausaMotivo = (mx) => {
 };
 // Extracts display label from pause reason
 const getPausaLabel = (mx) => {
-  const reason = mx?.timer_status?.replace?.(/^paused[-_]?/i,"")?.replace(/_/g," ")?.trim?.();
+  const reason = mx?.timer_status?.replace?.(/^paused:?/i,"")?.replace(/_/g," ")?.trim?.();
   return reason && reason.length>2 && reason.toLowerCase()!=="true" ? reason.toUpperCase() : null;
 };
 function getMondayUTC(){ const n=new Date(),d=n.getUTCDay(),b=d===0?6:d-1,m=new Date(n); m.setUTCDate(n.getUTCDate()-b); m.setUTCHours(0,0,0,0); return m; }

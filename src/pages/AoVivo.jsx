@@ -2553,7 +2553,20 @@ export default function AoVivo(){
           filter:D.dark?`drop-shadow(0 0 6px ${D.pink}aa)`:"none",flexShrink:0}}/>
         <span style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(13px,1.1vw,16px)",
           fontWeight:900,letterSpacing:"0.22em",color:D.dark?D.pink:"#0D0D0F",
-          textShadow:D.dark?`0 0 10px ${D.pink}77`:"none",marginRight:"auto"}}>WATCHER</span>
+          textShadow:D.dark?`0 0 10px ${D.pink}77`:"none"}}>WATCHER</span>
+
+        {/* STILL OFICINA — entre WATCHER e LIVE */}
+        <span style={{
+          fontFamily:"'Orbitron',monospace",
+          fontSize:"clamp(9px,0.75vw,11px)",
+          fontWeight:600,
+          letterSpacing:"0.22em",
+          color:D.dark?"rgba(255,255,255,0.55)":"rgba(0,0,0,0.55)",
+          marginRight:"auto",
+          paddingLeft:"clamp(8px,1vw,16px)",
+          borderLeft:`1px solid ${D.dark?"rgba(255,255,255,0.1)":"rgba(0,0,0,0.1)"}`,
+          marginLeft:"clamp(8px,1vw,16px)",
+        }}>STILL OFICINA</span>
 
         {/* CENTRO: LIVE + Relógio menor + nav */}
         <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
@@ -2800,21 +2813,7 @@ export default function AoVivo(){
           ))}
         </div>
 
-        <div style={{fontFamily:"'Orbitron',monospace",
-          fontSize:"clamp(9px,0.7vw,11px)",fontWeight:600,
-          color:D.muted,letterSpacing:"0.16em",
-          display:"flex",gap:"clamp(8px,1vw,16px)",flexWrap:"wrap",justifyContent:"center"}}>
-          <span><span style={{color:D.cyan}}>←→</span> NAV</span>
-          <span><span style={{color:D.cyan}}>SPACE</span> PAUSE</span>
-          <span><span style={{color:D.cyan}}>ESC</span> EXIT</span>
-          <span><span style={{color:D.cyan}}>F11</span> FULL</span>
-        </div>
 
-        <div style={{fontFamily:"'Orbitron',monospace",
-          fontSize:"clamp(9px,0.7vw,11px)",fontWeight:700,
-          color:D.muted,letterSpacing:"0.18em"}}>
-          STILL OFICINA · <span style={{color:D.pink}}>FROTA ACP</span>
-        </div>
       </div>
     </div>
   );

@@ -191,7 +191,7 @@ function HudTag({color, label, dim=false, glow=false}){
   const isDark = typeof document !== "undefined" && document.body.dataset.theme !== "light";
   return(
     <span style={{
-      fontFamily:"'Russo One',sans-serif",
+      fontFamily:'Russo One',sans-serif,
       fontSize:"clamp(8px,0.65vw,10px)",
       fontWeight:800,
       letterSpacing:isDark?"0.12em":"0.1em",
@@ -243,7 +243,7 @@ function Clock({D}){
     <div style={{textAlign:"right",lineHeight:1.1,position:"relative",padding:"3px 10px 3px 12px",
       borderLeft:`1px solid ${D.line}`,borderRight:`1px solid ${D.line}`}}>
       <div style={{
-        fontFamily:"'Russo One',sans-serif",
+        fontFamily:'Russo One',sans-serif,
         fontSize:"clamp(18px,1.5vw,24px)",
         fontWeight:D.dark?900:600,
         color:D.text,
@@ -253,7 +253,7 @@ function Clock({D}){
         {n.toLocaleTimeString("pt-PT")}
       </div>
       <div style={{
-        fontFamily:"'Russo One',sans-serif",
+        fontFamily:'Russo One',sans-serif,
         fontSize:"clamp(9px,0.7vw,11px)",color:D.muted,
         textTransform:"uppercase",letterSpacing:"0.14em",fontWeight:600,marginTop:"1px"}}>
         {n.toLocaleDateString("pt-PT",{weekday:"short",day:"2-digit",month:"short"})}
@@ -338,341 +338,350 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
       display:"flex",flexDirection:"column",
       height:"100%",width:"100%",
       boxSizing:"border-box",
-      overflow:"hidden",
+      overflow:"hidden",        // NUNCA expande
       borderRadius:dark?0:"8px",
       background:dark
-        ?`linear-gradient(160deg,color-mix(in srgb,${st} 8%,#0d0d10) 0%,#0a0a0c 60%)`
-        :`linear-gradient(160deg,color-mix(in srgb,${st} 5%,#fff) 0%,#fff 60%)`,
-      border:`1px solid color-mix(in srgb,${st} 22%,transparent)`,
-      boxShadow:dark
-        ?`0 0 0 1px rgba(0,0,0,.45),0 8px 32px -12px color-mix(in srgb,${st} 40%,transparent)`
-        :`0 2px 12px rgba(0,0,0,0.08)`,
+        ?`linear-gradient(160deg,color-mix(in srgb,${st} 9%,#0d0d10) 0%,#090909 45%)`
+        :`linear-gradient(160deg,color-mix(in srgb,${st} 5%,#fff) 0%,#fff 45%)`,
+      border:`1px solid color-mix(in srgb,${st} 25%,transparent)`,
+      boxShadow:`0 0 0 1px rgba(0,0,0,.45),0 8px 32px -12px color-mix(in srgb,${st} 50%,transparent)`,
       animation:isLate?"pulseCard 1.4s ease-in-out infinite":"none",
-      clipPath:dark?"polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))":"none",
+      clipPath:dark?"polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px))":"none",
     }}>
-
-      {/* ── barra de cor no topo (acento do estado) ── */}
+      {/* linha de topo = estado */}
       <div style={{position:"absolute",top:0,left:0,right:0,height:2,zIndex:3,
-        background:`linear-gradient(90deg,${st} 0%,${st}44 60%,transparent 100%)`,
-        boxShadow:`0 0 8px ${st}88`}}/>
+        background:`linear-gradient(90deg,${st},transparent 70%)`,boxShadow:`0 0 10px ${st}`}}/>
+      {/* spine = técnico */}
+      <div style={{position:"absolute",top:8,bottom:8,left:0,width:3,zIndex:3,
+        borderRadius:"0 3px 3px 0",background:tc,boxShadow:dark?`0 0 5px ${tc}44`:"none"}}/>
+      {/* HUD corners */}
+      {(isRisk||isLate)&&dark&&(<>
+        <div style={{position:"absolute",top:4,right:4,width:8,height:8,zIndex:4,
+          borderTop:`1.5px solid ${st}`,borderRight:`1.5px solid ${st}`,opacity:.65}}/>
+        <div style={{position:"absolute",bottom:4,left:4,width:8,height:8,zIndex:4,
+          borderBottom:`1.5px solid ${st}`,borderLeft:`1.5px solid ${st}`,opacity:.65}}/>
+      </>)}
 
-      {/* ── spine lateral esquerda (técnico) ── */}
-      <div style={{position:"absolute",top:0,bottom:0,left:0,width:3,zIndex:3,
-        background:tc,
-        boxShadow:dark?`0 0 8px ${tc}66`:"none"}}/>
-
-      {/* ── TOPO: badges esquerda + arco reator direita ── */}
+      {/* ── ROW 1: badges + timer ── */}
       <div style={{
         flexShrink:0,
-        display:"flex",alignItems:"flex-start",
-        justifyContent:"space-between",
-        padding:`${Math.round(10*scale)}px ${Math.round(10*scale)}px ${Math.round(6*scale)}px ${Math.round(14*scale)}px`,
-        gap:Math.round(6*scale),
+        display:"flex",alignItems:"center",gap:Math.round(4*scale),
+        padding:`${Math.round(8*scale)}px ${Math.round(14*scale)}px ${Math.round(6*scale)}px ${Math.round(16*scale)}px`,
+        borderBottom:`1px solid ${dark?"rgba(255,255,255,.05)":"rgba(0,0,0,.05)"}`,
+        flexWrap:"wrap",overflow:"hidden",
       }}>
-        {/* badges à esquerda */}
-        <div style={{display:"flex",flexWrap:"wrap",alignItems:"center",
-          gap:Math.round(3*scale),flex:1,minWidth:0,overflow:"hidden"}}>
-          {/* categoria principal */}
-          {tb&&(
-            <span style={{
-              fontFamily:"'Exo 2',sans-serif",fontWeight:800,
-              fontSize:FS(scale>=0.75?8:7),letterSpacing:".14em",textTransform:"uppercase",
-              padding:`${Math.round(2*scale)}px ${Math.round(6*scale)}px`,
-              borderRadius:2,color:tb.c,
-              background:`color-mix(in srgb,${tb.c} 12%,transparent)`,
-              border:`1px solid color-mix(in srgb,${tb.c} 30%,transparent)`,
-              flexShrink:0,
-            }}>{tb.l}</span>
-          )}
-          {/* prio badge */}
-          {prio&&(
-            <span style={{
-              fontFamily:"'Exo 2',sans-serif",fontWeight:800,
-              fontSize:FS(scale>=0.75?8:7),letterSpacing:".14em",
-              padding:`${Math.round(2*scale)}px ${Math.round(6*scale)}px`,
-              borderRadius:2,color:"#FFB200",
-              background:"rgba(255,178,0,.12)",
-              border:"1px solid rgba(255,178,0,.28)",
-              flexShrink:0,
-            }}>PRIO</span>
-          )}
-          {/* estado run/paused */}
-          {run&&(
-            <span style={{
-              fontFamily:"'Exo 2',sans-serif",fontWeight:700,
-              fontSize:FS(scale>=0.75?7.5:6.5),letterSpacing:".12em",
-              padding:`${Math.round(2*scale)}px ${Math.round(6*scale)}px`,
-              borderRadius:2,color:dark?"#2BE564":"#16A34A",
-              background:"rgba(43,229,100,.1)",border:"1px solid rgba(43,229,100,.25)",
-              display:"inline-flex",alignItems:"center",gap:Math.round(3*scale),flexShrink:0,
+        {/* estado badge */}
+        {isLate&&<Pill st={st} dark={dark} scale={scale}>✕</Pill>}
+        {isRisk&&!isLate&&<Pill st={st} dark={dark} scale={scale}>⚠</Pill>}
+        {!isRisk&&!isLate&&run&&(
+          <span style={{fontFamily:"'Exo 2',sans-serif",fontWeight:700,
+            fontSize:FS(9),letterSpacing:".09em",
+            padding:`${Math.round(2*scale)}px ${Math.round(6*scale)}px`,
+            borderRadius:2,color:dark?"#2BE564":"#16A34A",
+            background:"rgba(43,229,100,.1)",border:"1px solid rgba(43,229,100,.28)",
+            display:"inline-flex",alignItems:"center",gap:3,flexShrink:0}}>
+            <span style={{width:Math.round(5*scale),height:Math.round(5*scale),borderRadius:"50%",
+              background:dark?"#2BE564":"#16A34A",boxShadow:"0 0 5px #2BE564",
+              animation:"blink 1.6s infinite",flexShrink:0}}/>RUN
+          </span>
+        )}
+        {paused&&!run&&(<>
+          <Pill st={dark?"#FFB200":"#B08D2E"} dark={dark} scale={scale}>⏸</Pill>
+          {(()=>{
+            const reason = m.timer_status?.replace?.(/^paused[-_]?/i,"")?.replace(/_/g," ")?.trim?.();
+            const label = reason && reason.length>2 && reason.toLowerCase()!=="true" ? reason.toUpperCase() : null;
+            return label ? (
+              <span style={{
+                fontFamily:"'Russo One',sans-serif",fontWeight:600,
+                fontSize:FS(8),letterSpacing:".1em",
+                padding:`${Math.round(2*scale)}px ${Math.round(6*scale)}px`,
+                borderRadius:2,color:dark?"#FFB200":"#B08D2E",
+                background:"rgba(251,191,36,.08)",
+                border:"1px solid rgba(251,191,36,.22)",
+                flexShrink:0,maxWidth:`${Math.round(90*scale)}px`,
+                overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
+              }}>{label}</span>
+            ) : null;
+          })()}
+        </>)}
+        {prio&&<span style={{fontFamily:"'Exo 2',sans-serif",fontWeight:800,
+          fontSize:FS(9),padding:`${Math.round(2*scale)}px ${Math.round(5*scale)}px`,
+          borderRadius:2,color:"#0a0a0a",background:"#FFB200",flexShrink:0}}>⚡</span>}
+        {tb&&<Pill st={tb.c} dark={dark} scale={scale}>{tb.l}</Pill>}
+        {/* % pill removido — percentagem vai dentro do arco circular */}
+        {/* timer — fonte LCD digital */}
+        <div style={{marginLeft:"auto",textAlign:"right",flexShrink:0}}>
+          {/* Timer 7-segment LCD */}
+          <div style={{position:"relative",display:"inline-block"}}>
+            {/* ghost — dígitos apagados para dar efeito LCD */}
+            <div style={{
+              fontFamily:"'DSEG7','Share Tech Mono',monospace",
+              fontWeight:400,
+              fontSize:FS(scale>=0.88?22:scale>=0.75?18:14),
+              letterSpacing:".04em",lineHeight:1,
+              color:dark?`${st}18`:"rgba(0,0,0,0.07)",
+              userSelect:"none",position:"absolute",top:0,right:0,
+            }}>{"88:88:88"}</div>
+            {/* valor real */}
+            <div style={{
+              fontFamily:"'DSEG7','Share Tech Mono',monospace",
+              fontWeight:400,
+              fontSize:FS(scale>=0.88?22:scale>=0.75?18:14),
+              letterSpacing:".04em",color:st,lineHeight:1,
+              textShadow:dark?`0 0 10px ${st},0 0 20px ${st}55`:"none",
+              animation:run&&dark?"timerPulse 2s ease-in-out infinite":"none",
+              position:"relative",zIndex:1,
             }}>
-              <span style={{width:Math.round(4*scale),height:Math.round(4*scale),borderRadius:"50%",
-                background:"#2BE564",boxShadow:"0 0 4px #2BE564",
-                animation:"blink 1.6s infinite",flexShrink:0}}/>
-              RUN
-            </span>
-          )}
-          {paused&&!run&&(
-            <span style={{
-              fontFamily:"'Exo 2',sans-serif",fontWeight:700,
-              fontSize:FS(scale>=0.75?7.5:6.5),letterSpacing:".12em",
-              padding:`${Math.round(2*scale)}px ${Math.round(6*scale)}px`,
-              borderRadius:2,color:dark?"#FFB200":"#B08D2E",
-              background:"rgba(251,191,36,.1)",border:"1px solid rgba(251,191,36,.22)",
-              flexShrink:0,
-            }}>PAUSED</span>
-          )}
-          {(isLate||isRisk)&&(
-            <span style={{
-              fontFamily:"'Exo 2',sans-serif",fontWeight:800,
-              fontSize:FS(scale>=0.75?7.5:6.5),letterSpacing:".14em",
-              padding:`${Math.round(2*scale)}px ${Math.round(6*scale)}px`,
-              borderRadius:2,color:isLate?"#FF3344":"#FFB200",
-              background:isLate?"rgba(255,51,68,.12)":"rgba(255,178,0,.12)",
-              border:`1px solid ${isLate?"rgba(255,51,68,.28)":"rgba(255,178,0,.28)"}`,
-              flexShrink:0,
-            }}>{isLate?"ATRASADA":"EM RISCO"}</span>
+              {fmtHMS(isCD&&restante!==null?restante:elapsed)}
+            </div>
+          </div>
+          {meta>0&&(
+            <div style={{
+              fontFamily:"'Russo One',sans-serif",
+              fontWeight:600,
+              fontSize:FS(8),
+              color:dark?"rgba(255,255,255,0.85)":"rgba(0,0,0,0.75)",
+              letterSpacing:".12em",marginTop:2,
+            }}>
+              /{fh(meta)} meta
+            </div>
           )}
         </div>
+      </div>
 
-        {/* arco reator — canto superior direito */}
+      {/* ── ROW 2: NS plate (flex:1 — absorve espaço disponível) ── */}
+      <div style={{
+        flex:1,minHeight:0,overflow:"hidden",
+        display:"flex",flexDirection:"column",
+        alignItems:"center",justifyContent:"center",
+        padding:`${Math.round(10*scale)}px ${Math.round(10*scale)}px`,
+        margin:`${Math.round(8*scale)}px ${Math.round(10*scale)}px ${Math.round(4*scale)}px`,
+        background:dark?"rgba(0,0,0,.5)":"rgba(0,0,0,.03)",
+        border:`1px solid ${dark?"rgba(255,255,255,.06)":"rgba(0,0,0,.06)"}`,
+        borderRadius:dark?"2px":"8px",
+        position:"relative",
+      }}>
+        {dark&&run&&<div style={{position:"absolute",inset:0,pointerEvents:"none",
+          background:`radial-gradient(ellipse 80% 50% at 50% 110%,${st}12,transparent)`}}/>}
+        {/* NS — font-size adaptativo ao comprimento do série */}
+        {(()=>{
+          const ns = m.serie||"—";
+          const len = ns.length;
+          // base por scale, depois reduz proporcionalmente ao comprimento
+          const base = scale>=0.88?36:scale>=0.75?27:scale>=0.62?21:16;
+          // a partir de 10 chars começa a comprimir; cada char extra -1.5px
+          const fsSerie = len<=9 ? base : Math.max(base*0.55, base - (len-9)*2.2);
+          return (
+            <div style={{
+              fontFamily:"'Russo One','Orbitron',sans-serif",
+              fontWeight:400,
+              letterSpacing:len>11?"0em":".04em",
+              textAlign:"center",lineHeight:1,
+              fontSize:`${Math.round(fsSerie*scale)}px`,
+              color:dark?"#fff":"#0D0D0F",
+              textShadow:dark?"0 0 20px rgba(255,255,255,.15),0 0 40px rgba(255,255,255,.06)":"none",
+              overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
+              maxWidth:"100%",position:"relative",zIndex:1}}>
+              {ns}
+            </div>
+          );
+        })()}
+        {/* modelo */}
+        <div style={{
+          fontFamily:"'Exo 2',sans-serif",
+          fontWeight:400,
+          fontSize:FS(scale>=0.88?11:scale>=0.75?9:7.5),
+          letterSpacing:".22em",
+          textTransform:"uppercase",
+          color:dark?"rgba(180,180,190,.55)":"#999",
+          marginTop:Math.round(3*scale),position:"relative",zIndex:1,
+          overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:"100%"}}>
+          {m.modelo||"—"}
+        </div>
+        {/* ── REATOR ARC — segmentos estilo Arc Reactor ── */}
         {meta>0&&(()=>{
-          const sz      = Math.round((scale>=0.88?72:scale>=0.75?62:scale>=0.62?52:42)*scale);
+          const sz      = Math.round((scale>=0.88?60:scale>=0.75?50:scale>=0.62?42:34)*scale);
           const cx      = sz/2, cy = sz/2;
           const safePct = Math.min(pct, 100);
-          const SEGS    = 48;
-          const rOut    = sz*0.44;
-          const segW    = 3.5*scale, segH = Math.max(6, 9*scale);
-          const SEGS_IN = 36;
-          const rIn     = sz*0.30;
-          const segW2   = 2*scale, segH2 = Math.max(3, 5*scale);
-          const activeSeg = Math.round((safePct/100)*SEGS);
+          // outer ring: segmentos grandes (progress)
+          const SEGS_OUT = 40;
+          const rOut  = sz*0.44;
+          const segW  = 3.2*scale, segH = Math.max(5, 7*scale);
+          // inner ring: segmentos pequenos decorativos
+          const SEGS_IN = 32;
+          const rIn   = sz*0.33;
+          const segW2 = 2*scale, segH2 = Math.max(3, 5*scale);
+          const activeSeg = Math.round((safePct/100)*SEGS_OUT);
           const color = isLate?"#FF3344":st;
-          const dimColor = dark?"rgba(255,255,255,0.06)":"rgba(0,0,0,0.06)";
+          const dimColor = dark?"rgba(255,255,255,0.07)":"rgba(0,0,0,0.07)";
           return (
-            <div style={{flexShrink:0,display:"flex",flexDirection:"column",
-              alignItems:"center",gap:Math.round(2*scale)}}>
+            <div style={{marginTop:Math.round(8*scale),position:"relative",zIndex:1,
+              display:"flex",alignItems:"center",justifyContent:"center"}}>
               <svg width={sz} height={sz} style={{overflow:"visible"}}>
-                {/* outer segments */}
-                {Array.from({length:SEGS},(_,i)=>{
-                  const angle   = (i/SEGS)*360 - 90;
-                  const rad     = angle*(Math.PI/180);
-                  const x       = cx + rOut*Math.cos(rad);
-                  const y       = cy + rOut*Math.sin(rad);
-                  const isActive= i < activeSeg;
-                  const isEdge  = i === activeSeg-1 && !isLate && isActive;
+                {/* outer ring — segmentos de progresso */}
+                {Array.from({length:SEGS_OUT},(_,i)=>{
+                  const angle = (i/SEGS_OUT)*360 - 90;
+                  const rad   = angle*(Math.PI/180);
+                  const x     = cx + rOut*Math.cos(rad);
+                  const y     = cy + rOut*Math.sin(rad);
+                  const isActive = i < activeSeg;
+                  const isEdge   = i === activeSeg-1 && !isLate;
                   return (
                     <rect key={`o${i}`}
                       x={-segW/2} y={-segH/2}
                       width={segW} height={segH}
-                      rx={segW*0.35}
-                      fill={isActive?color:dimColor}
+                      rx={segW*0.3}
+                      fill={isActive ? color : dimColor}
                       transform={`translate(${x},${y}) rotate(${angle+90})`}
                       style={{
-                        filter: isEdge&&dark?`drop-shadow(0 0 5px ${color}) drop-shadow(0 0 10px ${color}88)`:
-                                isActive&&dark?`drop-shadow(0 0 2px ${color}55)`:"none",
-                        transition:"fill .4s ease",
+                        filter: isEdge&&dark ? `drop-shadow(0 0 4px ${color}) drop-shadow(0 0 8px ${color}88)` :
+                                isActive&&dark ? `drop-shadow(0 0 2px ${color}66)` : "none",
+                        transition:"fill .3s",
                       }}
                     />
                   );
                 })}
-                {/* inner ring decorativo */}
+                {/* inner ring — decorativo, intensidade proporcional */}
                 {Array.from({length:SEGS_IN},(_,i)=>{
                   const angle  = (i/SEGS_IN)*360 - 90;
                   const rad    = angle*(Math.PI/180);
                   const x      = cx + rIn*Math.cos(rad);
                   const y      = cy + rIn*Math.sin(rad);
-                  const active = i < Math.round((safePct/100)*SEGS_IN);
+                  const frac   = i/SEGS_IN;
+                  const active = frac < safePct/100;
                   return (
                     <rect key={`i${i}`}
                       x={-segW2/2} y={-segH2/2}
-                      width={segW2} height={segH2} rx={1}
-                      fill={active?`${color}44`:dimColor}
+                      width={segW2} height={segH2}
+                      rx={1}
+                      fill={active ? `${color}55` : dimColor}
                       transform={`translate(${x},${y}) rotate(${angle+90})`}
                     />
                   );
                 })}
-                {/* label RESTAM + timer no centro */}
-                <text x={cx} y={cy-Math.round(7*scale)}
+                {/* % no centro */}
+                <text x={cx} y={cy}
                   textAnchor="middle" dominantBaseline="central"
-                  fontFamily="'Exo 2',sans-serif" fontWeight={700}
-                  fontSize={Math.round(5.5*scale)}
-                  fill={dark?"rgba(255,255,255,0.35)":"rgba(0,0,0,0.3)"}
-                  letterSpacing="0.12em">
-                  {isLate?"ATRASO":"RESTAM"}
-                </text>
-                <text x={cx} y={cy+Math.round(6*scale)}
-                  textAnchor="middle" dominantBaseline="central"
-                  fontFamily="'DSEG7','Share Tech Mono',monospace" fontWeight={400}
-                  fontSize={Math.round((scale>=0.75?11:9)*scale)}
+                  fontFamily="'DSEG7','Share Tech Mono',monospace"
+                  fontWeight={400}
+                  fontSize={Math.round((scale>=0.75?12:9)*scale)}
                   fill={isLate?"#FF3344":st}
-                  style={{filter:dark?`drop-shadow(0 0 5px ${color})`:"none"}}>
-                  {isLate
-                    ? fmtHMS(asec).slice(0,5)
-                    : fmtHMS(rsec).slice(0,5)}
+                  style={{filter:dark?`drop-shadow(0 0 6px ${color})`:"none"}}>
+                  {isLate?`+${Math.round(asec/60)}m`:Math.round(safePct)+"%"}
                 </text>
               </svg>
             </div>
           );
         })()}
-
-        {/* timer corrido — quando sem meta */}
-        {meta<=0&&(run||paused)&&(
-          <div style={{flexShrink:0,textAlign:"right"}}>
-            <div style={{position:"relative",display:"inline-block"}}>
-              <div style={{
-                fontFamily:"'DSEG7','Share Tech Mono',monospace",fontWeight:400,
-                fontSize:FS(scale>=0.88?18:scale>=0.75?15:12),
-                letterSpacing:".04em",lineHeight:1,
-                color:dark?`${st}18`:"rgba(0,0,0,0.07)",
-                position:"absolute",top:0,right:0,userSelect:"none",
-              }}>{"88:88:88"}</div>
-              <div style={{
-                fontFamily:"'DSEG7','Share Tech Mono',monospace",fontWeight:400,
-                fontSize:FS(scale>=0.88?18:scale>=0.75?15:12),
-                letterSpacing:".04em",color:st,lineHeight:1,
-                textShadow:dark?`0 0 10px ${st},0 0 20px ${st}55`:"none",
-                position:"relative",zIndex:1,
-                animation:run&&dark?"timerPulse 2s ease-in-out infinite":"none",
-              }}>
-                {fmtHMS(elapsed)}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* ── MEIO: espaço vazio que cresce (empurra NS para baixo) ── */}
-      <div style={{flex:1,minHeight:0}}/>
-
-      {/* ── BAIXO: NS + modelo + tasks ── */}
-      <div style={{
-        flexShrink:0,
-        padding:`0 ${Math.round(14*scale)}px ${Math.round(8*scale)}px ${Math.round(14*scale)}px`,
-      }}>
-        {/* tasks chips — acima do NS */}
-        {tasks.length>0&&(
-          <div style={{display:"flex",flexWrap:"wrap",gap:Math.round(3*scale),
-            marginBottom:Math.round(5*scale),overflow:"hidden",maxHeight:`${Math.round(20*scale)}px`}}>
-            {tasks.slice(0, scale>=0.75?5:3).map((t,i)=>(
-              <span key={i} style={{
-                fontFamily:"'Exo 2',sans-serif",fontWeight:600,
-                fontSize:FS(scale>=0.75?8:7),letterSpacing:".05em",
-                padding:`${Math.round(1.5*scale)}px ${Math.round(5*scale)}px`,
-                borderRadius:2,flexShrink:0,
-                maxWidth:`${Math.round(110*scale)}px`,
-                overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
-                background:t._virtual
-                  ?(dark?`rgba(${t._color==='#F59E0B'?'245,158,11':'77,159,255'},.1)`:
-                         `rgba(${t._color==='#F59E0B'?'245,158,11':'77,159,255'},.08)`)
-                  :(dark?"rgba(255,255,255,.05)":"rgba(0,0,0,.05)"),
-                color:t._virtual?(t._color):(dark?"rgba(180,180,180,.7)":"#555"),
-                border:`1px solid ${t._virtual?`${t._color}33`:(dark?"rgba(255,255,255,.07)":"rgba(0,0,0,.08)")}`,
-              }}>
-                {t._virtual&&t.texto==="EXPRESS"?"⚡ ":""}
-                {t._virtual&&t.texto==="VPS"?"● ":""}
-                {t.texto}
-              </span>
-            ))}
-            {tasks.length>(scale>=0.75?5:3)&&(
-              <span style={{fontFamily:"'Share Tech Mono',monospace",fontSize:FS(7),
-                color:dark?"rgba(140,140,140,.3)":"#bbb",alignSelf:"center"}}>
-                +{tasks.length-(scale>=0.75?5:3)}
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* imprevistos chips */}
-        {imp.length>0&&(
-          <div style={{display:"flex",flexWrap:"wrap",gap:Math.round(3*scale),
-            marginBottom:Math.round(4*scale),overflow:"hidden",maxHeight:`${Math.round(18*scale)}px`}}>
-            {imp.slice(0,2).map((iv,i)=>(
-              <span key={i} style={{
-                fontFamily:"'Exo 2',sans-serif",fontWeight:500,
-                fontSize:FS(scale>=0.75?7.5:6.5),letterSpacing:".04em",
-                padding:`${Math.round(1.5*scale)}px ${Math.round(5*scale)}px`,
-                borderRadius:2,flexShrink:0,
-                maxWidth:`${Math.round(130*scale)}px`,
-                overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
-                background:dark?"rgba(251,146,60,.07)":"rgba(251,146,60,.07)",
-                color:dark?"#FB923C":"#D97706",
-                border:"1px solid rgba(251,146,60,.2)",
-              }}>⚡ {iv.descricao}</span>
-            ))}
-          </div>
-        )}
-
-        {/* NS — protagonista */}
-        {(()=>{
-          const ns  = m.serie||"—";
-          const len = ns.length;
-          const base= scale>=0.88?34:scale>=0.75?28:scale>=0.62?22:17;
-          const fsSerie = len<=9?base:Math.max(base*0.52, base-(len-9)*2.0);
-          return (
-            <div style={{
-              fontFamily:"'Russo One',sans-serif",
-              fontWeight:400,
-              letterSpacing:len>11?"0em":".02em",
-              lineHeight:1,
-              fontSize:`${Math.round(fsSerie*scale)}px`,
-              color:dark?"#fff":"#0D0D0F",
-              textShadow:dark?"0 0 20px rgba(255,255,255,.12)":"none",
-              overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
-              maxWidth:"100%",
-            }}>
-              {ns}
-            </div>
-          );
-        })()}
-
-        {/* modelo */}
+      {/* ── ROW 3: datas inline (só se scale>=0.55) ── */}
+      {showDatas&&(
         <div style={{
-          fontFamily:"'Exo 2',sans-serif",fontWeight:400,
-          fontSize:FS(scale>=0.88?10:scale>=0.75?9:7),
-          letterSpacing:".2em",textTransform:"uppercase",
-          color:dark?"rgba(170,170,180,.45)":"#aaa",
-          marginTop:Math.round(2*scale),
-          overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:"100%",
+          flexShrink:0,overflow:"hidden",
+          display:"flex",alignItems:"center",justifyContent:"center",
+          gap:Math.round(6*scale),flexWrap:"nowrap",
+          padding:`0 ${Math.round(14*scale)}px`,
+          marginBottom:Math.round(5*scale),
         }}>
-          {m.modelo||"—"}
+          {(m.previsao_inicio||m.dataEntrada)&&(
+            <span style={{display:"inline-flex",alignItems:"center",gap:Math.round(2*scale),flexShrink:0}}>
+              <span style={{fontFamily:"'Exo 2',sans-serif",fontWeight:700,
+                fontSize:FS(scale>=0.75?10:8),
+                color:dark?"rgba(140,140,140,.4)":"#bbb"}}>{"<"}</span>
+              <span style={{fontFamily:"'Share Tech Mono',monospace",fontWeight:700,
+                fontSize:FS(scale>=0.75?12:10),
+                color:dark?"#6FC3FF":"#0A6EBF"}}>
+                {fd(m.previsao_inicio||m.dataEntrada)}
+              </span>
+            </span>
+          )}
+          {(m.previsao_inicio||m.dataEntrada)&&m.previsao_fim&&(
+            <span style={{color:dark?"rgba(255,255,255,.12)":"rgba(0,0,0,.12)",
+              fontSize:FS(9),fontFamily:"'Exo 2',sans-serif"}}>·</span>
+          )}
+          {m.previsao_fim&&(
+            <span style={{display:"inline-flex",alignItems:"center",gap:Math.round(2*scale),flexShrink:0}}>
+              <span style={{fontFamily:"'Share Tech Mono',monospace",fontWeight:700,
+                fontSize:FS(scale>=0.75?12:10),
+                color:isLate?(dark?"#FF3344":"#DC2626"):isRisk?(dark?"#FFB200":"#B08D2E"):(dark?"#2BE564":"#16A34A")}}>
+                {fd(m.previsao_fim)}
+              </span>
+              <span style={{fontFamily:"'Exo 2',sans-serif",fontWeight:700,
+                fontSize:FS(scale>=0.75?10:8),
+                color:isLate?(dark?"#FF3344":"#DC2626"):isRisk?(dark?"#FFB200":"#B08D2E"):(dark?"#2BE564":"#16A34A")}}>{">"}</span>
+            </span>
+          )}
         </div>
-      </div>
+      )}
 
-      {/* ── RODAPÉ: dot técnico + datas ── */}
+      {/* ── RODAPÉ: técnico (dot) + tasks/imprevistos como chips + meta ── */}
       <div style={{
         flexShrink:0,
-        display:"flex",alignItems:"center",
-        gap:Math.round(5*scale),
-        padding:`${Math.round(5*scale)}px ${Math.round(14*scale)}px ${Math.round(6*scale)}px`,
+        display:"flex",flexDirection:"column",
+        gap:Math.round(3*scale),
+        padding:`${Math.round(5*scale)}px ${Math.round(12*scale)}px ${Math.round(7*scale)}px ${Math.round(14*scale)}px`,
         borderTop:`1px solid ${dark?"rgba(255,255,255,.04)":"rgba(0,0,0,.05)"}`,
       }}>
-        {/* dot técnico */}
-        <div style={{width:Math.round(7*scale),height:Math.round(7*scale),borderRadius:"50%",
-          background:tc,boxShadow:dark?`0 0 6px ${tc}88`:"none",flexShrink:0}}/>
-        <span style={{fontFamily:"'Exo 2',sans-serif",fontSize:FS(7),letterSpacing:".12em",
-          color:dark?"rgba(150,150,160,.5)":"#bbb",fontWeight:500}}>TÉC</span>
+        {/* linha 1: técnico dot + chips de tasks + meta */}
+        <div style={{display:"flex",alignItems:"center",gap:Math.round(5*scale),flexWrap:"wrap",overflow:"hidden"}}>
+          {/* dot técnico */}
+          <div style={{width:Math.round(7*scale),height:Math.round(7*scale),borderRadius:"50%",
+            background:tc,boxShadow:dark?`0 0 5px ${tc}`:"none",flexShrink:0}}/>
 
-        {/* datas — empurradas para a direita */}
-        {showDatas&&(
-          <div style={{marginLeft:"auto",display:"flex",alignItems:"center",
-            gap:Math.round(4*scale),flexShrink:0}}>
-            {(m.previsao_inicio||m.dataEntrada)&&(
-              <span style={{
-                fontFamily:"'Share Tech Mono',monospace",
-                fontSize:FS(scale>=0.75?9:8),fontWeight:400,
-                color:dark?"rgba(100,180,255,0.7)":"#0A6EBF",
+          {/* chips de tasks e badges (EXPRESS, VPS, tarefas reais) */}
+          {tasks.length>0&&tasks.slice(0,scale>=0.75?5:3).map((t,i)=>(
+            <span key={i} style={{
+              fontFamily:"'Exo 2',sans-serif",fontWeight:700,
+              fontSize:FS(scale>=0.75?9:8),letterSpacing:".07em",
+              padding:`${Math.round(1.5*scale)}px ${Math.round(5*scale)}px`,
+              borderRadius:2,flexShrink:0,maxWidth:`${Math.round(120*scale)}px`,
+              overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
+              background:t._virtual
+                ?(dark?`rgba(${t._color==='#F59E0B'?'245,158,11':'77,159,255'},.12)`:`rgba(${t._color==='#F59E0B'?'245,158,11':'77,159,255'},.1)`)
+                :(dark?"rgba(255,255,255,.06)":"rgba(0,0,0,.06)"),
+              color:t._virtual?(t._color):(dark?"rgba(200,200,200,.7)":"#555"),
+              border:`1px solid ${t._virtual?(dark?`${t._color}40`:`${t._color}50`):(dark?"rgba(255,255,255,.08)":"rgba(0,0,0,.1)")}`,
+            }}>
+              {t._virtual&&t.texto==="EXPRESS"?"⚡ ":t._virtual&&t.texto==="VPS"?"● ":""}{t.texto}
+            </span>
+          ))}
+          {tasks.length>(scale>=0.75?5:3)&&(
+            <span style={{fontFamily:"'Share Tech Mono',monospace",fontSize:FS(7.5),
+              color:dark?"rgba(140,140,140,.35)":"#bbb",flexShrink:0}}>
+              +{tasks.length-(scale>=0.75?5:3)}
+            </span>
+          )}
+
+          {/* META removido do rodapé — está no topo do card */}
+          <span style={{marginLeft:"auto"}}/>
+        </div>
+
+        {/* linha 2: imprevistos como chips (só se existirem) */}
+        {imp.length>0&&(
+          <div style={{display:"flex",alignItems:"center",gap:Math.round(4*scale),flexWrap:"wrap",overflow:"hidden"}}>
+            <span style={{fontFamily:"'Exo 2',sans-serif",fontWeight:700,
+              fontSize:FS(7),letterSpacing:".12em",
+              color:dark?"rgba(251,146,60,.5)":"#D97706",flexShrink:0}}>+{totalImpH}h</span>
+            {imp.slice(0,scale>=0.75?3:2).map((iv,i)=>(
+              <span key={i} style={{
+                fontFamily:"'Exo 2',sans-serif",fontWeight:600,
+                fontSize:FS(scale>=0.75?8.5:7.5),letterSpacing:".04em",
+                padding:`${Math.round(1.5*scale)}px ${Math.round(5*scale)}px`,
+                borderRadius:2,flexShrink:0,
+                maxWidth:`${Math.round(140*scale)}px`,
+                overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
+                background:dark?"rgba(251,146,60,.07)":"rgba(251,146,60,.08)",
+                color:dark?"#FB923C":"#D97706",
+                border:`1px solid ${dark?"rgba(251,146,60,.2)":"rgba(251,146,60,.3)"}`,
               }}>
-                {"< "}{fd(m.previsao_inicio||m.dataEntrada)}
+                ⚡ {iv.descricao}
               </span>
-            )}
-            {m.previsao_fim&&(
-              <span style={{
-                fontFamily:"'Share Tech Mono',monospace",
-                fontSize:FS(scale>=0.75?9:8),fontWeight:400,
-                color:isLate?(dark?"#FF3344":"#DC2626"):isRisk?(dark?"#FFB200":"#B08D2E"):(dark?"#2BE564":"#16A34A"),
-              }}>
-                {"✓ "}{fd(m.previsao_fim)}
+            ))}
+            {imp.length>(scale>=0.75?3:2)&&(
+              <span style={{fontFamily:"'Share Tech Mono',monospace",fontSize:FS(7.5),
+                color:dark?"rgba(251,146,60,.3)":"#D97706",flexShrink:0}}>
+                +{imp.length-(scale>=0.75?3:2)}
               </span>
             )}
           </div>
@@ -1041,7 +1050,7 @@ function CalendarFila({items, D, concluidas=[]}){
                 background:isToday?(D.dark?`rgba(200,16,46,0.12)`:"rgba(200,16,46,0.06)"):(D.dark?D.sub+"33":"rgba(13,13,15,0.03)"),
                 borderBottom:`1px solid ${isToday?(D.dark?"rgba(200,16,46,0.4)":"rgba(200,16,46,0.2)"):(D.dark?D.line:"rgba(13,13,15,0.06)")}`,
                 display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-                <span style={{fontFamily:"'Russo One',sans-serif",fontSize:"10px",fontWeight:900,
+                <span style={{fontFamily:'Russo One',sans-serif,fontSize:"10px",fontWeight:900,
                   color:isToday?"#c8102e":D.muted,letterSpacing:"0.1em",textTransform:"uppercase"}}>
                   {d.toLocaleDateString("pt-PT",{weekday:"short"})}
                 </span>
@@ -1073,7 +1082,7 @@ function CalendarFila({items, D, concluidas=[]}){
                       boxShadow:D.dark?"none":"0 1px 2px rgba(13,13,15,0.04)"}}>
                       {/* NS grande */}
                       <div style={{
-                        fontFamily:"'Russo One',sans-serif",
+                        fontFamily:'Russo One',sans-serif,
                         fontSize:"11px",fontWeight:D.dark?900:600,
                         color:D.dark?D.blue:"#0D0D0F",
                         letterSpacing:D.dark?"0.05em":"-0.01em",
@@ -1091,7 +1100,7 @@ function CalendarFila({items, D, concluidas=[]}){
                         <div style={{display:"flex",alignItems:"center",gap:3,marginTop:"3px"}}>
                           <span style={{fontFamily:"monospace",fontSize:"7px",color:"#22C55E",opacity:0.8}}>✓</span>
                           <span style={{
-                            fontFamily:"'Russo One',sans-serif",
+                            fontFamily:'Russo One',sans-serif,
                             fontSize:"8px",fontWeight:D.dark?700:600,
                             color:"#16A34A",
                             letterSpacing:D.dark?"0.06em":"0.02em",
@@ -1498,7 +1507,7 @@ function SlideHead({title,icon,color,pulse,count,D}){
       </div>
 
       <span style={{
-        fontFamily:"'Russo One',sans-serif",
+        fontFamily:'Russo One',sans-serif,
         fontSize:"clamp(18px,1.7vw,28px)",fontWeight:dark?900:700,
         letterSpacing:dark?"0.18em":"-0.03em",
         color:dark?"#e8e8e8":"#0D0D0F",
@@ -1515,12 +1524,12 @@ function SlideHead({title,icon,color,pulse,count,D}){
           clipPath:dark?"polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)":"none",
           borderRadius:dark?0:"8px"}}>
           <span style={{
-            fontFamily:"'Russo One',sans-serif",
+            fontFamily:'Russo One',sans-serif,
             fontSize:"clamp(9px,0.75vw,11px)",fontWeight:700,
             letterSpacing:dark?"0.18em":"0.02em",
             color:dark?`${color}cc`:"#5C5C61"}}>×</span>
           <span style={{
-            fontFamily:"'Russo One',sans-serif",
+            fontFamily:'Russo One',sans-serif,
             fontSize:"clamp(20px,1.9vw,30px)",fontWeight:dark?900:700,
             color:dark?color:"#0D0D0F",
             textShadow:dark?`0 0 12px ${color}88`:"none",
@@ -1560,7 +1569,7 @@ function Empty({label,D}){
     <div style={{position:"relative",display:"flex",alignItems:"center",justifyContent:"center",flex:1,
       flexDirection:"column",gap:"10px",
       color:D.dark?D.muted:"#8E8E93",
-      fontFamily:"'Russo One',sans-serif",
+      fontFamily:'Russo One',sans-serif,
       fontSize:"clamp(13px,1.1vw,17px)",fontWeight:600,
       letterSpacing:D.dark?"0.22em":"0.05em",
       textTransform:"uppercase"}}>
@@ -1699,6 +1708,7 @@ function GanttChart({ machines, D }) {
                 textAlign:"center",
                 fontFamily:"'Russo One',sans-serif",
                 fontSize: isToday ? "11px" : "9px",
+                fontFamily: 'Russo One',sans-serif,
                 fontWeight: isToday ? (D.dark?900:700) : 600,
                 color: isToday ? (D.dark?"#e8e8e8":"#C8102E") : isWE ? (D.dark?"rgba(210,210,210,0.4)":"#B8B8BD") : (D.dark?"rgba(180,180,180,0.6)":"#8E8E93"),
                 letterSpacing: D.dark?"0.04em":"0.01em",
@@ -1754,7 +1764,7 @@ function GanttChart({ machines, D }) {
                   position:"relative",overflow:"hidden"}}>
                   {count>0&&!isWE&&<div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center"}}>
                     <span style={{
-                      fontFamily:"'Russo One',sans-serif",
+                      fontFamily:'Russo One',sans-serif,
                       fontSize:"7px",fontWeight:D.dark?900:600,
                       color:overload?"#FCA5A5":warn?"#FCD34D":(D.dark?D.muted:"#8E8E93"),
                       letterSpacing:D.dark?"0.05em":"0.02em"}}>
@@ -1838,7 +1848,7 @@ function GanttChart({ machines, D }) {
                   background:"#22C55E",boxShadow:"0 0 8px #22C55E",
                   animation:"blink 1s ease-in-out infinite"}}/>}
                 {!isThin&&<span style={{
-                  fontFamily:"'Russo One',sans-serif",
+                  fontFamily:'Russo One',sans-serif,
                   fontSize:"11px",fontWeight:D.dark?900:600,
                   color:"#fff",letterSpacing:D.dark?"0.06em":"-0.01em",
                   whiteSpace:"nowrap",flexShrink:0,
@@ -1879,7 +1889,7 @@ function GanttChart({ machines, D }) {
                       background:"#22C55E",boxShadow:"0 0 6px #22C55E",
                       animation:"blink 1s ease-in-out infinite"}}/>}
                     <span style={{
-                      fontFamily:"'Russo One',sans-serif",
+                      fontFamily:'Russo One',sans-serif,
                       fontSize:"10px",fontWeight:D.dark?900:600,
                       color:D.dark?"#e8e8e8":"#0D0D0F",
                       letterSpacing:D.dark?"0.05em":"-0.01em",
@@ -2117,7 +2127,7 @@ export default function AoVivo(){
                         borderBottom:`2px solid ${col.color}`,
                         borderRadius:dark?"4px 4px 0 0":"10px 10px 0 0"}}>
                         <span style={{fontSize:"15px",lineHeight:1}}>{col.emoji}</span>
-                        <span style={{fontFamily:"'Russo One',sans-serif",
+                        <span style={{fontFamily:'Russo One',sans-serif,
                           fontSize:"9px",fontWeight:800,color:col.color,
                           letterSpacing:dark?"0.12em":"0.06em",
                           textTransform:"uppercase",flex:1,lineHeight:1.2}}>{col.label}</span>
@@ -2806,7 +2816,7 @@ export default function AoVivo(){
               <div style={{position:"absolute",top:"50%",left:0,transform:"translateY(-50%)",
                 width:"2px",height:"60%",background:k.c,opacity:0.25}}/>
               <div style={{
-                fontFamily:"'Russo One',sans-serif",
+                fontFamily:'Russo One',sans-serif,
                 fontSize:"clamp(20px,1.95vw,32px)",fontWeight:700,
                 color:isActive?k.c:(D.dark?k.c:"#0D0D0F"),
                 textShadow:D.dark?(isActive?`0 0 14px ${k.c}aa`:`0 0 8px ${k.c}44`):"none",
@@ -2851,7 +2861,7 @@ export default function AoVivo(){
           fontFamily:"'Russo One',sans-serif",pointerEvents:"none"}}>
           <span style={{
             fontSize:"clamp(26px,2.4vw,38px)",fontWeight:900,
-            fontFamily:"'Russo One',sans-serif",
+            fontFamily:'Russo One',sans-serif,
             color:D.dark?D.pink:"#C8102E",
             textShadow:D.dark?`0 0 14px ${D.pink}66`:"none",
             letterSpacing:D.dark?"0.04em":"-0.02em",lineHeight:1}}>
@@ -2918,7 +2928,7 @@ export default function AoVivo(){
               boxShadow:dark?"none":"0 8px 32px -8px rgba(13,13,15,0.08)"}}>
               {dark&&<HudCorners color={D.pink} size={16} thickness={2} inset={0} opacity={0.9} D={D}/>}
               <span style={{
-                fontFamily:"'Russo One',sans-serif",
+                fontFamily:'Russo One',sans-serif,
                 fontSize:"clamp(14px,1.1vw,18px)",fontWeight:dark?800:700,
                 color:D.pink,letterSpacing:dark?"0.32em":"0.05em",
                 textShadow:dark?`0 0 10px ${D.pink}77`:"none",

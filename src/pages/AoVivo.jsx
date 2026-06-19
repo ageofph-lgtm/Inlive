@@ -2517,8 +2517,8 @@ export default function AoVivo(){
     <style>{`
       @import url('https://fonts.googleapis.com/css2?family=Russo+One&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Share+Tech+Mono&family=Orbitron:wght@600;700;800;900&display=swap');
       /* DSDigital / DSEG7Classic — timer LCD 7-segment (fonte da imagem) */
-      @font-face{font-family:'DSDigital';src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7Classic/DSEG7Classic-Regular.woff2') format('woff2');font-weight:400;font-display:swap;}
-      @font-face{font-family:'DSDigital';src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7Classic/DSEG7Classic-Bold.woff2') format('woff2');font-weight:700;font-display:swap;}
+      @font-face{font-family:'DSDigital';src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Regular.woff2') format('woff2');font-weight:400;font-display:swap;}
+      @font-face{font-family:'DSDigital';src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2') format('woff2');font-weight:700;font-display:swap;}
       @keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
       @keyframes hudScan{0%{background-position:200% 0}100%{background-position:-200% 0}}
       @keyframes cardSweep{0%{left:-60%}100%{left:130%}}
@@ -2604,8 +2604,8 @@ export default function AoVivo(){
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Russo+One&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Share+Tech+Mono&family=Orbitron:wght@600;700;800;900&display=swap');
       /* DSDigital / DSEG7Classic — timer LCD 7-segment (fonte da imagem) */
-      @font-face{font-family:'DSDigital';src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7Classic/DSEG7Classic-Regular.woff2') format('woff2');font-weight:400;font-display:swap;}
-      @font-face{font-family:'DSDigital';src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7Classic/DSEG7Classic-Bold.woff2') format('woff2');font-weight:700;font-display:swap;}
+      @font-face{font-family:'DSDigital';src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Regular.woff2') format('woff2');font-weight:400;font-display:swap;}
+      @font-face{font-family:'DSDigital';src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2') format('woff2');font-weight:700;font-display:swap;}
         @keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
         @keyframes hudScan{0%{background-position:200% 0}100%{background-position:-200% 0}}
         @keyframes cardSweep{0%{left:-60%}100%{left:130%}}

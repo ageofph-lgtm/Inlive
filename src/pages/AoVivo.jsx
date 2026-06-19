@@ -190,7 +190,7 @@ function HudTag({color, label, dim=false, glow=false}){
   const isDark = typeof document !== "undefined" && document.body.dataset.theme !== "light";
   return(
     <span style={{
-      fontFamily:"'Russo One',sans-serif",
+      fontFamily:"'Chakra Petch',sans-serif",
       fontSize:"clamp(8px,0.65vw,10px)",
       fontWeight:800,
       letterSpacing:isDark?"0.12em":"0.1em",
@@ -242,7 +242,7 @@ function Clock({D}){
     <div style={{textAlign:"right",lineHeight:1.1,position:"relative",padding:"3px 10px 3px 12px",
       borderLeft:`1px solid ${D.line}`,borderRight:`1px solid ${D.line}`}}>
       <div style={{
-        fontFamily:"'Russo One',sans-serif",
+        fontFamily:"'Chakra Petch',sans-serif",
         fontSize:"clamp(18px,1.5vw,24px)",
         fontWeight:D.dark?900:600,
         color:D.text,
@@ -252,7 +252,7 @@ function Clock({D}){
         {n.toLocaleTimeString("pt-PT")}
       </div>
       <div style={{
-        fontFamily:"'Russo One',sans-serif",
+        fontFamily:"'Chakra Petch',sans-serif",
         fontSize:"clamp(9px,0.7vw,11px)",color:D.muted,
         textTransform:"uppercase",letterSpacing:"0.14em",fontWeight:600,marginTop:"1px"}}>
         {n.toLocaleDateString("pt-PT",{weekday:"short",day:"2-digit",month:"short"})}
@@ -373,7 +373,7 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
         {isLate&&<Pill st={st} dark={dark} scale={scale}>✕</Pill>}
         {isRisk&&!isLate&&<Pill st={st} dark={dark} scale={scale}>⚠</Pill>}
         {!isRisk&&!isLate&&run&&(
-          <span style={{fontFamily:"'Exo 2',sans-serif",fontWeight:700,
+          <span style={{fontFamily:"'Chakra Petch',sans-serif",fontWeight:700,
             fontSize:FS(9),letterSpacing:".09em",
             padding:`${Math.round(2*scale)}px ${Math.round(6*scale)}px`,
             borderRadius:2,color:dark?"#2BE564":"#16A34A",
@@ -391,7 +391,7 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
             const label = reason && reason.length>2 && reason.toLowerCase()!=="true" ? reason.toUpperCase() : null;
             return label ? (
               <span style={{
-                fontFamily:"'Russo One',sans-serif",fontWeight:600,
+                fontFamily:"'Chakra Petch',sans-serif",fontWeight:600,
                 fontSize:FS(8),letterSpacing:".1em",
                 padding:`${Math.round(2*scale)}px ${Math.round(6*scale)}px`,
                 borderRadius:2,color:dark?"#FFB200":"#B08D2E",
@@ -403,7 +403,7 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
             ) : null;
           })()}
         </>)}
-        {prio&&<span style={{fontFamily:"'Exo 2',sans-serif",fontWeight:800,
+        {prio&&<span style={{fontFamily:"'Chakra Petch',sans-serif",fontWeight:800,
           fontSize:FS(9),padding:`${Math.round(2*scale)}px ${Math.round(5*scale)}px`,
           borderRadius:2,color:"#0a0a0a",background:"#FFB200",flexShrink:0}}>⚡</span>}
         {tb&&<Pill st={tb.c} dark={dark} scale={scale}>{tb.l}</Pill>}
@@ -414,7 +414,7 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
           <div style={{position:"relative",display:"inline-block"}}>
             {/* ghost — dígitos apagados para dar efeito LCD */}
             <div style={{
-              fontFamily:"'DSDigital','DSEG7','Share Tech Mono',monospace",
+              fontFamily:"'DSDigital','DSEG7','Chakra Petch','Share Tech Mono',monospace",
               fontWeight:400,
               fontSize:FS(scale>=0.88?22:scale>=0.75?18:14),
               letterSpacing:".04em",lineHeight:1,
@@ -423,7 +423,7 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
             }}>{"88:88:88"}</div>
             {/* valor real */}
             <div style={{
-              fontFamily:"'DSDigital','DSEG7','Share Tech Mono',monospace",
+              fontFamily:"'DSDigital','DSEG7','Chakra Petch','Share Tech Mono',monospace",
               fontWeight:400,
               fontSize:FS(scale>=0.88?22:scale>=0.75?18:14),
               letterSpacing:".04em",color:st,lineHeight:1,
@@ -436,7 +436,7 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
           </div>
           {meta>0&&(
             <div style={{
-              fontFamily:"'Russo One',sans-serif",
+              fontFamily:"'Chakra Petch',sans-serif",
               fontWeight:600,
               fontSize:FS(8),
               color:dark?"rgba(255,255,255,0.85)":"rgba(0,0,0,0.75)",
@@ -472,7 +472,7 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
           const fsSerie = len<=9 ? base : Math.max(base*0.55, base - (len-9)*2.2);
           return (
             <div style={{
-              fontFamily:"'Russo One','Orbitron',sans-serif",
+              fontFamily:"'Chakra Petch',sans-serif",
               fontWeight:400,
               letterSpacing:len>11?"0em":".04em",
               textAlign:"center",lineHeight:1,
@@ -487,7 +487,7 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
         })()}
         {/* modelo */}
         <div style={{
-          fontFamily:"'Exo 2',sans-serif",
+          fontFamily:"'Chakra Petch',sans-serif",
           fontWeight:400,
           fontSize:FS(scale>=0.88?11:scale>=0.75?9:7.5),
           letterSpacing:".22em",
@@ -511,10 +511,10 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
         }}>
           {(m.previsao_inicio||m.dataEntrada)&&(
             <span style={{display:"inline-flex",alignItems:"center",gap:Math.round(2*scale),flexShrink:0}}>
-              <span style={{fontFamily:"'Exo 2',sans-serif",fontWeight:700,
+              <span style={{fontFamily:"'Chakra Petch',sans-serif",fontWeight:700,
                 fontSize:FS(scale>=0.75?10:8),
                 color:dark?"rgba(140,140,140,.4)":"#bbb"}}>{"<"}</span>
-              <span style={{fontFamily:"'Share Tech Mono',monospace",fontWeight:700,
+              <span style={{fontFamily:"'Chakra Petch','Share Tech Mono',monospace",fontWeight:700,
                 fontSize:FS(scale>=0.75?12:10),
                 color:dark?"#6FC3FF":"#0A6EBF"}}>
                 {fd(m.previsao_inicio||m.dataEntrada)}
@@ -523,16 +523,16 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
           )}
           {(m.previsao_inicio||m.dataEntrada)&&m.previsao_fim&&(
             <span style={{color:dark?"rgba(255,255,255,.12)":"rgba(0,0,0,.12)",
-              fontSize:FS(9),fontFamily:"'Exo 2',sans-serif"}}>·</span>
+              fontSize:FS(9),fontFamily:"'Chakra Petch',sans-serif"}}>·</span>
           )}
           {m.previsao_fim&&(
             <span style={{display:"inline-flex",alignItems:"center",gap:Math.round(2*scale),flexShrink:0}}>
-              <span style={{fontFamily:"'Share Tech Mono',monospace",fontWeight:700,
+              <span style={{fontFamily:"'Chakra Petch','Share Tech Mono',monospace",fontWeight:700,
                 fontSize:FS(scale>=0.75?12:10),
                 color:isLate?(dark?"#FF3344":"#DC2626"):isRisk?(dark?"#FFB200":"#B08D2E"):(dark?"#2BE564":"#16A34A")}}>
                 {fd(m.previsao_fim)}
               </span>
-              <span style={{fontFamily:"'Exo 2',sans-serif",fontWeight:700,
+              <span style={{fontFamily:"'Chakra Petch',sans-serif",fontWeight:700,
                 fontSize:FS(scale>=0.75?10:8),
                 color:isLate?(dark?"#FF3344":"#DC2626"):isRisk?(dark?"#FFB200":"#B08D2E"):(dark?"#2BE564":"#16A34A")}}>{">"}</span>
             </span>
@@ -557,7 +557,7 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
           {/* chips de tasks e badges (EXPRESS, VPS, tarefas reais) */}
           {tasks.length>0&&tasks.slice(0,scale>=0.75?5:3).map((t,i)=>(
             <span key={i} style={{
-              fontFamily:"'Exo 2',sans-serif",fontWeight:700,
+              fontFamily:"'Chakra Petch',sans-serif",fontWeight:700,
               fontSize:FS(scale>=0.75?9:8),letterSpacing:".07em",
               padding:`${Math.round(1.5*scale)}px ${Math.round(5*scale)}px`,
               borderRadius:2,flexShrink:0,maxWidth:`${Math.round(120*scale)}px`,
@@ -572,7 +572,7 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
             </span>
           ))}
           {tasks.length>(scale>=0.75?5:3)&&(
-            <span style={{fontFamily:"'Share Tech Mono',monospace",fontSize:FS(7.5),
+            <span style={{fontFamily:"'Chakra Petch','Share Tech Mono',monospace",fontSize:FS(7.5),
               color:dark?"rgba(140,140,140,.35)":"#bbb",flexShrink:0}}>
               +{tasks.length-(scale>=0.75?5:3)}
             </span>
@@ -585,12 +585,12 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
         {/* linha 2: imprevistos como chips (só se existirem) */}
         {imp.length>0&&(
           <div style={{display:"flex",alignItems:"center",gap:Math.round(4*scale),flexWrap:"wrap",overflow:"hidden"}}>
-            <span style={{fontFamily:"'Exo 2',sans-serif",fontWeight:700,
+            <span style={{fontFamily:"'Chakra Petch',sans-serif",fontWeight:700,
               fontSize:FS(7),letterSpacing:".12em",
               color:dark?"rgba(251,146,60,.5)":"#D97706",flexShrink:0}}>+{totalImpH}h</span>
             {imp.slice(0,scale>=0.75?3:2).map((iv,i)=>(
               <span key={i} style={{
-                fontFamily:"'Exo 2',sans-serif",fontWeight:600,
+                fontFamily:"'Chakra Petch',sans-serif",fontWeight:600,
                 fontSize:FS(scale>=0.75?8.5:7.5),letterSpacing:".04em",
                 padding:`${Math.round(1.5*scale)}px ${Math.round(5*scale)}px`,
                 borderRadius:2,flexShrink:0,
@@ -604,7 +604,7 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
               </span>
             ))}
             {imp.length>(scale>=0.75?3:2)&&(
-              <span style={{fontFamily:"'Share Tech Mono',monospace",fontSize:FS(7.5),
+              <span style={{fontFamily:"'Chakra Petch','Share Tech Mono',monospace",fontSize:FS(7.5),
                 color:dark?"rgba(251,146,60,.3)":"#D97706",flexShrink:0}}>
                 +{imp.length-(scale>=0.75?3:2)}
               </span>
@@ -620,7 +620,7 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
 function Pill({st, dark, scale, children}){
   const s = scale||1;
   return(
-    <span style={{fontFamily:"'Exo 2',sans-serif",fontWeight:700,
+    <span style={{fontFamily:"'Chakra Petch',sans-serif",fontWeight:700,
       fontSize:`${Math.round(9*s)}px`,letterSpacing:".09em",
       padding:`${Math.round(2*s)}px ${Math.round(6*s)}px`,
       borderRadius:2,color:st,
@@ -635,7 +635,7 @@ function Pill({st, dark, scale, children}){
 
 function BadgePillV2({color,bg,border,children}){
   return(
-    <span style={{fontFamily:"'Exo 2',sans-serif",fontWeight:700,fontSize:10,
+    <span style={{fontFamily:"'Chakra Petch',sans-serif",fontWeight:700,fontSize:10,
       letterSpacing:".1em",padding:"3px 7px",borderRadius:3,
       color,background:bg,border:`1px solid ${border}`,
       display:"inline-flex",alignItems:"center",gap:3,whiteSpace:"nowrap"}}>
@@ -705,7 +705,7 @@ function ReconCell({m, D, scale=1}){
               background:timerCol,
               boxShadow:`0 0 6px ${timerCol}`,
               animation:run?"blink 1.2s ease-in-out infinite":"none"}}/>
-            <span style={{fontFamily:"'Russo One',sans-serif",fontSize:"7px",fontWeight:800,
+            <span style={{fontFamily:"'Chakra Petch',sans-serif",fontSize:"7px",fontWeight:800,
               letterSpacing:"0.1em",padding:"1px 5px",
               color:run?"#22C55E":"#F59E0B",
               background:run?"rgba(34,197,94,0.12)":"rgba(245,158,11,0.12)",
@@ -714,20 +714,20 @@ function ReconCell({m, D, scale=1}){
               borderRadius:dark?0:"999px"}}>
               {run?"RUN":"PAUSED"}
             </span>
-            <span style={{fontFamily:"'Russo One',sans-serif",fontSize:"7px",fontWeight:700,
+            <span style={{fontFamily:"'Chakra Petch',sans-serif",fontSize:"7px",fontWeight:700,
               letterSpacing:"0.08em",padding:"1px 5px",
               color:accent,background:`rgba(${rgb},0.12)`,
               border:`1px solid rgba(${rgb},0.4)`,
               clipPath:dark?"polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)":"none",
               borderRadius:dark?0:"999px"}}>RECON</span>
-            {rLabel&&<span style={{fontFamily:"'Russo One',sans-serif",fontSize:"7px",fontWeight:700,
+            {rLabel&&<span style={{fontFamily:"'Chakra Petch',sans-serif",fontSize:"7px",fontWeight:700,
               letterSpacing:"0.08em",padding:"1px 5px",color:"#9b5cf6",
               background:"rgba(155,92,246,0.15)",border:"1px solid rgba(155,92,246,0.4)",
               clipPath:dark?"polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)":"none",
               borderRadius:dark?0:"999px"}}>{rLabel}</span>}
           </div>
           {/* timer pequeno */}
-          <span style={{fontFamily:"'DSDigital','DSEG7','Share Tech Mono',monospace",
+          <span style={{fontFamily:"'DSDigital','DSEG7','Chakra Petch','Share Tech Mono',monospace",
             fontSize:`clamp(9px,${1.1*scale}vw,${Math.round(16*scale)}px)`,
             fontWeight:400,color:timerCol,letterSpacing:"0.04em",
             fontVariantNumeric:"tabular-nums",flexShrink:0,
@@ -741,7 +741,7 @@ function ReconCell({m, D, scale=1}){
           alignItems:"center",justifyContent:"center",
           zIndex:1,gap:2,padding:"4px 0",textAlign:"center",minHeight:0}}>
           <div style={{
-            fontFamily:"'Russo One',sans-serif",
+            fontFamily:"'Chakra Petch',sans-serif",
             fontSize:`clamp(${Math.round(11*scale)}px,${1.9*scale}vw,${Math.round(26*scale)}px)`,
             fontWeight:900,
             color:dark?"#f0f0f0":"#0D0D0F",
@@ -749,7 +749,7 @@ function ReconCell({m, D, scale=1}){
             wordBreak:"break-all",textAlign:"center",maxWidth:"100%",
           }}>{m.serie||"—"}</div>
           <div style={{
-            fontFamily:"'Exo 2',sans-serif",
+            fontFamily:"'Chakra Petch',sans-serif",
             fontSize:`clamp(${Math.round(10*scale)}px,${1.2*scale}vw,${Math.round(17*scale)}px)`,
             fontWeight:700,color:dark?"rgba(200,200,200,0.80)":"#555",
             whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",maxWidth:"100%",
@@ -795,7 +795,7 @@ function ReconCell({m, D, scale=1}){
         {/* badges esquerda */}
         <div style={{display:"flex",alignItems:"center",gap:3}}>
           <span style={{
-            fontFamily:"'Russo One',sans-serif",fontSize:"7px",fontWeight:800,
+            fontFamily:"'Chakra Petch',sans-serif",fontSize:"7px",fontWeight:800,
             letterSpacing:"0.12em",padding:"2px 7px",
             color:accent,background:`rgba(${rgb},0.12)`,
             border:`1px solid rgba(${rgb},0.35)`,
@@ -803,7 +803,7 @@ function ReconCell({m, D, scale=1}){
             borderRadius:dark?0:"999px",
           }}>RECON</span>
           {rLabel&&<span style={{
-            fontFamily:"'Russo One',sans-serif",fontSize:"7px",fontWeight:800,
+            fontFamily:"'Chakra Petch',sans-serif",fontSize:"7px",fontWeight:800,
             letterSpacing:"0.1em",padding:"2px 6px",
             color:"#9b5cf6",background:"rgba(155,92,246,0.15)",
             border:"1px solid rgba(155,92,246,0.4)",
@@ -819,7 +819,7 @@ function ReconCell({m, D, scale=1}){
         alignItems:"center",justifyContent:"center",
         zIndex:1,gap:2,textAlign:"center",minHeight:0}}>
         <div style={{
-          fontFamily:"'Russo One',sans-serif",
+          fontFamily:"'Chakra Petch',sans-serif",
           fontSize:`clamp(${Math.round(11*scale)}px,${2.0*scale}vw,${Math.round(28*scale)}px)`,
           fontWeight:900,
           color:dark?"rgba(220,200,255,0.95)":"#2D1B5E",
@@ -836,7 +836,7 @@ function ReconCell({m, D, scale=1}){
           gap:5,flexWrap:"nowrap",maxWidth:"100%",overflow:"hidden",
         }}>
           <div style={{
-            fontFamily:"'Exo 2',sans-serif",
+            fontFamily:"'Chakra Petch',sans-serif",
             fontSize:`clamp(${Math.round(9*scale)}px,${1.1*scale}vw,${Math.round(16*scale)}px)`,
             fontWeight:700,
             color:dark?"rgba(200,180,240,0.75)":"#5B4A8A",
@@ -848,7 +848,7 @@ function ReconCell({m, D, scale=1}){
           </div>
           {tempoEstLbl&&(
             <span style={{
-              fontFamily:"'Russo One',sans-serif",
+              fontFamily:"'Chakra Petch',sans-serif",
               fontSize:`clamp(8px,${0.9*scale}vw,11px)`,
               fontWeight:900,
               color:"#F59E0B",
@@ -874,9 +874,9 @@ function ReconCell({m, D, scale=1}){
         }}>
           {m.previsao_inicio&&(
             <div style={{display:"flex",alignItems:"center",gap:3}}>
-              <span style={{fontFamily:"'Russo One',sans-serif",fontSize:"8px",
+              <span style={{fontFamily:"'Chakra Petch',sans-serif",fontSize:"8px",
                 color:"#4D9FFF",opacity:0.7,fontWeight:700}}>▶</span>
-              <span style={{fontFamily:"'Russo One',sans-serif",
+              <span style={{fontFamily:"'Chakra Petch',sans-serif",
                 fontSize:`clamp(${Math.round(8*scale)}px,${0.9*scale}vw,${Math.round(13*scale)}px)`,
                 fontWeight:800,color:"#4D9FFF",letterSpacing:"0.05em",
                 fontVariantNumeric:"tabular-nums"}}>
@@ -889,9 +889,9 @@ function ReconCell({m, D, scale=1}){
           )}
           {m.previsao_fim&&(
             <div style={{display:"flex",alignItems:"center",gap:3}}>
-              <span style={{fontFamily:"'Russo One',sans-serif",fontSize:"8px",
+              <span style={{fontFamily:"'Chakra Petch',sans-serif",fontSize:"8px",
                 color:"#22C55E",opacity:0.7,fontWeight:700}}>✓</span>
-              <span style={{fontFamily:"'Russo One',sans-serif",
+              <span style={{fontFamily:"'Chakra Petch',sans-serif",
                 fontSize:`clamp(${Math.round(8*scale)}px,${0.9*scale}vw,${Math.round(13*scale)}px)`,
                 fontWeight:800,color:"#22C55E",letterSpacing:"0.05em",
                 fontVariantNumeric:"tabular-nums"}}>
@@ -900,7 +900,7 @@ function ReconCell({m, D, scale=1}){
             </div>
           )}
           {!m.previsao_inicio&&!m.previsao_fim&&(
-            <span style={{fontFamily:"'Russo One',sans-serif",fontSize:"7px",
+            <span style={{fontFamily:"'Chakra Petch',sans-serif",fontSize:"7px",
               color:dark?"rgba(155,92,246,0.35)":"rgba(155,92,246,0.3)",letterSpacing:"0.1em"}}>
               — SEM DATA —
             </span>
@@ -975,7 +975,7 @@ function CalendarFila({items, D, concluidas=[]}){
                 background:isToday?(D.dark?`rgba(200,16,46,0.12)`:"rgba(200,16,46,0.06)"):(D.dark?D.sub+"33":"rgba(13,13,15,0.03)"),
                 borderBottom:`1px solid ${isToday?(D.dark?"rgba(200,16,46,0.4)":"rgba(200,16,46,0.2)"):(D.dark?D.line:"rgba(13,13,15,0.06)")}`,
                 display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-                <span style={{fontFamily:"'Russo One',sans-serif",fontSize:"10px",fontWeight:900,
+                <span style={{fontFamily:"'Chakra Petch',sans-serif",fontSize:"10px",fontWeight:900,
                   color:isToday?"#c8102e":D.muted,letterSpacing:"0.1em",textTransform:"uppercase"}}>
                   {d.toLocaleDateString("pt-PT",{weekday:"short"})}
                 </span>
@@ -993,7 +993,7 @@ function CalendarFila({items, D, concluidas=[]}){
                     const conDia=concluidas.filter(m=>{const raw=m.dataConclusao;if(!raw)return false;try{return new Date(raw).toISOString().slice(0,10)===dayKey;}catch{return false;}});
                     return isPast&&conDia.length>0
                       ?<div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",paddingTop:"8px",gap:2}}>
-                          <div style={{fontFamily:"'Russo One',sans-serif",fontSize:"13px",fontWeight:900,color:D.green,textShadow:`0 0 8px rgba(34,197,94,0.5)`}}>{conDia.length}</div>
+                          <div style={{fontFamily:"'Chakra Petch',sans-serif",fontSize:"13px",fontWeight:900,color:D.green,textShadow:`0 0 8px rgba(34,197,94,0.5)`}}>{conDia.length}</div>
                           <div style={{fontFamily:"monospace",fontSize:"7px",color:`rgba(34,197,94,0.6)`,letterSpacing:"0.1em"}}>CONCLUÍDAS</div>
                         </div>
                       :<div style={{fontFamily:"monospace",fontSize:"9px",color:D.sub,textAlign:"center",paddingTop:"8px"}}>—</div>;
@@ -1007,7 +1007,7 @@ function CalendarFila({items, D, concluidas=[]}){
                       boxShadow:D.dark?"none":"0 1px 2px rgba(13,13,15,0.04)"}}>
                       {/* NS grande */}
                       <div style={{
-                        fontFamily:"'Russo One',sans-serif",
+                        fontFamily:"'Chakra Petch',sans-serif",
                         fontSize:"11px",fontWeight:D.dark?900:600,
                         color:D.dark?D.blue:"#0D0D0F",
                         letterSpacing:D.dark?"0.05em":"-0.01em",
@@ -1025,7 +1025,7 @@ function CalendarFila({items, D, concluidas=[]}){
                         <div style={{display:"flex",alignItems:"center",gap:3,marginTop:"3px"}}>
                           <span style={{fontFamily:"monospace",fontSize:"7px",color:"#22C55E",opacity:0.8}}>✓</span>
                           <span style={{
-                            fontFamily:"'Russo One',sans-serif",
+                            fontFamily:"'Chakra Petch',sans-serif",
                             fontSize:"8px",fontWeight:D.dark?700:600,
                             color:"#16A34A",
                             letterSpacing:D.dark?"0.06em":"0.02em",
@@ -1090,7 +1090,7 @@ function CalendarFila({items, D, concluidas=[]}){
                     display:"flex",alignItems:"center",gap:"10px",overflow:"hidden"}}>
                     {m.prioridade&&<Flag size={9} color={D.yellow} style={{flexShrink:0}}/>}
                     <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontFamily:"'Russo One',sans-serif",fontSize:"12px",fontWeight:800,
+                      <div style={{fontFamily:"'Chakra Petch',sans-serif",fontSize:"12px",fontWeight:800,
                         color:D.blue,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
                         {m.serie||"—"}
                       </div>
@@ -1130,9 +1130,9 @@ function CalendarFila({items, D, concluidas=[]}){
             <div>
               <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"8px"}}>
                 <div style={{width:"3px",height:"18px",borderRadius:"2px",background:`linear-gradient(180deg,${D.blue},${D.pink})`}}/>
-                <span style={{fontFamily:"'Russo One',sans-serif",fontSize:"10px",fontWeight:800,
+                <span style={{fontFamily:"'Chakra Petch',sans-serif",fontSize:"10px",fontWeight:800,
                   letterSpacing:"0.1em",color:D.blue}}>SEMANAS SEGUINTES</span>
-                <span style={{fontFamily:"'Russo One',sans-serif",fontSize:"14px",fontWeight:900,color:D.blue}}>{futuras.length}</span>
+                <span style={{fontFamily:"'Chakra Petch',sans-serif",fontSize:"14px",fontWeight:900,color:D.blue}}>{futuras.length}</span>
                 <div style={{flex:1,height:"1px",background:`linear-gradient(90deg,${D.blue}44,transparent)`}}/>
               </div>
               <div style={{display:"flex",flexDirection:"column",gap:"4px"}}>
@@ -1149,18 +1149,18 @@ function CalendarFila({items, D, concluidas=[]}){
                       <div style={{flexShrink:0,textAlign:"center",
                         background:`${D.blue}14`,border:`1px solid ${D.blue}33`,
                         borderRadius:"6px",padding:"5px 10px",minWidth:"72px"}}>
-                        <div style={{fontFamily:"'Russo One',sans-serif",fontSize:"9px",fontWeight:900,
+                        <div style={{fontFamily:"'Chakra Petch',sans-serif",fontSize:"9px",fontWeight:900,
                           color:D.blue,letterSpacing:"0.08em",textTransform:"uppercase"}}>
                           {dt.toLocaleDateString("pt-PT",{weekday:"short"})}
                         </div>
-                        <div style={{fontFamily:"'Russo One',sans-serif",fontSize:"13px",fontWeight:900,
+                        <div style={{fontFamily:"'Chakra Petch',sans-serif",fontSize:"13px",fontWeight:900,
                           color:D.blue,letterSpacing:"0.04em",marginTop:"1px"}}>
                           {dt.toLocaleDateString("pt-PT",{day:"2-digit",month:"2-digit"})}
                         </div>
                       </div>
                       {/* Info máquina */}
                       <div style={{flex:1,minWidth:0}}>
-                        <div style={{fontFamily:"'Russo One',sans-serif",fontSize:"13px",fontWeight:800,
+                        <div style={{fontFamily:"'Chakra Petch',sans-serif",fontSize:"13px",fontWeight:800,
                           color:D.text,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
                           textShadow:`0 0 8px ${D.blue}33`}}>
                           {m.serie||"—"}
@@ -1270,7 +1270,7 @@ function RowItem({m, idx, D, forceCategory=null, showTimer=true, showDate=false}
             boxShadow:isCon?`0 0 8px #22C55E`:run?`0 0 8px #22C55E`:paused?`0 0 6px rgba(245,158,11,0.6)`:`0 0 6px rgba(${rgb},0.6)`,
             animation:run?"blink 1.2s ease-in-out infinite":"none"}}/>
           <span style={{
-            fontFamily:"'Russo One',sans-serif",fontSize:"8px",fontWeight:800,letterSpacing:"0.12em",flexShrink:0,
+            fontFamily:"'Chakra Petch',sans-serif",fontSize:"8px",fontWeight:800,letterSpacing:"0.12em",flexShrink:0,
             padding:"2px 7px",
             background:isCon?"rgba(34,197,94,0.12)":run?"rgba(34,197,94,0.12)":paused?"rgba(245,158,11,0.12)":`rgba(${rgb},0.12)`,
             border:`1px solid ${isCon?"rgba(34,197,94,0.4)":run?"rgba(34,197,94,0.4)":paused?"rgba(245,158,11,0.4)":`rgba(${rgb},0.4)`}`,
@@ -1280,19 +1280,19 @@ function RowItem({m, idx, D, forceCategory=null, showTimer=true, showDate=false}
             {isCon?"DONE":run?"RUN":paused?"PAUSED":"IDLE"}
           </span>
           <span style={{
-            fontFamily:"'Russo One',sans-serif",fontSize:"8px",fontWeight:700,letterSpacing:"0.08em",
+            fontFamily:"'Chakra Petch',sans-serif",fontSize:"8px",fontWeight:700,letterSpacing:"0.08em",
             padding:"2px 7px",color:accent,background:`rgba(${rgb},0.12)`,
             border:`1px solid rgba(${rgb},0.4)`,
             clipPath:dark?"polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)":"none",
             borderRadius:dark?0:"999px",textTransform:"uppercase",whiteSpace:"nowrap",flexShrink:0}}>
             {cat.label}
           </span>
-          {rLabel&&<span style={{fontFamily:"'Russo One',sans-serif",fontSize:"8px",fontWeight:700,
+          {rLabel&&<span style={{fontFamily:"'Chakra Petch',sans-serif",fontSize:"8px",fontWeight:700,
             padding:"2px 6px",color:CAT.recon.accent,
             background:"rgba(155,92,246,0.15)",border:"1px solid rgba(155,92,246,0.4)",
             clipPath:dark?"polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)":"none",
             borderRadius:dark?0:"999px",flexShrink:0}}>{rLabel}</span>}
-          {m.prioridade&&catKey!=="prio"&&<span style={{fontFamily:"'Russo One',sans-serif",fontSize:"8px",fontWeight:700,
+          {m.prioridade&&catKey!=="prio"&&<span style={{fontFamily:"'Chakra Petch',sans-serif",fontSize:"8px",fontWeight:700,
             padding:"2px 6px",color:CAT.prio.accent,
             background:"rgba(239,68,68,0.15)",border:"1px solid rgba(239,68,68,0.4)",
             clipPath:dark?"polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)":"none",
@@ -1300,7 +1300,7 @@ function RowItem({m, idx, D, forceCategory=null, showTimer=true, showDate=false}
         </div>
         {/* Timer topo direito */}
         {timerDisplay&&(
-          <div style={{fontFamily:"'DSDigital','DSEG7','Share Tech Mono',monospace",fontSize:"clamp(12px,1.6vw,22px)",
+          <div style={{fontFamily:"'DSDigital','DSEG7','Chakra Petch','Share Tech Mono',monospace",fontSize:"clamp(12px,1.6vw,22px)",
             fontWeight:400,flexShrink:0,color:timerFinalCol,letterSpacing:"0.04em",
             fontVariantNumeric:"tabular-nums",
             textShadow:dark?`0 0 14px ${timerFinalCol}99`:"none"}}>
@@ -1313,7 +1313,7 @@ function RowItem({m, idx, D, forceCategory=null, showTimer=true, showDate=false}
             {m.previsao_inicio&&(
               <div style={{display:"flex",alignItems:"center",gap:3}}>
                 <span style={{fontFamily:"monospace",fontSize:"7px",color:"#4D9FFF",opacity:0.8}}>▶</span>
-                <span style={{fontFamily:"'Russo One',sans-serif",fontSize:"10px",fontWeight:800,
+                <span style={{fontFamily:"'Chakra Petch',sans-serif",fontSize:"10px",fontWeight:800,
                   color:"#4D9FFF",letterSpacing:"0.06em",
                   textShadow:dark?"0 0 6px rgba(77,159,255,0.5)":"none",whiteSpace:"nowrap"}}>
                   {new Date(m.previsao_inicio+"T12:00:00").toLocaleDateString("pt-PT",{day:"2-digit",month:"2-digit"})}
@@ -1323,7 +1323,7 @@ function RowItem({m, idx, D, forceCategory=null, showTimer=true, showDate=false}
             {m.previsao_fim&&(
               <div style={{display:"flex",alignItems:"center",gap:3}}>
                 <span style={{fontFamily:"monospace",fontSize:"7px",color:"#22C55E",opacity:0.8}}>✓</span>
-                <span style={{fontFamily:"'Russo One',sans-serif",fontSize:"10px",fontWeight:800,
+                <span style={{fontFamily:"'Chakra Petch',sans-serif",fontSize:"10px",fontWeight:800,
                   color:"#22C55E",letterSpacing:"0.06em",
                   textShadow:dark?"0 0 6px rgba(34,197,94,0.5)":"none",whiteSpace:"nowrap"}}>
                   {new Date(m.previsao_fim+"T12:00:00").toLocaleDateString("pt-PT",{day:"2-digit",month:"2-digit"})}
@@ -1340,7 +1340,7 @@ function RowItem({m, idx, D, forceCategory=null, showTimer=true, showDate=false}
         zIndex:1,gap:4,padding:"6px 0",textAlign:"center",minHeight:0}}>
         {/* NS */}
         <div style={{
-          fontFamily:"'Russo One',sans-serif",
+          fontFamily:"'Chakra Petch',sans-serif",
           fontSize:"clamp(13px,1.8vw,26px)",fontWeight:900,
           color:dark?"#f5f5f5":"#0D0D0F",
           letterSpacing:"0.1em",lineHeight:1.1,
@@ -1351,7 +1351,7 @@ function RowItem({m, idx, D, forceCategory=null, showTimer=true, showDate=false}
         </div>
         {/* Modelo */}
         <div style={{
-          fontFamily:dark?"'Exo 2',sans-serif":"'Exo 2',sans-serif",
+          fontFamily:dark?"'Chakra Petch',sans-serif":"'Chakra Petch',sans-serif",
           fontSize:"clamp(10px,1.1vw,15px)",fontWeight:dark?700:600,
           color:dark?"rgba(200,200,200,0.80)":"#555",
           letterSpacing:dark?"0.06em":"0.01em",
@@ -1397,7 +1397,7 @@ function SecLabel({label,D}){
       <div style={{width:D.dark?"2px":"2px",height:"12px",borderRadius:"2px",flexShrink:0,
         background:D.dark?`linear-gradient(180deg,${D.pink},${D.muted})`:"#C8102E",opacity:D.dark?1:0.6}}/>
       <span style={{
-        fontFamily:D.dark?"'Exo 2',sans-serif":"'Exo 2',sans-serif",
+        fontFamily:D.dark?"'Chakra Petch',sans-serif":"'Chakra Petch',sans-serif",
         fontSize:"clamp(11px,0.82vw,13px)",fontWeight:700,
         letterSpacing:D.dark?"0.12em":"0.14em",
         color:D.dark?D.muted:"#8E8E93",textTransform:"uppercase"}}>
@@ -1432,7 +1432,7 @@ function SlideHead({title,icon,color,pulse,count,D}){
       </div>
 
       <span style={{
-        fontFamily:"'Russo One',sans-serif",
+        fontFamily:"'Chakra Petch',sans-serif",
         fontSize:"clamp(18px,1.7vw,28px)",fontWeight:dark?900:700,
         letterSpacing:dark?"0.18em":"-0.03em",
         color:dark?"#e8e8e8":"#0D0D0F",
@@ -1449,12 +1449,12 @@ function SlideHead({title,icon,color,pulse,count,D}){
           clipPath:dark?"polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)":"none",
           borderRadius:dark?0:"8px"}}>
           <span style={{
-            fontFamily:"'Russo One',sans-serif",
+            fontFamily:"'Chakra Petch',sans-serif",
             fontSize:"clamp(9px,0.75vw,11px)",fontWeight:700,
             letterSpacing:dark?"0.18em":"0.02em",
             color:dark?`${color}cc`:"#5C5C61"}}>×</span>
           <span style={{
-            fontFamily:"'Russo One',sans-serif",
+            fontFamily:"'Chakra Petch',sans-serif",
             fontSize:"clamp(20px,1.9vw,30px)",fontWeight:dark?900:700,
             color:dark?color:"#0D0D0F",
             textShadow:dark?`0 0 12px ${color}88`:"none",
@@ -1494,7 +1494,7 @@ function Empty({label,D}){
     <div style={{position:"relative",display:"flex",alignItems:"center",justifyContent:"center",flex:1,
       flexDirection:"column",gap:"10px",
       color:D.dark?D.muted:"#8E8E93",
-      fontFamily:"'Russo One',sans-serif",
+      fontFamily:"'Chakra Petch',sans-serif",
       fontSize:"clamp(13px,1.1vw,17px)",fontWeight:600,
       letterSpacing:D.dark?"0.22em":"0.05em",
       textTransform:"uppercase"}}>
@@ -1596,7 +1596,7 @@ function GanttChart({ machines, D }) {
   if (blocks.length === 0) {
     return (
       <div style={{display:"flex",alignItems:"center",justifyContent:"center",flex:1,
-        color:"rgba(180,180,180,0.5)",fontFamily:"'Russo One',sans-serif",fontSize:"11px",letterSpacing:"0.2em"}}>
+        color:"rgba(180,180,180,0.5)",fontFamily:"'Chakra Petch',sans-serif",fontSize:"11px",letterSpacing:"0.2em"}}>
         SEM PREVISÕES DEFINIDAS · CONFIGURAR NO WATCHER
       </div>
     );
@@ -1631,7 +1631,7 @@ function GanttChart({ machines, D }) {
                 position:"absolute", top:"50%", left:"50%",
                 transform:"translate(-50%,-50%)",
                 textAlign:"center",
-                fontFamily:"'Russo One',sans-serif",
+                fontFamily:"'Chakra Petch',sans-serif",
                 fontSize: isToday ? "11px" : "9px",
                 fontWeight: isToday ? (D.dark?900:700) : 600,
                 color: isToday ? (D.dark?"#e8e8e8":"#C8102E") : isWE ? (D.dark?"rgba(210,210,210,0.4)":"#B8B8BD") : (D.dark?"rgba(180,180,180,0.6)":"#8E8E93"),
@@ -1688,7 +1688,7 @@ function GanttChart({ machines, D }) {
                   position:"relative",overflow:"hidden"}}>
                   {count>0&&!isWE&&<div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center"}}>
                     <span style={{
-                      fontFamily:"'Russo One',sans-serif",
+                      fontFamily:"'Chakra Petch',sans-serif",
                       fontSize:"7px",fontWeight:D.dark?900:600,
                       color:overload?"#FCA5A5":warn?"#FCD34D":(D.dark?D.muted:"#8E8E93"),
                       letterSpacing:D.dark?"0.05em":"0.02em"}}>
@@ -1772,7 +1772,7 @@ function GanttChart({ machines, D }) {
                   background:"#22C55E",boxShadow:"0 0 8px #22C55E",
                   animation:"blink 1s ease-in-out infinite"}}/>}
                 {!isThin&&<span style={{
-                  fontFamily:"'Russo One',sans-serif",
+                  fontFamily:"'Chakra Petch',sans-serif",
                   fontSize:"11px",fontWeight:D.dark?900:600,
                   color:"#fff",letterSpacing:D.dark?"0.06em":"-0.01em",
                   whiteSpace:"nowrap",flexShrink:0,
@@ -1813,7 +1813,7 @@ function GanttChart({ machines, D }) {
                       background:"#22C55E",boxShadow:"0 0 6px #22C55E",
                       animation:"blink 1s ease-in-out infinite"}}/>}
                     <span style={{
-                      fontFamily:"'Russo One',sans-serif",
+                      fontFamily:"'Chakra Petch',sans-serif",
                       fontSize:"10px",fontWeight:D.dark?900:600,
                       color:D.dark?"#e8e8e8":"#0D0D0F",
                       letterSpacing:D.dark?"0.05em":"-0.01em",
@@ -1872,7 +1872,7 @@ function GanttChart({ machines, D }) {
             background:"linear-gradient(180deg,#ff2240,#d0d0d0)",boxShadow:"0 0 8px rgba(255,34,64,0.8)"}}/>
           HOJE
         </span>
-        <span style={{marginLeft:"auto",fontFamily:"'Russo One',sans-serif",fontSize:"8px",color:D.muted}}>
+        <span style={{marginLeft:"auto",fontFamily:"'Chakra Petch',sans-serif",fontSize:"8px",color:D.muted}}>
           {blocks.length} MÁQUINAS · {blocks.filter(b=>b.isActive).length} EM CURSO · {blocks.filter(b=>!b.isActive).length} FILA
         </span>
       </div>
@@ -1903,7 +1903,7 @@ function AlmocoClock(){
   const s=String(t.getSeconds()).padStart(2,"0");
   return(
     <div style={{
-      fontFamily:"'Russo One',sans-serif",
+      fontFamily:"'Chakra Petch',sans-serif",
       fontSize:"clamp(36px,6vw,72px)",fontWeight:900,
       color:"#FF2D78",letterSpacing:"0.12em",
       textShadow:"0 0 14px rgba(255,45,120,0.45)",
@@ -2051,13 +2051,13 @@ export default function AoVivo(){
                         borderBottom:`2px solid ${col.color}`,
                         borderRadius:dark?"4px 4px 0 0":"10px 10px 0 0"}}>
                         <span style={{fontSize:"15px",lineHeight:1}}>{col.emoji}</span>
-                        <span style={{fontFamily:"'Russo One',sans-serif",
+                        <span style={{fontFamily:"'Chakra Petch',sans-serif",
                           fontSize:"9px",fontWeight:800,color:col.color,
                           letterSpacing:dark?"0.12em":"0.06em",
                           textTransform:"uppercase",flex:1,lineHeight:1.2}}>{col.label}</span>
                         {/* contador */}
                         {items.length>0&&(
-                          <span style={{fontFamily:"'Russo One',sans-serif",
+                          <span style={{fontFamily:"'Chakra Petch',sans-serif",
                             fontSize:"16px",fontWeight:900,color:col.color,
                             lineHeight:1,textShadow:dark?`0 0 10px ${col.color}88`:"none"}}>
                             {items.length}
@@ -2069,7 +2069,7 @@ export default function AoVivo(){
                         {items.length===0?(
                           <div style={{display:"flex",alignItems:"center",justifyContent:"center",
                             height:"60px",opacity:0.25}}>
-                            <span style={{fontFamily:"'Russo One',sans-serif",fontSize:"8px",
+                            <span style={{fontFamily:"'Chakra Petch',sans-serif",fontSize:"8px",
                               letterSpacing:"0.15em",color:col.color}}>—</span>
                           </div>
                         ):items.map((m,i)=>(
@@ -2150,12 +2150,12 @@ export default function AoVivo(){
         }}>
           {emoji&&<span style={{fontSize:"13px"}}>{emoji}</span>}
           <span style={{
-            fontFamily:"'Russo One',sans-serif",
+            fontFamily:"'Chakra Petch',sans-serif",
             fontSize:"clamp(11px,1.1vw,15px)",fontWeight:800,
             letterSpacing:"0.18em",color,textTransform:"uppercase",
           }}>{text}</span>
           <span style={{
-            fontFamily:"'Russo One',sans-serif",
+            fontFamily:"'Chakra Petch',sans-serif",
             fontSize:"clamp(11px,1.0vw,14px)",fontWeight:900,
             color,opacity:0.55,
           }}>· {count}</span>
@@ -2249,16 +2249,16 @@ export default function AoVivo(){
                         }}>
                           {/* ✓ badge */}
                           <div style={{position:"absolute",top:4,right:6,
-                            fontFamily:"'Russo One',sans-serif",fontSize:"7px",fontWeight:800,
+                            fontFamily:"'Chakra Petch',sans-serif",fontSize:"7px",fontWeight:800,
                             color:"#22C55E",opacity:0.5}}>✓</div>
                           {rl&&<div style={{position:"absolute",top:4,left:6,
-                            fontFamily:"'Russo One',sans-serif",fontSize:"6px",fontWeight:800,
+                            fontFamily:"'Chakra Petch',sans-serif",fontSize:"6px",fontWeight:800,
                             padding:"1px 4px",color:"#9b5cf6",
                             background:"rgba(155,92,246,0.15)",border:"1px solid rgba(155,92,246,0.35)"}}>
                             {rl}
                           </div>}
                           <div style={{
-                            fontFamily:"'Russo One',sans-serif",
+                            fontFamily:"'Chakra Petch',sans-serif",
                             fontSize:`clamp(${Math.round(10*scaleC)}px,${1.8*scaleC}vw,${Math.round(24*scaleC)}px)`,
                             fontWeight:900,
                             color:dark?"#a7f3d0":"#065f46",
@@ -2266,7 +2266,7 @@ export default function AoVivo(){
                             wordBreak:"break-all",textAlign:"center",maxWidth:"100%",
                           }}>{m.serie||"—"}</div>
                           <div style={{
-                            fontFamily:"'Exo 2',sans-serif",
+                            fontFamily:"'Chakra Petch',sans-serif",
                             fontSize:`clamp(${Math.round(9*scaleC)}px,${1.1*scaleC}vw,${Math.round(15*scaleC)}px)`,
                             fontWeight:700,
                             color:dark?"rgba(134,239,172,0.65)":"#16a34a",
@@ -2335,7 +2335,7 @@ export default function AoVivo(){
                   }}>
                     {/* nº de ordem */}
                     <div style={{position:"absolute",top:4,right:6,
-                      fontFamily:"'Share Tech Mono',monospace",
+                      fontFamily:"'Chakra Petch','Share Tech Mono',monospace",
                       fontSize:"8px",fontWeight:400,color:`rgba(56,189,248,0.35)`,letterSpacing:"0.1em"}}>
                       {String(i+1).padStart(2,"0")}
                     </div>
@@ -2343,7 +2343,7 @@ export default function AoVivo(){
                     <div style={{display:"flex",flexDirection:"column",alignItems:"center",
                       justifyContent:"center",padding:"4px 0 2px",textAlign:"center"}}>
                       <div style={{
-                        fontFamily:"'Russo One',sans-serif",
+                        fontFamily:"'Chakra Petch',sans-serif",
                         fontWeight:400,
                         fontSize:"clamp(12px,1.3vw,18px)",
                         color:D.dark?"#e0f2fe":"#0D0D0F",
@@ -2354,7 +2354,7 @@ export default function AoVivo(){
                         {m.serie||"—"}
                       </div>
                       <div style={{
-                        fontFamily:"'Exo 2',sans-serif",
+                        fontFamily:"'Chakra Petch',sans-serif",
                         fontWeight:400,fontSize:"clamp(8px,0.8vw,11px)",
                         letterSpacing:".22em",textTransform:"uppercase",
                         color:D.dark?"rgba(148,209,242,0.55)":"#555",
@@ -2371,13 +2371,13 @@ export default function AoVivo(){
                         {/* timer LCD */}
                         <div style={{position:"relative",display:"inline-block"}}>
                           <div style={{
-                            fontFamily:"'DSDigital','DSEG7','Share Tech Mono',monospace",fontWeight:400,
+                            fontFamily:"'DSDigital','DSEG7','Chakra Petch','Share Tech Mono',monospace",fontWeight:400,
                             fontSize:"clamp(14px,1.4vw,20px)",letterSpacing:".04em",lineHeight:1,
                             color:D.dark?"rgba(56,189,248,0.12)":"rgba(0,0,0,0.07)",
                             position:"absolute",top:0,right:0,userSelect:"none",
                           }}>{"88:88:88"}</div>
                           <div style={{
-                            fontFamily:"'DSDigital','DSEG7','Share Tech Mono',monospace",fontWeight:400,
+                            fontFamily:"'DSDigital','DSEG7','Chakra Petch','Share Tech Mono',monospace",fontWeight:400,
                             fontSize:"clamp(14px,1.4vw,20px)",letterSpacing:".04em",lineHeight:1,
                             color:"#38BDF8",position:"relative",zIndex:1,
                             textShadow:D.dark?"0 0 10px rgba(56,189,248,0.7),0 0 20px rgba(56,189,248,0.35)":"none",
@@ -2395,12 +2395,12 @@ export default function AoVivo(){
                           return (
                             <div style={{display:"flex",alignItems:"center",gap:4}}>
                               <span style={{
-                                fontFamily:"'Exo 2',sans-serif",fontSize:"clamp(8px,0.7vw,10px)",
+                                fontFamily:"'Chakra Petch',sans-serif",fontSize:"clamp(8px,0.7vw,10px)",
                                 fontWeight:400,letterSpacing:".14em",
                                 color:D.dark?"rgba(255,255,255,0.35)":"#aaa",
                               }}>META</span>
                               <span style={{
-                                fontFamily:"'Share Tech Mono',monospace",
+                                fontFamily:"'Chakra Petch','Share Tech Mono',monospace",
                                 fontSize:"clamp(8px,0.75vw,11px)",fontWeight:400,
                                 letterSpacing:".06em",color:overColor,
                               }}>
@@ -2430,7 +2430,7 @@ export default function AoVivo(){
                                 flexShrink:0,lineHeight:1,
                               }}>✓</span>
                               <span style={{
-                                fontFamily:"'Exo 2',sans-serif",
+                                fontFamily:"'Chakra Petch',sans-serif",
                                 fontSize:"clamp(9px,0.85vw,12px)",
                                 fontWeight:500,
                                 letterSpacing:".04em",
@@ -2445,7 +2445,7 @@ export default function AoVivo(){
                           ))}
                           {more>0&&(
                             <span style={{
-                              fontFamily:"'Share Tech Mono',monospace",
+                              fontFamily:"'Chakra Petch','Share Tech Mono',monospace",
                               fontSize:"9px",color:"rgba(56,189,248,0.40)",
                             }}>
                               +{more} tarefas
@@ -2459,17 +2459,17 @@ export default function AoVivo(){
                     <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",
                       gap:4,marginTop:"auto",flexWrap:"nowrap",overflow:"hidden"}}>
                       <div style={{display:"flex",gap:3,alignItems:"center",overflow:"hidden"}}>
-                        {rLabel&&<span style={{fontFamily:"'Russo One',sans-serif",fontSize:"7px",fontWeight:600,
+                        {rLabel&&<span style={{fontFamily:"'Chakra Petch',sans-serif",fontSize:"7px",fontWeight:600,
                           padding:"1px 4px",color:CAT.recon.accent,
                           background:`rgba(155,92,246,0.15)`,border:`1px solid rgba(155,92,246,0.35)`,
                           whiteSpace:"nowrap",flexShrink:0,borderRadius:2}}>{rLabel}</span>}
-                        {m.prioridade&&<span style={{fontFamily:"'Russo One',sans-serif",fontSize:"7px",fontWeight:600,
+                        {m.prioridade&&<span style={{fontFamily:"'Chakra Petch',sans-serif",fontSize:"7px",fontWeight:600,
                           padding:"1px 4px",color:"#F59E0B",
                           background:`rgba(245,158,11,0.15)`,border:`1px solid rgba(245,158,11,0.35)`,
                           whiteSpace:"nowrap",flexShrink:0,borderRadius:2}}>⚑</span>}
                       </div>
                       <div style={{
-                        fontFamily:"'Share Tech Mono',monospace",
+                        fontFamily:"'Chakra Petch','Share Tech Mono',monospace",
                         fontSize:"8px",fontWeight:400,
                         color:D.dark?"rgba(56,189,248,0.55)":"#0284c7",
                         letterSpacing:"0.04em",flexShrink:0,whiteSpace:"nowrap"}}>
@@ -2515,7 +2515,7 @@ export default function AoVivo(){
 
   const SHARED_STYLE = (
     <style>{`
-      @import url('https://fonts.googleapis.com/css2?family=Russo+One&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Share+Tech+Mono&family=Orbitron:wght@600;700;800;900&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=Orbitron:wght@600;700;800;900&family=Share+Tech+Mono&display=swap');
       /* DSDigital / DSEG7Classic — timer LCD 7-segment (fonte da imagem) */
       @font-face{font-family:'DSDigital';src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Regular.woff2') format('woff2');font-weight:400;font-display:swap;}
       @font-face{font-family:'DSDigital';src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2') format('woff2');font-weight:700;font-display:swap;}
@@ -2541,7 +2541,7 @@ export default function AoVivo(){
       position:"fixed",inset:0,
       background:"linear-gradient(135deg,#030803 0%,#061006 50%,#030803 100%)",
       display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
-      fontFamily:"'Russo One',sans-serif",gap:20,overflow:"hidden",
+      fontFamily:"'Chakra Petch',sans-serif",gap:20,overflow:"hidden",
     }}>
       {SHARED_STYLE}
       {/* scanlines */}
@@ -2593,7 +2593,7 @@ export default function AoVivo(){
 
   return(
     <div style={{width:"100vw",height:"100vh",background:D.dark?D.bg:`radial-gradient(1200px 600px at 85% -10%, rgba(200,16,46,0.04), transparent 60%), radial-gradient(900px 500px at 10% 110%, rgba(176,141,46,0.04), transparent 60%), #F2F2F4`,color:D.text,
-      display:"flex",flexDirection:"column",fontFamily:D.dark?"'Exo 2',sans-serif":"'Exo 2',sans-serif",
+      display:"flex",flexDirection:"column",fontFamily:D.dark?"'Chakra Petch',sans-serif":"'Chakra Petch',sans-serif",
       overflow:"hidden",position:"fixed",top:0,left:0,inset:0}}>
       {/* ARMOR BACKGROUND — scanlines + hex grid + vignette */}
       {dark&&<div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:0,
@@ -2602,7 +2602,7 @@ export default function AoVivo(){
         backgroundImage:`linear-gradient(60deg,transparent 49%,rgba(210,210,210,0.015) 49%,rgba(210,210,210,0.015) 51%,transparent 51%),linear-gradient(-60deg,transparent 49%,rgba(210,210,210,0.015) 49%,rgba(210,210,210,0.015) 51%,transparent 51%)`,
         backgroundSize:"40px 70px"}}/>}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Russo+One&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Share+Tech+Mono&family=Orbitron:wght@600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=Orbitron:wght@600;700;800;900&family=Share+Tech+Mono&display=swap');
       /* DSDigital / DSEG7Classic — timer LCD 7-segment (fonte da imagem) */
       @font-face{font-family:'DSDigital';src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Regular.woff2') format('woff2');font-weight:400;font-display:swap;}
       @font-face{font-family:'DSDigital';src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2') format('woff2');font-weight:700;font-display:swap;}
@@ -2659,7 +2659,7 @@ export default function AoVivo(){
             <div style={{width:"5px",height:"5px",background:D.green,
               clipPath:"polygon(50% 0, 100% 50%, 50% 100%, 0 50%)",
               animation:"blink 1.2s ease-in-out infinite"}}/>
-            <span style={{fontFamily:"'Russo One',sans-serif",fontSize:"8px",fontWeight:800,
+            <span style={{fontFamily:"'Chakra Petch',sans-serif",fontSize:"8px",fontWeight:800,
               color:D.green,letterSpacing:"0.15em"}}>LIVE</span>
           </div>
 
@@ -2683,7 +2683,7 @@ export default function AoVivo(){
               padding:"3px 8px",cursor:"pointer",color:paused?D.yellow:D.text,
               display:"flex",alignItems:"center",gap:"4px",borderRadius:dark?0:"8px"}}>
               {paused?<Play size={10}/>:<Pause size={10}/>}
-              <span style={{fontFamily:"'Russo One',sans-serif",fontSize:"9px",fontWeight:700,letterSpacing:"0.1em"}}>
+              <span style={{fontFamily:"'Chakra Petch',sans-serif",fontSize:"9px",fontWeight:700,letterSpacing:"0.1em"}}>
                 {paused?"RETOMAR":"PAUSAR"}
               </span>
             </button>
@@ -2740,7 +2740,7 @@ export default function AoVivo(){
               <div style={{position:"absolute",top:"50%",left:0,transform:"translateY(-50%)",
                 width:"2px",height:"60%",background:k.c,opacity:0.25}}/>
               <div style={{
-                fontFamily:"'Russo One',sans-serif",
+                fontFamily:"'Chakra Petch',sans-serif",
                 fontSize:"clamp(20px,1.95vw,32px)",fontWeight:700,
                 color:isActive?k.c:(D.dark?k.c:"#0D0D0F"),
                 textShadow:D.dark?(isActive?`0 0 14px ${k.c}aa`:`0 0 8px ${k.c}44`):"none",
@@ -2749,7 +2749,7 @@ export default function AoVivo(){
                 {loading?"··":String(k.v).padStart(2,"0")}
               </div>
               <div style={{
-                fontFamily:D.dark?"'Exo 2',sans-serif":"'Exo 2',sans-serif",
+                fontFamily:D.dark?"'Chakra Petch',sans-serif":"'Chakra Petch',sans-serif",
                 fontSize:"clamp(9px,0.72vw,11px)",fontWeight:D.dark?600:700,
                 color:isActive?k.c:D.muted,
                 letterSpacing:D.dark?"0.08em":"0.14em",textAlign:"center",
@@ -2782,7 +2782,7 @@ export default function AoVivo(){
         {/* Slide counter big — canto superior direito do conteúdo */}
         <div style={{position:"absolute",top:"clamp(8px,0.9vw,14px)",right:"clamp(18px,1.8vw,28px)",
           zIndex:2,display:"flex",alignItems:"baseline",gap:"4px",
-          fontFamily:"'Russo One',sans-serif",pointerEvents:"none"}}>
+          fontFamily:"'Chakra Petch',sans-serif",pointerEvents:"none"}}>
           <span style={{
             fontSize:"clamp(26px,2.4vw,38px)",fontWeight:900,
             color:D.dark?D.pink:"#C8102E",
@@ -2851,7 +2851,7 @@ export default function AoVivo(){
               boxShadow:dark?"none":"0 8px 32px -8px rgba(13,13,15,0.08)"}}>
               {dark&&<HudCorners color={D.pink} size={16} thickness={2} inset={0} opacity={0.9} D={D}/>}
               <span style={{
-                fontFamily:"'Russo One',sans-serif",
+                fontFamily:"'Chakra Petch',sans-serif",
                 fontSize:"clamp(14px,1.1vw,18px)",fontWeight:dark?800:700,
                 color:D.pink,letterSpacing:dark?"0.32em":"0.05em",
                 textShadow:dark?`0 0 10px ${D.pink}77`:"none",

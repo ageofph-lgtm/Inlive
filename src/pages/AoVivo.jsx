@@ -2390,8 +2390,6 @@ export default function AoVivo(){
                           const meta_s = Number(m.tempo_estimado_segundos)||0;
                           if(meta_s<60) return null;
                           const fh2=s=>{const h=Math.floor(s/3600),mn=Math.floor((s%3600)/60);return mn===0?`${h}h`:`${h}h${String(mn).padStart(2,"0")}`;};
-                          const diff = m.timer_accumulated_seconds - meta_s;
-                          const overColor = diff>0?"#FB923C":"rgba(56,189,248,0.55)";
                           return (
                             <div style={{display:"flex",alignItems:"center",gap:4}}>
                               <span style={{
@@ -2402,9 +2400,9 @@ export default function AoVivo(){
                               <span style={{
                                 fontFamily:"'Chakra Petch','Share Tech Mono',monospace",
                                 fontSize:"clamp(8px,0.75vw,11px)",fontWeight:400,
-                                letterSpacing:".06em",color:overColor,
+                                letterSpacing:".06em",color:D.dark?"rgba(56,189,248,0.55)":"#0369a1",
                               }}>
-                                {fh2(meta_s)}{diff!==0&&<span style={{fontSize:"0.85em",marginLeft:2}}>{diff>0?`+${fh2(diff)}`:fh2(diff)}</span>}
+                                {fh2(meta_s)}
                               </span>
                             </div>
                           );
@@ -2412,49 +2410,61 @@ export default function AoVivo(){
                       </div>
                     )}
 
-                    {/* tarefas — lista centralizada com check ✓ */}
+                    {/* tarefas + badges EXPRESS/VPS */}
                     {(()=>{
-                      const doneTasks = tasks.filter(t=>!["EXPRESS","VPS","IMPREVISTOS","⚡ IMPREVISTOS"].includes(t.texto?.trim()));
-                      if(doneTasks.length===0) return null;
-                      const show = doneTasks.slice(0,5);
-                      const more = doneTasks.length - show.length;
+                      const RESERVED = ["EXPRESS","VPS","IMPREVISTOS","⚡ IMPREVISTOS"];
+                      const hasExpress = m.isExpress || tasks.some(t=>t.texto?.trim()==="EXPRESS");
+                      const hasVps     = m.isVps     || tasks.some(t=>t.texto?.trim()==="VPS");
+                      const realTasks  = tasks.filter(t=>!RESERVED.includes(t.texto?.trim()));
+                      const show       = realTasks.slice(0,4);
+                      const more       = realTasks.length - show.length;
+                      const hasBadges  = hasExpress||hasVps;
+                      const hasTasks   = show.length>0;
+                      if(!hasBadges && !hasTasks) return null;
                       return (
                         <div style={{display:"flex",flexDirection:"column",gap:"3px",
                           margin:"4px 0 2px",overflow:"hidden",alignItems:"center"}}>
+                          {hasBadges&&(
+                            <div style={{display:"flex",gap:4,justifyContent:"center",flexWrap:"wrap",marginBottom:2}}>
+                              {hasExpress&&(
+                                <span style={{
+                                  fontFamily:"'Chakra Petch',sans-serif",fontSize:"clamp(7px,0.65vw,9px)",
+                                  fontWeight:700,letterSpacing:".1em",padding:"1px 5px",
+                                  color:"#F59E0B",background:"rgba(245,158,11,0.15)",
+                                  border:"1px solid rgba(245,158,11,0.45)",borderRadius:2,
+                                }}>EXPRESS</span>
+                              )}
+                              {hasVps&&(
+                                <span style={{
+                                  fontFamily:"'Chakra Petch',sans-serif",fontSize:"clamp(7px,0.65vw,9px)",
+                                  fontWeight:700,letterSpacing:".1em",padding:"1px 5px",
+                                  color:"#4D9FFF",background:"rgba(77,159,255,0.15)",
+                                  border:"1px solid rgba(77,159,255,0.45)",borderRadius:2,
+                                }}>VPS</span>
+                              )}
+                            </div>
+                          )}
                           {show.map((t,j)=>(
                             <div key={j} style={{display:"flex",alignItems:"center",gap:5,
                               maxWidth:"100%",overflow:"hidden"}}>
-                              <span style={{
-                                color:"#38BDF8",
-                                fontSize:"clamp(9px,0.85vw,11px)",
-                                flexShrink:0,lineHeight:1,
-                              }}>✓</span>
+                              <span style={{color:"#38BDF8",fontSize:"clamp(8px,0.8vw,10px)",flexShrink:0,lineHeight:1}}>✓</span>
                               <span style={{
                                 fontFamily:"'Chakra Petch',sans-serif",
-                                fontSize:"clamp(9px,0.85vw,12px)",
-                                fontWeight:500,
-                                letterSpacing:".04em",
+                                fontSize:"clamp(8px,0.8vw,11px)",fontWeight:500,letterSpacing:".04em",
                                 color:D.dark?"rgba(148,209,242,0.85)":"#0369a1",
                                 whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
-                                textDecoration:"line-through",
-                                textDecorationColor:"rgba(56,189,248,0.4)",
-                              }}>
-                                {t.texto}
-                              </span>
+                                textDecoration:"line-through",textDecorationColor:"rgba(56,189,248,0.4)",
+                              }}>{t.texto}</span>
                             </div>
                           ))}
                           {more>0&&(
-                            <span style={{
-                              fontFamily:"'Chakra Petch','Share Tech Mono',monospace",
-                              fontSize:"9px",color:"rgba(56,189,248,0.40)",
-                            }}>
-                              +{more} tarefas
+                            <span style={{fontFamily:"'Chakra Petch',monospace",fontSize:"8px",color:"rgba(56,189,248,0.40)"}}>
+                              +{more}
                             </span>
                           )}
                         </div>
                       );
                     })()}
-
                     {/* rodapé: badges + data conclusão */}
                     <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",
                       gap:4,marginTop:"auto",flexWrap:"nowrap",overflow:"hidden"}}>

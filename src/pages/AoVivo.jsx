@@ -191,7 +191,7 @@ function HudTag({color, label, dim=false, glow=false}){
   const isDark = typeof document !== "undefined" && document.body.dataset.theme !== "light";
   return(
     <span style={{
-      fontFamily:'Russo One',sans-serif,
+      fontFamily:"'Russo One',sans-serif",
       fontSize:"clamp(8px,0.65vw,10px)",
       fontWeight:800,
       letterSpacing:isDark?"0.12em":"0.1em",
@@ -243,7 +243,7 @@ function Clock({D}){
     <div style={{textAlign:"right",lineHeight:1.1,position:"relative",padding:"3px 10px 3px 12px",
       borderLeft:`1px solid ${D.line}`,borderRight:`1px solid ${D.line}`}}>
       <div style={{
-        fontFamily:'Russo One',sans-serif,
+        fontFamily:"'Russo One',sans-serif",
         fontSize:"clamp(18px,1.5vw,24px)",
         fontWeight:D.dark?900:600,
         color:D.text,
@@ -253,7 +253,7 @@ function Clock({D}){
         {n.toLocaleTimeString("pt-PT")}
       </div>
       <div style={{
-        fontFamily:'Russo One',sans-serif,
+        fontFamily:"'Russo One',sans-serif",
         fontSize:"clamp(9px,0.7vw,11px)",color:D.muted,
         textTransform:"uppercase",letterSpacing:"0.14em",fontWeight:600,marginTop:"1px"}}>
         {n.toLocaleDateString("pt-PT",{weekday:"short",day:"2-digit",month:"short"})}
@@ -1050,7 +1050,7 @@ function CalendarFila({items, D, concluidas=[]}){
                 background:isToday?(D.dark?`rgba(200,16,46,0.12)`:"rgba(200,16,46,0.06)"):(D.dark?D.sub+"33":"rgba(13,13,15,0.03)"),
                 borderBottom:`1px solid ${isToday?(D.dark?"rgba(200,16,46,0.4)":"rgba(200,16,46,0.2)"):(D.dark?D.line:"rgba(13,13,15,0.06)")}`,
                 display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-                <span style={{fontFamily:'Russo One',sans-serif,fontSize:"10px",fontWeight:900,
+                <span style={{fontFamily:"'Russo One',sans-serif",fontSize:"10px",fontWeight:900,
                   color:isToday?"#c8102e":D.muted,letterSpacing:"0.1em",textTransform:"uppercase"}}>
                   {d.toLocaleDateString("pt-PT",{weekday:"short"})}
                 </span>
@@ -1082,7 +1082,7 @@ function CalendarFila({items, D, concluidas=[]}){
                       boxShadow:D.dark?"none":"0 1px 2px rgba(13,13,15,0.04)"}}>
                       {/* NS grande */}
                       <div style={{
-                        fontFamily:'Russo One',sans-serif,
+                        fontFamily:"'Russo One',sans-serif",
                         fontSize:"11px",fontWeight:D.dark?900:600,
                         color:D.dark?D.blue:"#0D0D0F",
                         letterSpacing:D.dark?"0.05em":"-0.01em",
@@ -1100,7 +1100,7 @@ function CalendarFila({items, D, concluidas=[]}){
                         <div style={{display:"flex",alignItems:"center",gap:3,marginTop:"3px"}}>
                           <span style={{fontFamily:"monospace",fontSize:"7px",color:"#22C55E",opacity:0.8}}>✓</span>
                           <span style={{
-                            fontFamily:'Russo One',sans-serif,
+                            fontFamily:"'Russo One',sans-serif",
                             fontSize:"8px",fontWeight:D.dark?700:600,
                             color:"#16A34A",
                             letterSpacing:D.dark?"0.06em":"0.02em",
@@ -1507,7 +1507,7 @@ function SlideHead({title,icon,color,pulse,count,D}){
       </div>
 
       <span style={{
-        fontFamily:'Russo One',sans-serif,
+        fontFamily:"'Russo One',sans-serif",
         fontSize:"clamp(18px,1.7vw,28px)",fontWeight:dark?900:700,
         letterSpacing:dark?"0.18em":"-0.03em",
         color:dark?"#e8e8e8":"#0D0D0F",
@@ -1524,12 +1524,12 @@ function SlideHead({title,icon,color,pulse,count,D}){
           clipPath:dark?"polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)":"none",
           borderRadius:dark?0:"8px"}}>
           <span style={{
-            fontFamily:'Russo One',sans-serif,
+            fontFamily:"'Russo One',sans-serif",
             fontSize:"clamp(9px,0.75vw,11px)",fontWeight:700,
             letterSpacing:dark?"0.18em":"0.02em",
             color:dark?`${color}cc`:"#5C5C61"}}>×</span>
           <span style={{
-            fontFamily:'Russo One',sans-serif,
+            fontFamily:"'Russo One',sans-serif",
             fontSize:"clamp(20px,1.9vw,30px)",fontWeight:dark?900:700,
             color:dark?color:"#0D0D0F",
             textShadow:dark?`0 0 12px ${color}88`:"none",
@@ -1569,7 +1569,7 @@ function Empty({label,D}){
     <div style={{position:"relative",display:"flex",alignItems:"center",justifyContent:"center",flex:1,
       flexDirection:"column",gap:"10px",
       color:D.dark?D.muted:"#8E8E93",
-      fontFamily:'Russo One',sans-serif,
+      fontFamily:"'Russo One',sans-serif",
       fontSize:"clamp(13px,1.1vw,17px)",fontWeight:600,
       letterSpacing:D.dark?"0.22em":"0.05em",
       textTransform:"uppercase"}}>
@@ -1708,7 +1708,6 @@ function GanttChart({ machines, D }) {
                 textAlign:"center",
                 fontFamily:"'Russo One',sans-serif",
                 fontSize: isToday ? "11px" : "9px",
-                fontFamily: 'Russo One',sans-serif,
                 fontWeight: isToday ? (D.dark?900:700) : 600,
                 color: isToday ? (D.dark?"#e8e8e8":"#C8102E") : isWE ? (D.dark?"rgba(210,210,210,0.4)":"#B8B8BD") : (D.dark?"rgba(180,180,180,0.6)":"#8E8E93"),
                 letterSpacing: D.dark?"0.04em":"0.01em",
@@ -1764,7 +1763,7 @@ function GanttChart({ machines, D }) {
                   position:"relative",overflow:"hidden"}}>
                   {count>0&&!isWE&&<div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center"}}>
                     <span style={{
-                      fontFamily:'Russo One',sans-serif,
+                      fontFamily:"'Russo One',sans-serif",
                       fontSize:"7px",fontWeight:D.dark?900:600,
                       color:overload?"#FCA5A5":warn?"#FCD34D":(D.dark?D.muted:"#8E8E93"),
                       letterSpacing:D.dark?"0.05em":"0.02em"}}>
@@ -1848,7 +1847,7 @@ function GanttChart({ machines, D }) {
                   background:"#22C55E",boxShadow:"0 0 8px #22C55E",
                   animation:"blink 1s ease-in-out infinite"}}/>}
                 {!isThin&&<span style={{
-                  fontFamily:'Russo One',sans-serif,
+                  fontFamily:"'Russo One',sans-serif",
                   fontSize:"11px",fontWeight:D.dark?900:600,
                   color:"#fff",letterSpacing:D.dark?"0.06em":"-0.01em",
                   whiteSpace:"nowrap",flexShrink:0,
@@ -1889,7 +1888,7 @@ function GanttChart({ machines, D }) {
                       background:"#22C55E",boxShadow:"0 0 6px #22C55E",
                       animation:"blink 1s ease-in-out infinite"}}/>}
                     <span style={{
-                      fontFamily:'Russo One',sans-serif,
+                      fontFamily:"'Russo One',sans-serif",
                       fontSize:"10px",fontWeight:D.dark?900:600,
                       color:D.dark?"#e8e8e8":"#0D0D0F",
                       letterSpacing:D.dark?"0.05em":"-0.01em",
@@ -2127,7 +2126,7 @@ export default function AoVivo(){
                         borderBottom:`2px solid ${col.color}`,
                         borderRadius:dark?"4px 4px 0 0":"10px 10px 0 0"}}>
                         <span style={{fontSize:"15px",lineHeight:1}}>{col.emoji}</span>
-                        <span style={{fontFamily:'Russo One',sans-serif,
+                        <span style={{fontFamily:"'Russo One',sans-serif",
                           fontSize:"9px",fontWeight:800,color:col.color,
                           letterSpacing:dark?"0.12em":"0.06em",
                           textTransform:"uppercase",flex:1,lineHeight:1.2}}>{col.label}</span>
@@ -2816,7 +2815,7 @@ export default function AoVivo(){
               <div style={{position:"absolute",top:"50%",left:0,transform:"translateY(-50%)",
                 width:"2px",height:"60%",background:k.c,opacity:0.25}}/>
               <div style={{
-                fontFamily:'Russo One',sans-serif,
+                fontFamily:"'Russo One',sans-serif",
                 fontSize:"clamp(20px,1.95vw,32px)",fontWeight:700,
                 color:isActive?k.c:(D.dark?k.c:"#0D0D0F"),
                 textShadow:D.dark?(isActive?`0 0 14px ${k.c}aa`:`0 0 8px ${k.c}44`):"none",
@@ -2861,7 +2860,6 @@ export default function AoVivo(){
           fontFamily:"'Russo One',sans-serif",pointerEvents:"none"}}>
           <span style={{
             fontSize:"clamp(26px,2.4vw,38px)",fontWeight:900,
-            fontFamily:'Russo One',sans-serif,
             color:D.dark?D.pink:"#C8102E",
             textShadow:D.dark?`0 0 14px ${D.pink}66`:"none",
             letterSpacing:D.dark?"0.04em":"-0.02em",lineHeight:1}}>
@@ -2928,7 +2926,7 @@ export default function AoVivo(){
               boxShadow:dark?"none":"0 8px 32px -8px rgba(13,13,15,0.08)"}}>
               {dark&&<HudCorners color={D.pink} size={16} thickness={2} inset={0} opacity={0.9} D={D}/>}
               <span style={{
-                fontFamily:'Russo One',sans-serif,
+                fontFamily:"'Russo One',sans-serif",
                 fontSize:"clamp(14px,1.1vw,18px)",fontWeight:dark?800:700,
                 color:D.pink,letterSpacing:dark?"0.32em":"0.05em",
                 textShadow:dark?`0 0 10px ${D.pink}77`:"none",

@@ -2344,11 +2344,11 @@ export default function AoVivo(){
                       justifyContent:"center",padding:"4px 0 2px",textAlign:"center"}}>
                       <div style={{
                         fontFamily:"'Chakra Petch',sans-serif",
-                        fontWeight:400,
-                        fontSize:"clamp(12px,1.3vw,18px)",
+                        fontWeight:700,
+                        fontSize:"clamp(18px,2.1vw,30px)",
                         color:D.dark?"#e0f2fe":"#0D0D0F",
-                        letterSpacing:"0.03em",lineHeight:1.1,
-                        textShadow:D.dark?"0 0 16px rgba(56,189,248,0.25)":"none",
+                        letterSpacing:"0.04em",lineHeight:1.0,
+                        textShadow:D.dark?"0 0 22px rgba(56,189,248,0.5),0 0 44px rgba(56,189,248,0.2)":"none",
                         whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
                         maxWidth:"100%"}}>
                         {m.serie||"—"}
@@ -2372,13 +2372,13 @@ export default function AoVivo(){
                         <div style={{position:"relative",display:"inline-block"}}>
                           <div style={{
                             fontFamily:"'DSDigital','DSEG7','Chakra Petch','Share Tech Mono',monospace",fontWeight:400,
-                            fontSize:"clamp(14px,1.4vw,20px)",letterSpacing:".04em",lineHeight:1,
+                            fontSize:"clamp(10px,0.9vw,13px)",letterSpacing:".04em",lineHeight:1,
                             color:D.dark?"rgba(56,189,248,0.12)":"rgba(0,0,0,0.07)",
                             position:"absolute",top:0,right:0,userSelect:"none",
                           }}>{"88:88:88"}</div>
                           <div style={{
                             fontFamily:"'DSDigital','DSEG7','Chakra Petch','Share Tech Mono',monospace",fontWeight:400,
-                            fontSize:"clamp(14px,1.4vw,20px)",letterSpacing:".04em",lineHeight:1,
+                            fontSize:"clamp(10px,0.9vw,13px)",letterSpacing:".04em",lineHeight:1,
                             color:"#38BDF8",position:"relative",zIndex:1,
                             textShadow:D.dark?"0 0 10px rgba(56,189,248,0.7),0 0 20px rgba(56,189,248,0.35)":"none",
                           }}>

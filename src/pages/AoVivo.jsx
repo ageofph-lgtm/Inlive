@@ -727,9 +727,9 @@ function ReconCell({m, D, scale=1}){
               borderRadius:dark?0:"999px"}}>{rLabel}</span>}
           </div>
           {/* timer pequeno */}
-          <span style={{fontFamily:"'Russo One',sans-serif",
+          <span style={{fontFamily:"'DSEG7','Share Tech Mono',monospace",
             fontSize:`clamp(9px,${1.1*scale}vw,${Math.round(16*scale)}px)`,
-            fontWeight:900,color:timerCol,letterSpacing:"0.04em",
+            fontWeight:400,color:timerCol,letterSpacing:"0.04em",
             fontVariantNumeric:"tabular-nums",flexShrink:0,
             textShadow:dark?`0 0 10px ${timerCol}88`:"none"}}>
             {fmtHMS(displayRCD)}
@@ -1300,8 +1300,8 @@ function RowItem({m, idx, D, forceCategory=null, showTimer=true, showDate=false}
         </div>
         {/* Timer topo direito */}
         {timerDisplay&&(
-          <div style={{fontFamily:"'Russo One',sans-serif",fontSize:"clamp(12px,1.6vw,22px)",
-            fontWeight:900,flexShrink:0,color:timerFinalCol,letterSpacing:"0.06em",
+          <div style={{fontFamily:"'DSEG7','Share Tech Mono',monospace",fontSize:"clamp(12px,1.6vw,22px)",
+            fontWeight:400,flexShrink:0,color:timerFinalCol,letterSpacing:"0.04em",
             fontVariantNumeric:"tabular-nums",
             textShadow:dark?`0 0 14px ${timerFinalCol}99`:"none"}}>
             {timerDisplay}
@@ -2506,7 +2506,7 @@ export default function AoVivo(){
     {l:"PRÓXIMAS",    v:proximas.length,               c:D.muted },
     {l:"NTS",         v:ntsAnd.length+ntsAF.length,  c:D.pink  },
     {l:"RECON",       v:reconAnd.length+reconAF.length,c:D.purple},
-    {l:"ESTA SEMANA", v:conSemana.length,             c:D.green },
+    {l:"ESTA SEMANA", v:conSemana.length,             c:"#38BDF8" },
     {l:"HOJE",        v:conHoje.length,               c:D.cyan  },
     {l:"MÉD.h/MÁQ",  v:avgH,                         c:D.silver},
     {l:"TOTAL 2026",  v:totalCon.length,              c:"#FF2D78"},

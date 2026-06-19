@@ -151,7 +151,7 @@ export default function BoardCell({m, D, forceCategory=null, scale=1, compact=fa
         <div style={{marginLeft:"auto",textAlign:"right",flexShrink:0}}>
           <div style={{position:"relative",display:"inline-block"}}>
             <div style={{
-              fontFamily:"'Digital-7 V7','DSEG7','Share Tech Mono',monospace",
+              fontFamily:"'DSEG7','Share Tech Mono',monospace",
               fontWeight:400,
               fontSize:FS(scale>=0.88?22:scale>=0.75?18:14),
               letterSpacing:".04em",lineHeight:1,
@@ -159,7 +159,7 @@ export default function BoardCell({m, D, forceCategory=null, scale=1, compact=fa
               userSelect:"none",position:"absolute",top:0,right:0,
             }}>{"88:88:88"}</div>
             <div style={{
-              fontFamily:"'Digital-7 V7','DSEG7','Share Tech Mono',monospace",
+              fontFamily:"'DSEG7','Share Tech Mono',monospace",
               fontWeight:400,
               fontSize:FS(scale>=0.88?22:scale>=0.75?18:14),
               letterSpacing:".04em",color:st,lineHeight:1,

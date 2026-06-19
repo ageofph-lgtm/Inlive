@@ -5,7 +5,7 @@ import { useLiveTimer, getModoTimer, calcRestanteAoVivo, getMachineCategory, CAT
 function Pill({st, dark, scale, children}){
   const s = scale||1;
   return(
-    <span style={{fontFamily:"'Exo 2',sans-serif",fontWeight:700,
+    <span style={{fontFamily:"'Chakra Petch',sans-serif",fontWeight:700,
       fontSize:`${Math.round(9*s)}px`,letterSpacing:".09em",
       padding:`${Math.round(2*s)}px ${Math.round(6*s)}px`,
       borderRadius:2,color:st,
@@ -119,7 +119,7 @@ export default function BoardCell({m, D, forceCategory=null, scale=1, compact=fa
         {isLate&&<Pill st={st} dark={dark} scale={scale}>✕</Pill>}
         {isRisk&&!isLate&&<Pill st={st} dark={dark} scale={scale}>⚠</Pill>}
         {!isRisk&&!isLate&&run&&(
-          <span style={{fontFamily:"'Exo 2',sans-serif",fontWeight:700,
+          <span style={{fontFamily:"'Chakra Petch',sans-serif",fontWeight:700,
             fontSize:FS(9),letterSpacing:".09em",
             padding:`${Math.round(2*scale)}px ${Math.round(6*scale)}px`,
             borderRadius:2,color:dark?"#2BE564":"#16A34A",
@@ -137,7 +137,7 @@ export default function BoardCell({m, D, forceCategory=null, scale=1, compact=fa
             const label = reason && reason.length>2 && reason.toLowerCase()!=="true" ? reason.toUpperCase() : null;
             return label ? (
               <span style={{
-                fontFamily:"'Russo One',sans-serif",fontWeight:600,
+                fontFamily:"'Chakra Petch',sans-serif",fontWeight:600,
                 fontSize:FS(8),letterSpacing:".1em",
                 padding:`${Math.round(2*scale)}px ${Math.round(6*scale)}px`,
                 borderRadius:2,color:dark?"#FFB200":"#B08D2E",
@@ -149,14 +149,14 @@ export default function BoardCell({m, D, forceCategory=null, scale=1, compact=fa
             ) : null;
           })()}
         </>)}
-        {prio&&<span style={{fontFamily:"'Exo 2',sans-serif",fontWeight:800,
+        {prio&&<span style={{fontFamily:"'Chakra Petch',sans-serif",fontWeight:800,
           fontSize:FS(9),padding:`${Math.round(2*scale)}px ${Math.round(5*scale)}px`,
           borderRadius:2,color:"#0a0a0a",background:"#FFB200",flexShrink:0}}>⚡</span>}
         {tb&&<Pill st={tb.c} dark={dark} scale={scale}>{tb.l}</Pill>}
         <div style={{marginLeft:"auto",textAlign:"right",flexShrink:0}}>
           <div style={{position:"relative",display:"inline-block"}}>
             <div style={{
-              fontFamily:"'DSDigital','DSEG7','Share Tech Mono',monospace",
+              fontFamily:"'DSDigital','DSEG7','Chakra Petch','Share Tech Mono',monospace",
               fontWeight:400,
               fontSize:FS(scale>=0.88?22:scale>=0.75?18:14),
               letterSpacing:".04em",lineHeight:1,
@@ -164,7 +164,7 @@ export default function BoardCell({m, D, forceCategory=null, scale=1, compact=fa
               userSelect:"none",position:"absolute",top:0,right:0,
             }}>{"88:88:88"}</div>
             <div style={{
-              fontFamily:"'DSDigital','DSEG7','Share Tech Mono',monospace",
+              fontFamily:"'DSDigital','DSEG7','Chakra Petch','Share Tech Mono',monospace",
               fontWeight:400,
               fontSize:FS(scale>=0.88?22:scale>=0.75?18:14),
               letterSpacing:".04em",color:st,lineHeight:1,
@@ -177,7 +177,7 @@ export default function BoardCell({m, D, forceCategory=null, scale=1, compact=fa
           </div>
           {meta>0&&(
             <div style={{
-              fontFamily:"'Russo One',sans-serif",
+              fontFamily:"'Chakra Petch',sans-serif",
               fontWeight:600,
               fontSize:FS(8),
               color:dark?"rgba(255,255,255,0.85)":"rgba(0,0,0,0.75)",
@@ -210,7 +210,7 @@ export default function BoardCell({m, D, forceCategory=null, scale=1, compact=fa
           const fsSerie = len<=9 ? base : Math.max(base*0.55, base - (len-9)*2.2);
           return (
             <div style={{
-              fontFamily:"'Russo One','Orbitron',sans-serif",
+              fontFamily:"'Chakra Petch',sans-serif",
               fontWeight:400,
               letterSpacing:len>11?"0em":".04em",
               textAlign:"center",lineHeight:1,
@@ -224,7 +224,7 @@ export default function BoardCell({m, D, forceCategory=null, scale=1, compact=fa
           );
         })()}
         <div style={{
-          fontFamily:"'Exo 2',sans-serif",
+          fontFamily:"'Chakra Petch',sans-serif",
           fontWeight:400,
           fontSize:FS(scale>=0.88?11:scale>=0.75?9:7.5),
           letterSpacing:".22em",
@@ -293,7 +293,7 @@ export default function BoardCell({m, D, forceCategory=null, scale=1, compact=fa
                 })}
                 <text x={cx} y={cy}
                   textAnchor="middle" dominantBaseline="central"
-                  fontFamily="'DSDigital','DSEG7','Share Tech Mono',monospace"
+                  fontFamily="'DSDigital','DSEG7','Chakra Petch','Share Tech Mono',monospace"
                   fontWeight={400}
                   fontSize={Math.round((scale>=0.75?12:9)*scale)}
                   fill={isLate?"#FF3344":st}
@@ -317,10 +317,10 @@ export default function BoardCell({m, D, forceCategory=null, scale=1, compact=fa
         }}>
           {(m.previsao_inicio||m.dataEntrada)&&(
             <span style={{display:"inline-flex",alignItems:"center",gap:Math.round(2*scale),flexShrink:0}}>
-              <span style={{fontFamily:"'Exo 2',sans-serif",fontWeight:700,
+              <span style={{fontFamily:"'Chakra Petch',sans-serif",fontWeight:700,
                 fontSize:FS(scale>=0.75?10:8),
                 color:dark?"rgba(140,140,140,.4)":"#bbb"}}>{"<"}</span>
-              <span style={{fontFamily:"'Share Tech Mono',monospace",fontWeight:700,
+              <span style={{fontFamily:"'Chakra Petch','Share Tech Mono',monospace",fontWeight:700,
                 fontSize:FS(scale>=0.75?12:10),
                 color:dark?"#6FC3FF":"#0A6EBF"}}>
                 {fd(m.previsao_inicio||m.dataEntrada)}
@@ -329,16 +329,16 @@ export default function BoardCell({m, D, forceCategory=null, scale=1, compact=fa
           )}
           {(m.previsao_inicio||m.dataEntrada)&&m.previsao_fim&&(
             <span style={{color:dark?"rgba(255,255,255,.12)":"rgba(0,0,0,.12)",
-              fontSize:FS(9),fontFamily:"'Exo 2',sans-serif"}}>·</span>
+              fontSize:FS(9),fontFamily:"'Chakra Petch',sans-serif"}}>·</span>
           )}
           {m.previsao_fim&&(
             <span style={{display:"inline-flex",alignItems:"center",gap:Math.round(2*scale),flexShrink:0}}>
-              <span style={{fontFamily:"'Share Tech Mono',monospace",fontWeight:700,
+              <span style={{fontFamily:"'Chakra Petch','Share Tech Mono',monospace",fontWeight:700,
                 fontSize:FS(scale>=0.75?12:10),
                 color:isLate?(dark?"#FF3344":"#DC2626"):isRisk?(dark?"#FFB200":"#B08D2E"):(dark?"#2BE564":"#16A34A")}}>
                 {fd(m.previsao_fim)}
               </span>
-              <span style={{fontFamily:"'Exo 2',sans-serif",fontWeight:700,
+              <span style={{fontFamily:"'Chakra Petch',sans-serif",fontWeight:700,
                 fontSize:FS(scale>=0.75?10:8),
                 color:isLate?(dark?"#FF3344":"#DC2626"):isRisk?(dark?"#FFB200":"#B08D2E"):(dark?"#2BE564":"#16A34A")}}>{">"}</span>
             </span>
@@ -359,7 +359,7 @@ export default function BoardCell({m, D, forceCategory=null, scale=1, compact=fa
             background:tc,boxShadow:dark?`0 0 5px ${tc}`:"none",flexShrink:0}}/>
           {tasks.length>0&&tasks.slice(0,scale>=0.75?5:3).map((t,i)=>(
             <span key={i} style={{
-              fontFamily:"'Exo 2',sans-serif",fontWeight:700,
+              fontFamily:"'Chakra Petch',sans-serif",fontWeight:700,
               fontSize:FS(scale>=0.75?9:8),letterSpacing:".07em",
               padding:`${Math.round(1.5*scale)}px ${Math.round(5*scale)}px`,
               borderRadius:2,flexShrink:0,maxWidth:`${Math.round(120*scale)}px`,
@@ -374,7 +374,7 @@ export default function BoardCell({m, D, forceCategory=null, scale=1, compact=fa
             </span>
           ))}
           {tasks.length>(scale>=0.75?5:3)&&(
-            <span style={{fontFamily:"'Share Tech Mono',monospace",fontSize:FS(7.5),
+            <span style={{fontFamily:"'Chakra Petch','Share Tech Mono',monospace",fontSize:FS(7.5),
               color:dark?"rgba(140,140,140,.35)":"#bbb",flexShrink:0}}>
               +{tasks.length-(scale>=0.75?5:3)}
             </span>
@@ -383,12 +383,12 @@ export default function BoardCell({m, D, forceCategory=null, scale=1, compact=fa
         </div>
         {imp.length>0&&(
           <div style={{display:"flex",alignItems:"center",gap:Math.round(4*scale),flexWrap:"wrap",overflow:"hidden"}}>
-            <span style={{fontFamily:"'Exo 2',sans-serif",fontWeight:700,
+            <span style={{fontFamily:"'Chakra Petch',sans-serif",fontWeight:700,
               fontSize:FS(7),letterSpacing:".12em",
               color:dark?"rgba(251,146,60,.5)":"#D97706",flexShrink:0}}>+{totalImpH}h</span>
             {imp.slice(0,scale>=0.75?3:2).map((iv,i)=>(
               <span key={i} style={{
-                fontFamily:"'Exo 2',sans-serif",fontWeight:600,
+                fontFamily:"'Chakra Petch',sans-serif",fontWeight:600,
                 fontSize:FS(scale>=0.75?8.5:7.5),letterSpacing:".04em",
                 padding:`${Math.round(1.5*scale)}px ${Math.round(5*scale)}px`,
                 borderRadius:2,flexShrink:0,
@@ -402,7 +402,7 @@ export default function BoardCell({m, D, forceCategory=null, scale=1, compact=fa
               </span>
             ))}
             {imp.length>(scale>=0.75?3:2)&&(
-              <span style={{fontFamily:"'Share Tech Mono',monospace",fontSize:FS(7.5),
+              <span style={{fontFamily:"'Chakra Petch','Share Tech Mono',monospace",fontSize:FS(7.5),
                 color:dark?"rgba(251,146,60,.3)":"#D97706",flexShrink:0}}>
                 +{imp.length-(scale>=0.75?3:2)}
               </span>

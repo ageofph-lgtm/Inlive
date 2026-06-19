@@ -414,7 +414,7 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
           <div style={{position:"relative",display:"inline-block"}}>
             {/* ghost — dígitos apagados para dar efeito LCD */}
             <div style={{
-              fontFamily:"'DSEG7','Share Tech Mono',monospace",
+              fontFamily:"'DSDigital','DSEG7','Share Tech Mono',monospace",
               fontWeight:400,
               fontSize:FS(scale>=0.88?22:scale>=0.75?18:14),
               letterSpacing:".04em",lineHeight:1,
@@ -423,7 +423,7 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
             }}>{"88:88:88"}</div>
             {/* valor real */}
             <div style={{
-              fontFamily:"'DSEG7','Share Tech Mono',monospace",
+              fontFamily:"'DSDigital','DSEG7','Share Tech Mono',monospace",
               fontWeight:400,
               fontSize:FS(scale>=0.88?22:scale>=0.75?18:14),
               letterSpacing:".04em",color:st,lineHeight:1,
@@ -727,7 +727,7 @@ function ReconCell({m, D, scale=1}){
               borderRadius:dark?0:"999px"}}>{rLabel}</span>}
           </div>
           {/* timer pequeno */}
-          <span style={{fontFamily:"'DSEG7','Share Tech Mono',monospace",
+          <span style={{fontFamily:"'DSDigital','DSEG7','Share Tech Mono',monospace",
             fontSize:`clamp(9px,${1.1*scale}vw,${Math.round(16*scale)}px)`,
             fontWeight:400,color:timerCol,letterSpacing:"0.04em",
             fontVariantNumeric:"tabular-nums",flexShrink:0,
@@ -1300,7 +1300,7 @@ function RowItem({m, idx, D, forceCategory=null, showTimer=true, showDate=false}
         </div>
         {/* Timer topo direito */}
         {timerDisplay&&(
-          <div style={{fontFamily:"'DSEG7','Share Tech Mono',monospace",fontSize:"clamp(12px,1.6vw,22px)",
+          <div style={{fontFamily:"'DSDigital','DSEG7','Share Tech Mono',monospace",fontSize:"clamp(12px,1.6vw,22px)",
             fontWeight:400,flexShrink:0,color:timerFinalCol,letterSpacing:"0.04em",
             fontVariantNumeric:"tabular-nums",
             textShadow:dark?`0 0 14px ${timerFinalCol}99`:"none"}}>
@@ -2371,13 +2371,13 @@ export default function AoVivo(){
                         {/* timer LCD */}
                         <div style={{position:"relative",display:"inline-block"}}>
                           <div style={{
-                            fontFamily:"'DSEG7','Share Tech Mono',monospace",fontWeight:400,
+                            fontFamily:"'DSDigital','DSEG7','Share Tech Mono',monospace",fontWeight:400,
                             fontSize:"clamp(14px,1.4vw,20px)",letterSpacing:".04em",lineHeight:1,
                             color:D.dark?"rgba(56,189,248,0.12)":"rgba(0,0,0,0.07)",
                             position:"absolute",top:0,right:0,userSelect:"none",
                           }}>{"88:88:88"}</div>
                           <div style={{
-                            fontFamily:"'DSEG7','Share Tech Mono',monospace",fontWeight:400,
+                            fontFamily:"'DSDigital','DSEG7','Share Tech Mono',monospace",fontWeight:400,
                             fontSize:"clamp(14px,1.4vw,20px)",letterSpacing:".04em",lineHeight:1,
                             color:"#38BDF8",position:"relative",zIndex:1,
                             textShadow:D.dark?"0 0 10px rgba(56,189,248,0.7),0 0 20px rgba(56,189,248,0.35)":"none",
@@ -2516,9 +2516,8 @@ export default function AoVivo(){
   const SHARED_STYLE = (
     <style>{`
       @import url('https://fonts.googleapis.com/css2?family=Russo+One&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Share+Tech+Mono&family=Orbitron:wght@600;700;800;900&display=swap');
-      /* DSEG7 — timer LCD 7-segment */
-      @font-face{font-family:'DSEG7';src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7Classic/DSEG7Classic-Regular.woff2') format('woff2');font-weight:400;}
-      @font-face{font-family:'DSEG7';src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7Classic/DSEG7Classic-Bold.woff2') format('woff2');font-weight:700;}
+      /* DSDigital — timer 7-segment */
+      @font-face{font-family:'DSDigital';src:url('https://db.onlinewebfonts.com/t/d4349f53210b2055a8e16971c8c8bc1d.woff2') format('woff2');font-weight:400;font-display:swap;}@font-face{font-family:'DSDigital';src:url('https://db.onlinewebfonts.com/t/d4349f53210b2055a8e16971c8c8bc1d.woff2') format('woff2');font-weight:700;font-display:swap;}
       @keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
       @keyframes hudScan{0%{background-position:200% 0}100%{background-position:-200% 0}}
       @keyframes cardSweep{0%{left:-60%}100%{left:130%}}
@@ -2603,9 +2602,8 @@ export default function AoVivo(){
         backgroundSize:"40px 70px"}}/>}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Russo+One&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Share+Tech+Mono&family=Orbitron:wght@600;700;800;900&display=swap');
-      /* DSEG7 — timer LCD 7-segment */
-      @font-face{font-family:'DSEG7';src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7Classic/DSEG7Classic-Regular.woff2') format('woff2');font-weight:400;}
-      @font-face{font-family:'DSEG7';src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7Classic/DSEG7Classic-Bold.woff2') format('woff2');font-weight:700;}
+      /* DSDigital — timer 7-segment */
+      @font-face{font-family:'DSDigital';src:url('https://db.onlinewebfonts.com/t/d4349f53210b2055a8e16971c8c8bc1d.woff2') format('woff2');font-weight:400;font-display:swap;}@font-face{font-family:'DSDigital';src:url('https://db.onlinewebfonts.com/t/d4349f53210b2055a8e16971c8c8bc1d.woff2') format('woff2');font-weight:700;font-display:swap;}
         @keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
         @keyframes hudScan{0%{background-position:200% 0}100%{background-position:-200% 0}}
         @keyframes cardSweep{0%{left:-60%}100%{left:130%}}

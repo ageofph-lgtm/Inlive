@@ -49,7 +49,7 @@ export default function ArcReactorGauge({pct, isLate, asec, scale, dark}) {
           );
         })}
         <text x={cx} y={cy} textAnchor="middle" dominantBaseline="central"
-          fontFamily="'DSEG7','Share Tech Mono',monospace" fontWeight={400}
+          fontFamily="'DSDigital','DSEG7','Share Tech Mono',monospace" fontWeight={400}
           fontSize={Math.round((scale>=0.75?12:9)*scale)}
           fill="#fff"
           style={{filter:dark?`drop-shadow(0 0 6px ${color})`:"none"}}>

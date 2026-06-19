@@ -77,7 +77,12 @@ export default function BoardCell({m, D, forceCategory=null, scale=1, compact=fa
   const totalImpH  = imp.reduce((s,iv)=>s+Number(iv.horas_extra||0),0);
 
   return(
-    <div style={{
+    <>
+      <style>{`
+        @font-face{font-family:'DSDigital';src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7Classic/DSEG7Classic-Regular.woff2') format('woff2');font-weight:400;font-display:swap;}
+        @font-face{font-family:'DSDigital';src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7Classic/DSEG7Classic-Bold.woff2') format('woff2');font-weight:700;font-display:swap;}
+      `}</style>
+      <div style={{
       position:"relative",
       display:"flex",flexDirection:"column",
       height:"100%",width:"100%",
@@ -288,7 +293,7 @@ export default function BoardCell({m, D, forceCategory=null, scale=1, compact=fa
                 })}
                 <text x={cx} y={cy}
                   textAnchor="middle" dominantBaseline="central"
-                  fontFamily="'Digital-7 V7','DSEG7','Share Tech Mono',monospace"
+                  fontFamily="'DSDigital','DSEG7','Share Tech Mono',monospace"
                   fontWeight={400}
                   fontSize={Math.round((scale>=0.75?12:9)*scale)}
                   fill={isLate?"#FF3344":st}
@@ -406,5 +411,6 @@ export default function BoardCell({m, D, forceCategory=null, scale=1, compact=fa
         )}
       </div>
     </div>
+    </>
   );
 }

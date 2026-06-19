@@ -79,8 +79,8 @@ export default function BoardCell({m, D, forceCategory=null, scale=1, compact=fa
   return(
     <>
       <style>{`
-        @font-face{font-family:'DSDigital';src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7Classic/DSEG7Classic-Regular.woff2') format('woff2');font-weight:400;font-display:swap;}
-        @font-face{font-family:'DSDigital';src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7Classic/DSEG7Classic-Bold.woff2') format('woff2');font-weight:700;font-display:swap;}
+        @font-face{font-family:'DSDigital';src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Regular.woff2') format('woff2');font-weight:400;font-display:swap;}
+        @font-face{font-family:'DSDigital';src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2') format('woff2');font-weight:700;font-display:swap;}
       `}</style>
       <div style={{
       position:"relative",

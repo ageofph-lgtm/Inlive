@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Activity, Flag, CheckCircle2, ListOrdered, Sun, Moon,
-         ChevronLeft, ChevronRight, Pause, Play, Wrench, CalendarDays } from "lucide-react";
-
+import { Activity, Flag, CheckCircle2, ListOrdered, Sun, Moon, ChevronLeft, ChevronRight, Pause, Play, Wrench, CalendarDays } from "lucide-react";
+import ArcReactorGauge from "@/components/ArcReactorGauge";
 // ── Config ────────────────────────────────────────────────────────────────────
 // Chama directamente a saganBridge do Watcher com segredo read-only.
 // Read-only enforced pelo saganBridge (INLIVE_READ_SECRET só permite list/filter/get).
@@ -498,81 +497,7 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
           overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:"100%"}}>
           {m.modelo||"—"}
         </div>
-        {/* ── REATOR ARC — segmentos estilo Arc Reactor ── */}
-        {meta>0&&(()=>{
-          const sz      = Math.round((scale>=0.88?60:scale>=0.75?50:scale>=0.62?42:34)*scale);
-          const cx      = sz/2, cy = sz/2;
-          const safePct = Math.min(pct, 100);
-          // outer ring: segmentos grandes (progress)
-          const SEGS_OUT = 40;
-          const rOut  = sz*0.44;
-          const segW  = 3.2*scale, segH = Math.max(5, 7*scale);
-          // inner ring: segmentos pequenos decorativos
-          const SEGS_IN = 32;
-          const rIn   = sz*0.33;
-          const segW2 = 2*scale, segH2 = Math.max(3, 5*scale);
-          const activeSeg = Math.round((safePct/100)*SEGS_OUT);
-          const color = isLate?"#FF3344":st;
-          const dimColor = dark?"rgba(255,255,255,0.07)":"rgba(0,0,0,0.07)";
-          return (
-            <div style={{marginTop:Math.round(8*scale),position:"relative",zIndex:1,
-              display:"flex",alignItems:"center",justifyContent:"center"}}>
-              <svg width={sz} height={sz} style={{overflow:"visible"}}>
-                {/* outer ring — segmentos de progresso */}
-                {Array.from({length:SEGS_OUT},(_,i)=>{
-                  const angle = (i/SEGS_OUT)*360 - 90;
-                  const rad   = angle*(Math.PI/180);
-                  const x     = cx + rOut*Math.cos(rad);
-                  const y     = cy + rOut*Math.sin(rad);
-                  const isActive = i < activeSeg;
-                  const isEdge   = i === activeSeg-1 && !isLate;
-                  return (
-                    <rect key={`o${i}`}
-                      x={-segW/2} y={-segH/2}
-                      width={segW} height={segH}
-                      rx={segW*0.3}
-                      fill={isActive ? color : dimColor}
-                      transform={`translate(${x},${y}) rotate(${angle+90})`}
-                      style={{
-                        filter: isEdge&&dark ? `drop-shadow(0 0 4px ${color}) drop-shadow(0 0 8px ${color}88)` :
-                                isActive&&dark ? `drop-shadow(0 0 2px ${color}66)` : "none",
-                        transition:"fill .3s",
-                      }}
-                    />
-                  );
-                })}
-                {/* inner ring — decorativo, intensidade proporcional */}
-                {Array.from({length:SEGS_IN},(_,i)=>{
-                  const angle  = (i/SEGS_IN)*360 - 90;
-                  const rad    = angle*(Math.PI/180);
-                  const x      = cx + rIn*Math.cos(rad);
-                  const y      = cy + rIn*Math.sin(rad);
-                  const frac   = i/SEGS_IN;
-                  const active = frac < safePct/100;
-                  return (
-                    <rect key={`i${i}`}
-                      x={-segW2/2} y={-segH2/2}
-                      width={segW2} height={segH2}
-                      rx={1}
-                      fill={active ? `${color}55` : dimColor}
-                      transform={`translate(${x},${y}) rotate(${angle+90})`}
-                    />
-                  );
-                })}
-                {/* % no centro */}
-                <text x={cx} y={cy}
-                  textAnchor="middle" dominantBaseline="central"
-                  fontFamily="'DSEG7','Share Tech Mono',monospace"
-                  fontWeight={400}
-                  fontSize={Math.round((scale>=0.75?12:9)*scale)}
-                  fill={isLate?"#FF3344":st}
-                  style={{filter:dark?`drop-shadow(0 0 6px ${color})`:"none"}}>
-                  {isLate?`+${Math.round(asec/60)}m`:Math.round(safePct)+"%"}
-                </text>
-              </svg>
-            </div>
-          );
-        })()}
+        {meta>0&&<ArcReactorGauge pct={pct} isLate={isLate} asec={asec} scale={scale} dark={dark}/>}
       </div>
 
       {/* ── ROW 3: datas inline (só se scale>=0.55) ── */}

@@ -2476,7 +2476,7 @@ export default function AoVivo(){
             <div style={{
               fontSize:"clamp(13px,1.8vw,22px)",fontWeight:700,letterSpacing:"0.25em",
               color:"rgba(255,45,120,0.55)",
-            }}>13:13 — 13:30</div>
+            }}>12:30 — 13:30</div>
             <AlmocoClock/>
             <div style={{
               marginTop:8,padding:"10px 32px",

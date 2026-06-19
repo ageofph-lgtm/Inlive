@@ -1794,7 +1794,7 @@ export default function AoVivo(){
   // ── Tela de almoço ─────────────────────────────────────────────────────────
   const [isAlmoco, setIsAlmoco] = useState(()=>{
     const now=new Date(); const t=now.getHours()*60+now.getMinutes();
-    return t>=13*60+18 && t<13*60+20;
+    return t>=12*60+30 && t<13*60+30;
   });
   useEffect(()=>{
     const check=()=>{

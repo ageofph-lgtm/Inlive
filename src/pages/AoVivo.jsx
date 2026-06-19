@@ -2415,62 +2415,6 @@ export default function AoVivo(){
       *{box-sizing:border-box}
     `}</style>
   );
-  // ── Tela de almoço 12:30–13:30 ──────────────────────────────────────────────
-  if(isAlmoco) return(
-    <div style={{
-      position:"fixed",inset:0,
-      background:"linear-gradient(135deg,#030803 0%,#061006 50%,#030803 100%)",
-      display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
-      fontFamily:"'Chakra Petch',sans-serif",gap:20,overflow:"hidden",
-    }}>
-      {SHARED_STYLE}
-      {/* scanlines */}
-      <div style={{position:"absolute",inset:0,pointerEvents:"none",
-        backgroundImage:"repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,45,120,0.012) 2px,rgba(255,45,120,0.012) 4px)",
-        zIndex:0}}/>
-
-      {/* Jordan — igual às outras páginas */}
-      <div style={{position:"absolute",bottom:0,right:0,
-        width:"clamp(220px,28vw,380px)",pointerEvents:"none",zIndex:2}}>
-        <img src={JORDAN_URL} alt="Jordan" style={{
-          position:"relative",width:"100%",
-          objectFit:"contain",objectPosition:"bottom right",
-          opacity:0.82,
-          filter:`drop-shadow(0 0 24px #FF2D78cc) drop-shadow(0 0 8px #FF2D78aa) drop-shadow(0 0 4px rgba(255,255,255,0.2))`,
-          display:"block",
-        }}/>
-      </div>
-
-      <div style={{position:"relative",zIndex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:16}}>
-        <div style={{fontSize:"clamp(56px,8vw,88px)",lineHeight:1,
-          filter:"drop-shadow(0 0 12px rgba(255,45,120,0.3))"}}>
-          🍽️
-        </div>
-        <div style={{
-          fontSize:"clamp(24px,3.5vw,42px)",fontWeight:900,letterSpacing:"0.15em",
-          color:"#FF2D78",textShadow:"0 0 12px rgba(255,45,120,0.5)",
-          textTransform:"uppercase",
-        }}>Horário de Almoço</div>
-        <div style={{
-          fontSize:"clamp(13px,1.8vw,22px)",fontWeight:700,letterSpacing:"0.25em",
-          color:"rgba(255,45,120,0.55)",
-        }}>12:30 — 13:30</div>
-        <AlmocoClock/>
-        <div style={{
-          marginTop:8,padding:"10px 32px",
-          border:"1px solid rgba(255,45,120,0.15)",borderRadius:8,
-          fontSize:"clamp(9px,1vw,12px)",fontWeight:600,letterSpacing:"0.1em",
-          color:"rgba(255,45,120,0.35)",textAlign:"center",lineHeight:1.8,
-        }}>
-          Todos os timers foram pausados automaticamente<br/>
-          <span style={{color:"rgba(255,45,120,0.2)"}}>
-            Os técnicos retomam manualmente às 13:30
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-
   return(
     <div style={{width:"100vw",height:"100vh",background:D.dark?D.bg:`radial-gradient(1200px 600px at 85% -10%, rgba(200,16,46,0.04), transparent 60%), radial-gradient(900px 500px at 10% 110%, rgba(176,141,46,0.04), transparent 60%), #F2F2F4`,color:D.text,
       display:"flex",flexDirection:"column",fontFamily:D.dark?"'Chakra Petch',sans-serif":"'Chakra Petch',sans-serif",
@@ -2498,6 +2442,56 @@ export default function AoVivo(){
         ::-webkit-scrollbar-thumb{background:rgba(210,210,210,0.2);border-radius:2px}
         *{box-sizing:border-box}
       `}</style>
+
+      {/* ── OVERLAY ALMOÇO — cobre tudo, dentro do return principal ── */}
+      {isAlmoco&&(
+        <div style={{
+          position:"fixed",inset:0,zIndex:9999,
+          background:"linear-gradient(135deg,#030803 0%,#061006 50%,#030803 100%)",
+          display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
+          fontFamily:"'Chakra Petch',sans-serif",gap:20,overflow:"hidden",
+        }}>
+          {/* scanlines */}
+          <div style={{position:"absolute",inset:0,pointerEvents:"none",
+            backgroundImage:"repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,45,120,0.012) 2px,rgba(255,45,120,0.012) 4px)",
+            zIndex:0}}/>
+          {/* Jordan */}
+          <div style={{position:"absolute",bottom:0,right:0,
+            width:"clamp(220px,28vw,380px)",pointerEvents:"none",zIndex:2}}>
+            <img src={JORDAN_URL} alt="Jordan" style={{
+              width:"100%",objectFit:"contain",objectPosition:"bottom right",
+              opacity:0.82,display:"block",
+              filter:"drop-shadow(0 0 24px #FF2D78cc) drop-shadow(0 0 8px #FF2D78aa)",
+            }}/>
+          </div>
+          {/* conteúdo centrado */}
+          <div style={{position:"relative",zIndex:3,display:"flex",flexDirection:"column",alignItems:"center",gap:16}}>
+            <div style={{fontSize:"clamp(56px,8vw,88px)",lineHeight:1,
+              filter:"drop-shadow(0 0 12px rgba(255,45,120,0.3))"}}>🍽️</div>
+            <div style={{
+              fontSize:"clamp(24px,3.5vw,42px)",fontWeight:900,letterSpacing:"0.15em",
+              color:"#FF2D78",textShadow:"0 0 12px rgba(255,45,120,0.5)",
+              textTransform:"uppercase",
+            }}>Horário de Almoço</div>
+            <div style={{
+              fontSize:"clamp(13px,1.8vw,22px)",fontWeight:700,letterSpacing:"0.25em",
+              color:"rgba(255,45,120,0.55)",
+            }}>12:30 — 13:30</div>
+            <AlmocoClock/>
+            <div style={{
+              marginTop:8,padding:"10px 32px",
+              border:"1px solid rgba(255,45,120,0.15)",borderRadius:8,
+              fontSize:"clamp(9px,1vw,12px)",fontWeight:600,letterSpacing:"0.1em",
+              color:"rgba(255,45,120,0.35)",textAlign:"center",lineHeight:1.8,
+            }}>
+              Todos os timers foram pausados automaticamente<br/>
+              <span style={{color:"rgba(255,45,120,0.2)"}}>
+                Os técnicos retomam manualmente às 13:30
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── MICRO STRIP ── */}
       <div style={{display:"flex",alignItems:"center",gap:"10px",

@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Activity, Flag, CheckCircle2, ListOrdered, Sun, Moon, ChevronLeft, ChevronRight, Pause, Play, Wrench, CalendarDays } from "lucide-react";
+import { Activity, Flag, CheckCircle2, ListOrdered, Sun, Moon, Layers,
+         ChevronLeft, ChevronRight, Pause, Play, Wrench, CalendarDays } from "lucide-react";
+import AoVivoGlass from "@/components/AoVivoGlass";
 import ArcReactorGauge from "@/components/ArcReactorGauge";
 // ── Config ────────────────────────────────────────────────────────────────────
 // Chama directamente a saganBridge do Watcher com segredo read-only.
@@ -1783,7 +1785,15 @@ function AlmocoClock(){
 }
 
 export default function AoVivo(){
-  const [dark,sDark] = useState(()=>{ try{return localStorage.getItem("theme")!=="light";}catch{return true;} });
+  // Tema: dark | light | glass. `dark` derivado para preservar toda a lógica existente.
+  const [theme,sTheme] = useState(()=>{ try{const t=localStorage.getItem("theme");return ["dark","light","glass"].includes(t)?t:"dark";}catch{return "dark";} });
+  const dark = theme === "dark";
+  const cycleTheme = () => {
+    const order = ["dark","light","glass"];
+    const next = order[(order.indexOf(theme)+1)%3];
+    sTheme(next);
+    try{localStorage.setItem("theme",next);}catch{ /* ignore */ }
+  };
   const navigate = useNavigate();
   const [machines,sM] = useState([]);
   const [loading,sL]  = useState(true);
@@ -2392,6 +2402,24 @@ export default function AoVivo(){
     {l:"TOTAL 2026",  v:totalCon.length,              c:"#FF2D78"},
   ];
 
+  // ── Modo Glass — UI alternativa (Apple-style, glassmorphism) ───────────────
+  // Componente standalone que recebe dados já calculados. Quando theme!=="glass"
+  // esta linha é ignorada. Durante o almoço cai para o return principal, que
+  // sobrepõe o overlay de almoço (zIndex 9999) — funciona nos 3 modos.
+  if(theme==="glass" && !isAlmoco) return(
+    <AoVivoGlass
+      key="aovivo-glass"
+      loading={loading}
+      slide={slide} prog={prog} paused={paused}
+      SLIDES={SLIDES} next={next} prev={prev} sPaused={sPaused}
+      cycleTheme={cycleTheme} theme={theme}
+      data={{
+        machines, andamento, standby, prioritarias, proximas,
+        ntsAnd, ntsAF, reconAnd, reconAF, reconCon,
+        conSemana, totalCon, conHoje, avgH,
+      }}
+    />
+  );
 
   const SHARED_STYLE = (
     <style>{`
@@ -2500,6 +2528,7 @@ export default function AoVivo(){
         borderBottom:`1px solid ${D.dark?D.hudLine:"rgba(13,13,15,0.07)"}`,
         flexShrink:0}}>
 
+
         {/* ESQUERDA: logo + WATCHER maior, puxado pro centro */}
         <img src="https://media.base44.com/images/public/6a045759b56878764b71db11/b4686dedd_Gemini_Generated_Image_6i6wgc6i6wgc6i6w1.png"
           alt="" style={{width:"26px",height:"26px",objectFit:"contain",
@@ -2570,13 +2599,13 @@ export default function AoVivo(){
           </div>
         </div>
 
-        {/* DIREITA: botão tema */}
-        <button onClick={()=>{sDark(d=>!d);localStorage.setItem("theme",dark?"light":"dark");}}
+        {/* DIREITA: botão tema (cicla dark → light → glass) */}
+        <button onClick={cycleTheme} title={`Tema: ${theme} → próximo`}
           style={{background:dark?D.sub:"rgba(255,255,255,0.9)",
           border:`1px solid ${dark?D.line:"rgba(13,13,15,0.08)"}`,
           padding:"3px 6px",cursor:"pointer",color:D.text,display:"flex",borderRadius:dark?0:"8px",
           marginLeft:"auto"}}>
-          {dark?<Sun size={11}/>:<Moon size={11}/>}
+          {theme==="dark"?<Sun size={11}/>:theme==="light"?<Layers size={11}/>:<Moon size={11}/>}
         </button>
       </div>
       {/* PROGRESS BAR */}

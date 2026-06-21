@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Activity, Flag, CheckCircle2, ListOrdered, Sun, Moon,
+import { Activity, Flag, CheckCircle2, ListOrdered, Sun, Moon, Layers,
          ChevronLeft, ChevronRight, Pause, Play, Wrench, CalendarDays } from "lucide-react";
+import AoVivoGlass from "@/components/AoVivoGlass";
 
 // ── Config ────────────────────────────────────────────────────────────────────
 // Proxy server-side: segredos nunca chegam ao browser.
@@ -1824,7 +1825,15 @@ function AlmocoClock(){
 }
 
 export default function AoVivo(){
-  const [dark,sDark] = useState(()=>{ try{return localStorage.getItem("theme")!=="light";}catch{return true;} });
+  // Tema: dark | light | glass. `dark` derivado para preservar toda a lógica existente.
+  const [theme,sTheme] = useState(()=>{ try{const t=localStorage.getItem("theme");return ["dark","light","glass"].includes(t)?t:"dark";}catch{return "dark";} });
+  const dark = theme === "dark";
+  const cycleTheme = () => {
+    const order = ["dark","light","glass"];
+    const next = order[(order.indexOf(theme)+1)%3];
+    sTheme(next);
+    try{localStorage.setItem("theme",next);}catch{ /* ignore */ }
+  };
   const navigate = useNavigate();
   const [machines,sM] = useState([]);
   const [loading,sL]  = useState(true);
@@ -2354,6 +2363,24 @@ export default function AoVivo(){
     {l:"TOTAL 2026",  v:totalCon.length,              c:"#FF2D78"},
   ];
 
+  // ── Modo Glass — UI alternativa (Apple-style, glassmorphism) ───────────────
+  // Componente standalone que recebe dados já calculados. Não toca em nada do
+  // JSX original — quando theme!=="glass", esta linha é ignorada.
+  if(theme==="glass" && !isAlmoco) return(
+    <AoVivoGlass
+      key="aovivo-glass"
+      loading={loading}
+      slide={slide} prog={prog} paused={paused}
+      SLIDES={SLIDES} next={next} prev={prev} sPaused={sPaused}
+      cycleTheme={cycleTheme} theme={theme}
+      data={{
+        machines, andamento, standby, prioritarias, proximas,
+        ntsAnd, ntsAF, reconAnd, reconAF, reconCon,
+        conSemana, totalCon, conHoje, avgH,
+      }}
+    />
+  );
+
   // ── Tela de almoço 12:30–13:30 ──────────────────────────────────────────────
   // key força remount limpo na transição normal→almoço; width/height em vw/vh
   // (em vez de inset:0) garante ancoragem ao viewport mesmo se algum ancestor
@@ -2558,14 +2585,14 @@ export default function AoVivo(){
             </button>
           </div>
 
-          <button onClick={()=>{sDark(d=>!d);localStorage.setItem("theme",dark?"light":"dark");}}
-            title="Tema" style={{
+          <button onClick={cycleTheme}
+            title={`Tema: ${theme} → próximo`} style={{
             background:dark?D.sub:"rgba(255,255,255,0.9)",
             border:`1px solid ${dark?D.line:"rgba(13,13,15,0.08)"}`,
             padding:"6px 8px",cursor:"pointer",color:D.text,display:"flex",
             borderRadius:dark?0:"10px",
             boxShadow:dark?"none":"0 1px 2px rgba(13,13,15,0.06)"}}>
-            {dark?<Sun size={13}/>:<Moon size={13}/>}
+            {theme==="dark"?<Sun size={13}/>:theme==="light"?<Layers size={13}/>:<Moon size={13}/>}
           </button>
 
           {/* LIVE indicator táctico */}

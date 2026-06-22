@@ -222,12 +222,16 @@ const CSS_GLASS = `
   grid-auto-rows:minmax(0, 1fr); gap:14px; min-height:0; align-content:stretch; }
 
 /* CARDS — denso, sem espaço morto, com timer regressivo destacado */
+/* Card: blocos distribuídos (space-between) para preencher a altura sem
+   void. NS/modelo/timer ficam agrupados em .mid e nunca encolhem/cortam. */
 .card { padding:18px 20px; display:flex; flex-direction:column; min-height:0;
-  position:relative; overflow:hidden; border-radius:24px; --st:var(--green); gap:12px; }
+  position:relative; overflow:hidden; border-radius:24px; --st:var(--green);
+  gap:12px; justify-content:space-between; }
 /* Faixa de tipo (NTS/RECON/ACP) no topo do card */
 .card .typestrip { position:absolute; top:0; left:0; right:0; height:4px;
   background:var(--type,var(--teal)); box-shadow:0 0 12px var(--type,var(--teal)); }
-.card .top { display:flex; align-items:flex-start; gap:8px; }
+.card .mid { flex:none; display:flex; flex-direction:column; gap:12px; }
+.card .top { display:flex; align-items:flex-start; gap:8px; flex:none; }
 .badges { display:flex; gap:6px; flex-wrap:wrap; }
 .bdg { font-size:9.5px; font-weight:700; padding:3px 8px; border-radius:100px; letter-spacing:.04em; }
 .bdg.type { font-size:11px; font-weight:800; padding:4px 11px; letter-spacing:.1em;
@@ -277,7 +281,7 @@ const CSS_GLASS = `
 /* Lista de tarefas — ELEMENTO FLEXÍVEL: cresce para encher o espaço livre.
    É o único que pode desaparecer (overflow:hidden) quando falta espaço;
    NS/modelo/timer/datas ficam sempre intactos. */
-.card .tasks { flex:1 1 auto; min-height:0; display:flex; flex-direction:column; gap:6px;
+.card .tasks { flex:0 1 auto; min-height:0; display:flex; flex-direction:column; gap:7px;
   overflow:hidden; align-content:flex-start; }
 .card .tasklbl { font-size:10px; font-weight:700; letter-spacing:.14em; color:var(--txt3);
   text-transform:uppercase; flex:none; }
@@ -290,7 +294,7 @@ const CSS_GLASS = `
 .card .tk.done .txt { text-decoration:line-through; text-decoration-color:rgba(255,255,255,.3); }
 .card .tk.done .icon { color:var(--green); }
 .card .tk .txt { overflow:hidden; text-overflow:ellipsis; }
-.card .dates { margin-top:auto; display:flex; gap:14px; font-size:12px; font-weight:600; color:var(--txt2);
+.card .dates { display:flex; gap:14px; font-size:12px; font-weight:600; color:var(--txt2);
   font-variant-numeric:tabular-nums; padding-top:8px; flex:none;
   border-top:1px solid var(--stroke); }
 .card .dates b { color:var(--teal); }
@@ -495,31 +499,31 @@ function MachineCard({ m }) {
         )}
       </div>
 
-      {/* CENTRAL: NS gigante + modelo */}
-      <div className="central">
-        <div className="ns" style={{ fontSize: nsFontSize(ns.main, 40, 24) + "px" }}>{ns.main}{ns.sub && <small> · {ns.sub}</small>}</div>
-        <div className="mo">{m.modelo || "—"}</div>
+      {/* GRUPO CENTRAL: NS + modelo + timer (mantêm-se juntos e intactos) */}
+      <div className="mid">
+        <div className="central">
+          <div className="ns" style={{ fontSize: nsFontSize(ns.main, 40, 24) + "px" }}>{ns.main}{ns.sub && <small> · {ns.sub}</small>}</div>
+          <div className="mo">{m.modelo || "—"}</div>
+        </div>
+        {meta > 0 && (
+          <div className={`timer${isLate ? " late" : ""}`}>
+            <div>
+              <div className="lbl">{isLate ? "ATRASO" : "RESTANTE"}</div>
+              <div className="val">{timerLabel}</div>
+            </div>
+            <div className="meta">meta {metaH}</div>
+          </div>
+        )}
+        {meta === 0 && (
+          <div className="timer">
+            <div>
+              <div className="lbl">DECORRIDO</div>
+              <div className="val" style={{ color: "var(--teal)" }}>{fmtHMS(elapsed)}</div>
+            </div>
+            <div className="meta">sem meta</div>
+          </div>
+        )}
       </div>
-
-      {/* TIMER REGRESSIVO — protagonista do card */}
-      {meta > 0 && (
-        <div className={`timer${isLate ? " late" : ""}`}>
-          <div>
-            <div className="lbl">{isLate ? "ATRASO" : "RESTANTE"}</div>
-            <div className="val">{timerLabel}</div>
-          </div>
-          <div className="meta">meta {metaH}</div>
-        </div>
-      )}
-      {meta === 0 && (
-        <div className="timer">
-          <div>
-            <div className="lbl">DECORRIDO</div>
-            <div className="val" style={{ color: "var(--teal)" }}>{fmtHMS(elapsed)}</div>
-          </div>
-          <div className="meta">sem meta</div>
-        </div>
-      )}
 
       {/* TAREFAS — preenchem o espaço livre; cortadas (não quebram o card) se faltar espaço */}
       {tasks.length > 0 && (

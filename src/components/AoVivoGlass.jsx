@@ -274,13 +274,24 @@ const CSS_GLASS = `
 .card .timer .meta { font-size:11px; color:var(--txt2); font-weight:600; letter-spacing:.06em;
   font-variant-numeric:tabular-nums; }
 .card .timer.late .val { color:var(--red); text-shadow:0 0 14px var(--red); }
-.card .task { display:flex; align-items:center; gap:6px; }
-.card .task .icon { color:var(--st); flex:none; font-size:11px; }
-.card .task span { font-size:12px; font-weight:500; color:#dfe2ea; background:rgba(255,255,255,.05);
-  padding:4px 10px; border-radius:8px; max-width:100%; flex:1;
+/* Lista de tarefas — ELEMENTO FLEXÍVEL: cresce para encher o espaço livre.
+   É o único que pode desaparecer (overflow:hidden) quando falta espaço;
+   NS/modelo/timer/datas ficam sempre intactos. */
+.card .tasks { flex:1 1 auto; min-height:0; display:flex; flex-direction:column; gap:6px;
+  overflow:hidden; align-content:flex-start; }
+.card .tasklbl { font-size:10px; font-weight:700; letter-spacing:.14em; color:var(--txt3);
+  text-transform:uppercase; flex:none; }
+.card .tk { display:flex; align-items:center; gap:8px; flex:none;
+  font-size:13px; font-weight:500; color:#dfe2ea;
+  background:rgba(255,255,255,.05); padding:5px 11px; border-radius:8px;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.card .tk .icon { flex:none; font-size:11px; color:var(--st); }
+.card .tk.done { color:var(--txt2); }
+.card .tk.done .txt { text-decoration:line-through; text-decoration-color:rgba(255,255,255,.3); }
+.card .tk.done .icon { color:var(--green); }
+.card .tk .txt { overflow:hidden; text-overflow:ellipsis; }
 .card .dates { margin-top:auto; display:flex; gap:14px; font-size:12px; font-weight:600; color:var(--txt2);
-  font-variant-numeric:tabular-nums; padding-top:6px;
+  font-variant-numeric:tabular-nums; padding-top:8px; flex:none;
   border-top:1px solid var(--stroke); }
 .card .dates b { color:var(--teal); }
 .card .dates .e b { color:var(--green); }
@@ -441,8 +452,10 @@ function MachineCard({ m }) {
   const paused  = m.timer_status?.startsWith("paused");
   const tier    = tierRecon(m);
   const ns      = nsSplit(m.serie);
-  const tasks   = m.tarefas || [];
-  const activeTask = tasks.find(t => !t.concluida) || tasks[0];
+  // Tarefas reais (ignora marcadores) — pendentes primeiro, depois as feitas
+  const RESERVED = new Set(["EXPRESS", "VPS", "IMPREVISTOS"]);
+  const allTasks = (m.tarefas || []).filter(t => (t.texto || "").trim() && !RESERVED.has((t.texto || "").trim()));
+  const tasks    = [...allTasks.filter(t => !t.concluida), ...allTasks.filter(t => t.concluida)];
   const over    = isOverdue(m);
   const cringP  = Math.min(100, Math.max(0, ratio * 100));
   const metaH   = meta > 0 ? (() => {
@@ -508,11 +521,16 @@ function MachineCard({ m }) {
         </div>
       )}
 
-      {/* TAREFA ACTIVA */}
-      {activeTask && (
-        <div className="task">
-          <span className="icon">▸</span>
-          <span>{activeTask.texto}</span>
+      {/* TAREFAS — preenchem o espaço livre; cortadas (não quebram o card) se faltar espaço */}
+      {tasks.length > 0 && (
+        <div className="tasks">
+          <span className="tasklbl">Tarefas · {tasks.length}</span>
+          {tasks.map((t, i) => (
+            <div key={i} className={`tk${t.concluida ? " done" : ""}`}>
+              <span className="icon">{t.concluida ? "✓" : "▸"}</span>
+              <span className="txt">{t.texto}</span>
+            </div>
+          ))}
         </div>
       )}
 

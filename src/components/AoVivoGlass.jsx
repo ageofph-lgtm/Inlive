@@ -47,6 +47,13 @@ function nsSplit(ns) {
   if (ns.includes("|")) { const [main, sub] = ns.split("|"); return { main, sub }; }
   return { main: ns, sub: null };
 }
+// Fonte adaptativa para o NS: encolhe à medida que a série cresce, garantindo
+// que nunca há corte. base = tamanho para séries curtas (≤9 chars), min = piso.
+function nsFontSize(text, base, min = 14) {
+  const len = (text || "").length;
+  if (len <= 9) return base;
+  return Math.max(min, Math.round(base - (len - 9) * (base * 0.07)));
+}
 function fmtDateShort(v) {
   if (!v) return null;
   try { return new Date(String(v).length === 10 ? v + "T12:00:00" : v).toLocaleDateString("pt-PT", { day: "2-digit", month: "2-digit" }); }
@@ -203,7 +210,10 @@ const CSS_GLASS = `
   font-variant-numeric:tabular-nums; }
 .rkpis b i { font-style:normal; font-size:13px; color:var(--txt2); margin-left:1px; }
 .rkpis span { font-size:9.5px; font-weight:600; color:var(--txt3); letter-spacing:.08em; text-transform:uppercase; }
-.cards { display:grid; grid-template-columns:repeat(3,1fr); grid-auto-rows:1fr; gap:14px; min-height:0; }
+/* Colunas adaptativas: cada card nunca fica mais estreito que 330px; com poucos
+   cards alargam, com muitos quebram em mais colunas. Garante espaço p/ o NS. */
+.cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(330px, 1fr));
+  grid-auto-rows:minmax(0, 1fr); gap:14px; min-height:0; align-content:stretch; }
 
 /* CARDS — denso, sem espaço morto, com timer regressivo destacado */
 .card { padding:18px 20px; display:flex; flex-direction:column; min-height:0;
@@ -237,11 +247,12 @@ const CSS_GLASS = `
 .cring .cc span { font-size:8px; color:var(--txt3); font-weight:600; margin-top:3px; letter-spacing:.06em; }
 /* Bloco central — NS gigante, modelo, técnico */
 .card .central { display:flex; flex-direction:column; gap:4px; }
-.card .ns { font-family:'Orbitron'; font-weight:800; font-size:34px; letter-spacing:.02em; line-height:1;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.card .ns small { font-size:18px; color:var(--txt2); font-weight:700; }
+/* NS nunca corta: fonte vem inline (adaptativa) e o texto pode quebrar */
+.card .ns { font-family:'Orbitron'; font-weight:800; letter-spacing:.02em; line-height:1.04;
+  word-break:break-word; overflow-wrap:anywhere; }
+.card .ns small { font-size:.55em; color:var(--txt2); font-weight:700; }
 .card .mo { font-size:14px; color:var(--txt2); font-weight:500;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  word-break:break-word; overflow-wrap:anywhere; line-height:1.2; }
 .card .tech { font-size:11px; color:var(--txt3); font-weight:600; letter-spacing:.05em;
   display:flex; align-items:center; gap:6px; }
 .card .tech b { color:var(--teal); font-weight:700; }
@@ -278,8 +289,8 @@ const CSS_GLASS = `
 .gh .gn { margin-left:auto; font-family:'Orbitron'; color:var(--st); }
 .gb { padding:14px; display:flex; flex-direction:column; gap:12px; overflow:hidden; min-height:0; }
 .box { padding:14px 15px; border-radius:18px; background:rgba(255,255,255,.05); border-left:3px solid var(--st); }
-.box .bn { font-family:'Orbitron'; font-weight:700; font-size:20px;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.box .bn { font-family:'Orbitron'; font-weight:700; font-size:18px; line-height:1.05;
+  word-break:break-word; overflow-wrap:anywhere; }
 .box .bm { font-size:11px; color:var(--txt2); margin:3px 0 6px; }
 .box .bt { float:right; font-family:'Orbitron'; font-weight:700; color:var(--orange); }
 .box .bnote { font-size:11.5px; color:#cfd3dc; clear:both; }
@@ -294,7 +305,7 @@ const CSS_GLASS = `
 .grows { position:relative; flex:1; padding-top:10px; overflow:hidden; }
 .gnow { position:absolute; top:0; bottom:0; width:2px; background:var(--red); box-shadow:0 0 10px var(--red); z-index:3; }
 .grow { display:grid; grid-template-columns:200px repeat(15,1fr); align-items:center; height:38px; margin-bottom:5px; }
-.grow .l { font-size:12px; color:#cfd3dc; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding-right:10px; }
+.grow .l { font-size:11px; color:#cfd3dc; line-height:1.1; word-break:break-word; overflow-wrap:anywhere; padding-right:10px; }
 .gb2 { height:22px; border-radius:100px; display:flex; align-items:center; padding:0 13px; font-size:11px; font-weight:700;
   color:#06070c; white-space:nowrap; overflow:hidden; }
 .gb2.run { background:var(--green); }
@@ -310,8 +321,8 @@ const CSS_GLASS = `
 .dh .dd { color:var(--txt2); }
 .db { padding:12px; display:flex; flex-direction:column; gap:10px; overflow:hidden; min-height:0; }
 .mini { padding:11px 13px; border-radius:16px; background:rgba(255,255,255,.05); border-left:3px solid var(--st,var(--blue)); }
-.mini .mn { font-family:'Orbitron'; font-weight:700; font-size:16px;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.mini .mn { font-family:'Orbitron'; font-weight:700; font-size:15px; line-height:1.05;
+  word-break:break-word; overflow-wrap:anywhere; }
 .mini .mm { font-size:10px; color:var(--txt2); margin:2px 0 4px; }
 .mini .mh { font-size:11px; color:var(--orange); font-weight:600; }
 
@@ -320,9 +331,9 @@ const CSS_GLASS = `
 .ntc { padding:22px 24px; display:flex; flex-direction:column; gap:14px; border:1px solid rgba(255,69,58,.3); overflow:hidden; min-height:0; }
 .ntc::before { content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
   background:radial-gradient(110% 70% at 85% 0%,rgba(255,69,58,.12),transparent 55%); }
-.ntc .nn { font-family:'Orbitron'; font-weight:800; font-size:30px; line-height:1;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.ntc .nn small { font-size:18px; color:var(--txt2); }
+.ntc .nn { font-family:'Orbitron'; font-weight:800; line-height:1.04;
+  word-break:break-word; overflow-wrap:anywhere; }
+.ntc .nn small { font-size:.6em; color:var(--txt2); }
 .ntc .nm { font-size:13px; color:var(--txt2); margin-top:-6px; }
 .ntc .nwhy { background:rgba(255,69,58,.1); color:#FFD9D6; border-radius:14px; padding:11px 14px;
   font-size:13px; font-weight:500; line-height:1.5;
@@ -350,8 +361,8 @@ const CSS_GLASS = `
 .rt2.paus { border-top-color:var(--orange); }
 .rt2 .t { font-size:9px; font-weight:700; color:var(--purple); letter-spacing:.06em; }
 .rt2.run .t { color:var(--green); } .rt2.paus .t { color:var(--orange); }
-.rt2 .n { font-family:'Orbitron'; font-weight:700; font-size:15px; margin-top:3px;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.rt2 .n { font-family:'Orbitron'; font-weight:700; font-size:14px; margin-top:3px; line-height:1.05;
+  word-break:break-word; overflow-wrap:anywhere; }
 .rt2 .m { font-size:9.5px; color:var(--txt2); margin-top:2px; display:flex; justify-content:space-between; }
 .rt2 .m .h { color:var(--orange); font-variant-numeric:tabular-nums; }
 .rdone { display:flex; gap:9px; flex-wrap:wrap; }
@@ -364,10 +375,10 @@ const CSS_GLASS = `
 .dc { padding:18px 22px; display:flex; align-items:center; gap:18px; overflow:hidden; border:1px solid rgba(52,199,89,.22); }
 .dc .ck { width:46px; height:46px; border-radius:50%; background:var(--green); display:grid; place-items:center;
   font-size:22px; color:#06070c; flex:none; font-weight:900; }
-.dc .dn { font-family:'Orbitron'; font-weight:700; font-size:22px;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dc .dn { font-family:'Orbitron'; font-weight:700; font-size:20px; line-height:1.05;
+  word-break:break-word; overflow-wrap:anywhere; }
 .dc .dm { font-size:12px; color:var(--txt2); margin-top:3px;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  word-break:break-word; overflow-wrap:anywhere; line-height:1.2; }
 .dc .dt { margin-left:auto; text-align:right; flex:none; }
 .dc .dt b { font-family:'Orbitron'; font-weight:700; font-size:22px; color:var(--green); font-variant-numeric:tabular-nums; }
 .dc .dt span { display:block; font-size:11px; color:var(--txt2); }
@@ -443,7 +454,7 @@ function MachineCard({ m }) {
 
       {/* CENTRAL: NS gigante + modelo */}
       <div className="central">
-        <div className="ns">{ns.main}{ns.sub && <small> · {ns.sub}</small>}</div>
+        <div className="ns" style={{ fontSize: nsFontSize(ns.main, 34) + "px" }}>{ns.main}{ns.sub && <small> · {ns.sub}</small>}</div>
         <div className="mo">{m.modelo || "—"}</div>
       </div>
 
@@ -601,7 +612,7 @@ function SlideStandby({ standby }) {
 function SlidePrioritarias({ prioritarias }) {
   return (
     <div className="andamento" style={{ gridTemplateColumns: "1fr" }}>
-      <div className="cards" style={{ gridTemplateColumns: "repeat(4,1fr)" }}>
+      <div className="cards">
         {prioritarias.length === 0
           ? <div style={{ gridColumn: "1 / -1", display: "grid", placeItems: "center", color: "var(--txt3)", fontSize: 14 }}>Sem prioritárias</div>
           : prioritarias.slice(0, 8).map(m => <MachineCard key={m.id} m={m} />)}
@@ -747,7 +758,7 @@ function NTSCard({ m }) {
   return (
     <div className="ntc glass">
       <div>
-        <div className="nn">{ns.main}{ns.sub && <small> · {ns.sub}</small>}</div>
+        <div className="nn" style={{ fontSize: nsFontSize(ns.main, 30) + "px" }}>{ns.main}{ns.sub && <small> · {ns.sub}</small>}</div>
         <div className="nm">{m.modelo || "—"}</div>
       </div>
       {m.observacoes && <div className="nwhy">{m.observacoes}</div>}
@@ -819,7 +830,7 @@ function SlideRecon({ reconAnd, reconAF, reconCon }) {
             return (
               <div key={m.id} className={`rt2 ${cls}`}>
                 <div className="t">{run ? "EM CURSO" : paus ? "PAUSED" : "IDLE"}{tier ? ` · ${tier}` : ""}</div>
-                <div className="n" style={{ fontSize: 18 }}>{nsSplit(m.serie).main}</div>
+                <div className="n" style={{ fontSize: nsFontSize(nsSplit(m.serie).main, 18, 12) + "px" }}>{nsSplit(m.serie).main}</div>
                 <div className="m"><span>{m.modelo}</span><span className="h">⏱ {fmtHMS(elapsed)}</span></div>
               </div>
             );
@@ -872,7 +883,7 @@ function SlideConcluidas({ conSemana }) {
             <div key={m.id} className="dc glass">
               <div className="ck">✓</div>
               <div style={{ minWidth: 0, flex: 1 }}>
-                <div className="dn">{nsSplit(m.serie).main}</div>
+                <div className="dn" style={{ fontSize: nsFontSize(nsSplit(m.serie).main, 20, 13) + "px" }}>{nsSplit(m.serie).main}</div>
                 <div className="dm">{m.modelo}</div>
               </div>
               <div className="dt">

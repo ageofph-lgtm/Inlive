@@ -56,6 +56,12 @@ function tierRecon(m) {
   const r = m.recondicao || {};
   return r.ouro ? "OURO" : r.prata ? "PRATA" : r.bronze ? "BRONZE" : r.ferro ? "FERRO" : null;
 }
+// Tipo de intervenção visível (NTS / RECON / ACP) — em ordem de prioridade
+function tipoIntervencao(m) {
+  if (m.tipo === "nova") return { label: "NTS",   color: "var(--red)"    };
+  if (tierRecon(m))      return { label: "RECON", color: "var(--purple)" };
+  return                        { label: "ACP",   color: "var(--teal)"   };
+}
 function isOverdue(m) {
   if (!m.previsao_fim) return false;
   const conc = m.estado?.startsWith("concluida") || m.estado === "concluida";
@@ -63,6 +69,9 @@ function isOverdue(m) {
   try { return new Date(m.previsao_fim + (String(m.previsao_fim).length === 10 ? "T23:59:59" : "")) < new Date(); }
   catch { return false; }
 }
+
+// Logo do mascote STILL (mesma URL que o AoVivo principal usa)
+const JORDAN_URL = "https://media.base44.com/images/public/6a045759b56878764b71db11/b4686dedd_Gemini_Generated_Image_6i6wgc6i6wgc6i6w1.png";
 
 // ── CSS (adaptado do mockup) ────────────────────────────────────────────────
 const CSS_GLASS = `
@@ -82,7 +91,17 @@ const CSS_GLASS = `
 }
 .glass-root *, .glass-root *::before, .glass-root *::after { box-sizing:border-box; margin:0; padding:0; }
 
-#glass-screen { width:1920px; height:1080px; position:fixed; top:50%; left:50%; transform-origin:center center; overflow:hidden; }
+/* Fullscreen — usa todo o viewport, sem barras pretas */
+#glass-screen { width:100vw; height:100vh; position:fixed; top:0; left:0; overflow:hidden; }
+
+/* Marca d'água do mascote em cada slide */
+.watermark { position:absolute; bottom:0; right:0; width:32vw; height:62vh;
+  pointer-events:none; z-index:0; opacity:0.10;
+  background-image:url('${"https://media.base44.com/images/public/6a045759b56878764b71db11/b4686dedd_Gemini_Generated_Image_6i6wgc6i6wgc6i6w1.png"}');
+  background-size:contain; background-repeat:no-repeat; background-position:bottom right;
+  mix-blend-mode:luminosity; filter:drop-shadow(0 0 30px rgba(255,69,58,0.3)); }
+/* Garante que o conteúdo do slide fica por cima da marca d'água */
+.slide > *:not(.watermark) { position:relative; z-index:1; }
 
 .mesh { position:absolute; inset:-15%; z-index:0; filter:blur(8px); }
 .blob { position:absolute; border-radius:50%; mix-blend-mode:screen; opacity:.5; animation:gdrift 28s ease-in-out infinite; }
@@ -106,11 +125,19 @@ const CSS_GLASS = `
 
 /* chrome */
 .chrome { display:flex; align-items:center; gap:16px; }
-.wm { display:flex; align-items:center; gap:11px; }
-.wm .ic { width:34px; height:34px; border-radius:11px; background:linear-gradient(160deg,#FF6B6B,#FF453A);
-  display:grid; place-items:center; font-family:'Orbitron'; font-weight:900; font-size:15px; color:#fff;
-  box-shadow:0 6px 16px -4px var(--red); }
-.wm .tt { font-family:'Orbitron'; font-weight:800; letter-spacing:.14em; font-size:22px; }
+.wm { display:flex; align-items:center; gap:12px; }
+/* Ícone: logo do mascote — fundo transparente (multiply remove o branco em dark) */
+.wm .ic { width:44px; height:44px; flex:none; position:relative;
+  border-radius:12px; overflow:hidden;
+  background:linear-gradient(160deg,rgba(255,107,107,0.18),rgba(255,69,58,0.12));
+  border:1px solid rgba(255,107,107,0.32);
+  box-shadow:0 6px 16px -4px var(--red), inset 0 1px 0 rgba(255,255,255,.18); }
+.wm .ic img { width:100%; height:100%; object-fit:contain; object-position:center;
+  mix-blend-mode:multiply; filter:brightness(1.45) contrast(1.15) drop-shadow(0 0 4px rgba(255,69,58,0.4)); }
+.wm .tt { font-family:'Orbitron'; font-weight:800; letter-spacing:.14em; font-size:22px; line-height:1; }
+.wm .tt2 { font-family:'Orbitron'; font-weight:600; letter-spacing:.22em; font-size:11px;
+  color:var(--txt2); margin-left:2px; padding-left:10px;
+  border-left:1px solid var(--stroke); align-self:center; }
 .live { display:flex; align-items:center; gap:8px; font-size:12px; font-weight:600; letter-spacing:.04em;
   color:var(--green); padding:6px 13px; border-radius:100px; }
 .live .d { width:8px; height:8px; border-radius:50%; background:var(--green);
@@ -148,8 +175,17 @@ const CSS_GLASS = `
 
 /* andamento — anéis + cartões */
 .andamento { flex:1; min-height:0; display:grid; grid-template-columns:430px 1fr; gap:16px; }
-.ringspanel { padding:24px 26px; display:flex; flex-direction:column; }
-.ringspanel .rt { font-size:14px; font-weight:700; color:var(--txt2); letter-spacing:.02em; }
+.ringspanel { padding:24px 26px; display:flex; flex-direction:column; gap:16px; }
+/* Cabeçalho com logo mascote */
+.rhead { display:flex; align-items:center; gap:14px; padding-bottom:14px; border-bottom:1px solid var(--stroke); }
+.rlogo { width:60px; height:60px; flex:none; border-radius:14px; overflow:hidden; position:relative;
+  background:linear-gradient(160deg,rgba(255,107,107,0.20),rgba(255,69,58,0.10));
+  border:1px solid rgba(255,107,107,0.35);
+  box-shadow:0 8px 22px -8px var(--red), inset 0 1px 0 rgba(255,255,255,.2); }
+.rlogo img { width:100%; height:100%; object-fit:contain;
+  mix-blend-mode:multiply; filter:brightness(1.45) contrast(1.15) drop-shadow(0 0 6px rgba(255,69,58,0.4)); }
+.ringspanel .rt { font-family:'Orbitron'; font-size:17px; font-weight:800; letter-spacing:.06em; line-height:1.1; }
+.ringspanel .rts { font-size:11px; font-weight:600; color:var(--txt3); letter-spacing:.14em; margin-top:3px; }
 .ringspanel .rmid { flex:1; display:flex; align-items:center; justify-content:center; gap:24px; }
 .ringwrap { width:200px; height:200px; position:relative; flex:none; }
 .ringwrap svg { transform:rotate(-90deg); }
@@ -158,45 +194,80 @@ const CSS_GLASS = `
 .lg .dot { width:13px; height:13px; border-radius:50%; box-shadow:0 0 10px currentColor; flex:none; }
 .lg b { display:block; font-size:22px; font-weight:800; line-height:1; font-variant-numeric:tabular-nums; }
 .lg span { font-size:12px; color:var(--txt2); font-weight:500; }
-.ringspanel .rfoot { display:flex; justify-content:space-between; padding-top:18px; border-top:1px solid var(--stroke);
-  font-size:13px; color:var(--txt2); }
-.ringspanel .rfoot b { color:var(--txt); font-weight:700; }
+/* Bloco KPIs extra — 4 colunas */
+.rkpis { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; padding-top:14px;
+  border-top:1px solid var(--stroke); }
+.rkpis > div { display:flex; flex-direction:column; gap:3px; padding:10px 8px; border-radius:12px;
+  background:rgba(255,255,255,.04); text-align:center; }
+.rkpis b { font-family:'Orbitron'; font-size:20px; font-weight:800; line-height:1; color:var(--txt);
+  font-variant-numeric:tabular-nums; }
+.rkpis b i { font-style:normal; font-size:13px; color:var(--txt2); margin-left:1px; }
+.rkpis span { font-size:9.5px; font-weight:600; color:var(--txt3); letter-spacing:.08em; text-transform:uppercase; }
 .cards { display:grid; grid-template-columns:repeat(3,1fr); grid-auto-rows:1fr; gap:14px; min-height:0; }
 
-.card { padding:16px 18px; display:flex; flex-direction:column; min-height:0; position:relative; overflow:hidden;
-  border-radius:24px; --st:var(--green); }
-.card .top { display:flex; align-items:flex-start; gap:7px; }
+/* CARDS — denso, sem espaço morto, com timer regressivo destacado */
+.card { padding:18px 20px; display:flex; flex-direction:column; min-height:0;
+  position:relative; overflow:hidden; border-radius:24px; --st:var(--green); gap:12px; }
+/* Faixa de tipo (NTS/RECON/ACP) no topo do card */
+.card .typestrip { position:absolute; top:0; left:0; right:0; height:4px;
+  background:var(--type,var(--teal)); box-shadow:0 0 12px var(--type,var(--teal)); }
+.card .top { display:flex; align-items:flex-start; gap:8px; }
 .badges { display:flex; gap:6px; flex-wrap:wrap; }
-.bdg { font-size:9.5px; font-weight:700; padding:3px 8px; border-radius:100px; letter-spacing:.02em; }
-.bdg.run { color:var(--green); background:rgba(52,199,89,.16); }
+.bdg { font-size:9.5px; font-weight:700; padding:3px 8px; border-radius:100px; letter-spacing:.04em; }
+.bdg.type { font-size:11px; font-weight:800; padding:4px 11px; letter-spacing:.1em;
+  color:var(--type,var(--teal)); background:rgba(255,255,255,.04);
+  border:1px solid var(--type,var(--teal)); }
+.bdg.run { color:var(--green); background:rgba(52,199,89,.18); }
 .bdg.run i { font-style:normal; }
-.bdg.paused { color:var(--orange); background:rgba(255,159,10,.16); }
+.bdg.paused { color:var(--orange); background:rgba(255,159,10,.18); }
 .bdg.idle { color:var(--txt2); background:rgba(255,255,255,.06); }
 .bdg.prio { color:#160d00; background:var(--orange); font-weight:800; }
-.bdg.nts { color:var(--red); background:rgba(255,69,58,.16); }
-.bdg.recon { color:var(--purple); background:rgba(191,90,242,.16); }
-.bdg.tier { color:var(--txt2); background:rgba(255,255,255,.08); }
-.bdg.over { color:#fff; background:var(--red); }
-.cring { margin-left:auto; width:74px; height:74px; border-radius:50%; flex:none; position:relative;
-  background:conic-gradient(var(--st) calc(var(--p,0)*1%),rgba(255,255,255,.1) 0); }
-.cring::before { content:''; position:absolute; inset:5px; border-radius:50%; background:rgba(8,9,14,.66); backdrop-filter:blur(6px); }
-.cring .cc { position:absolute; inset:0; display:grid; place-content:center; text-align:center; z-index:1; line-height:1; }
-.cring .cc b { font-size:13px; font-weight:700; font-variant-numeric:tabular-nums; color:var(--st); display:block; }
-.cring .cc span { font-size:8px; color:var(--txt3); font-weight:600; margin-top:2px; }
-.card .ns { font-family:'Orbitron'; font-weight:800; font-size:27px; letter-spacing:.01em; line-height:1; margin-top:14px;
+.bdg.tier { color:var(--purple); background:rgba(191,90,242,.16); }
+.bdg.over { color:#fff; background:var(--red); font-weight:800;
+  animation:bdgPulse 1.4s ease-in-out infinite; }
+@keyframes bdgPulse { 50% { opacity:.5; } }
+/* Anel de progresso (continua a usar conic-gradient) */
+.cring { margin-left:auto; width:84px; height:84px; border-radius:50%; flex:none; position:relative;
+  background:conic-gradient(var(--st) calc(var(--p,0)*1%),rgba(255,255,255,.08) 0); }
+.cring::before { content:''; position:absolute; inset:5px; border-radius:50%;
+  background:rgba(8,9,14,.78); backdrop-filter:blur(6px); }
+.cring .cc { position:absolute; inset:0; display:grid; place-content:center; text-align:center; z-index:1; line-height:1.05; }
+.cring .cc b { font-size:11px; font-weight:800; font-variant-numeric:tabular-nums;
+  color:var(--st); display:block; letter-spacing:.04em; }
+.cring .cc span { font-size:8px; color:var(--txt3); font-weight:600; margin-top:3px; letter-spacing:.06em; }
+/* Bloco central — NS gigante, modelo, técnico */
+.card .central { display:flex; flex-direction:column; gap:4px; }
+.card .ns { font-family:'Orbitron'; font-weight:800; font-size:34px; letter-spacing:.02em; line-height:1;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.card .ns small { font-size:17px; color:var(--txt2); font-weight:700; }
-.card .mo { font-size:12.5px; color:var(--txt2); font-weight:500; margin-top:5px;
+.card .ns small { font-size:18px; color:var(--txt2); font-weight:700; }
+.card .mo { font-size:14px; color:var(--txt2); font-weight:500;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.card .task { margin-top:8px; }
-.card .task span { font-size:11.5px; font-weight:500; color:#dfe2ea; background:rgba(255,255,255,.06);
-  padding:3px 9px; border-radius:8px; display:inline-block; max-width:100%;
+.card .tech { font-size:11px; color:var(--txt3); font-weight:600; letter-spacing:.05em;
+  display:flex; align-items:center; gap:6px; }
+.card .tech b { color:var(--teal); font-weight:700; }
+/* Timer regressivo — protagonista */
+.card .timer { display:flex; align-items:baseline; justify-content:space-between; gap:10px;
+  padding:10px 12px; border-radius:14px; background:rgba(255,255,255,.04);
+  border:1px solid var(--stroke); }
+.card .timer .lbl { font-size:10px; font-weight:700; color:var(--txt3); letter-spacing:.16em; }
+.card .timer .val { font-family:'Orbitron'; font-weight:800; font-size:30px; letter-spacing:.04em;
+  font-variant-numeric:tabular-nums; color:var(--st);
+  text-shadow:0 0 12px var(--st); }
+.card .timer .meta { font-size:11px; color:var(--txt2); font-weight:600; letter-spacing:.06em;
+  font-variant-numeric:tabular-nums; }
+.card .timer.late .val { color:var(--red); text-shadow:0 0 14px var(--red); }
+.card .task { display:flex; align-items:center; gap:6px; }
+.card .task .icon { color:var(--st); flex:none; font-size:11px; }
+.card .task span { font-size:12px; font-weight:500; color:#dfe2ea; background:rgba(255,255,255,.05);
+  padding:4px 10px; border-radius:8px; max-width:100%; flex:1;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .card .dates { margin-top:auto; display:flex; gap:14px; font-size:12px; font-weight:600; color:var(--txt2);
-  font-variant-numeric:tabular-nums; padding-top:10px; }
+  font-variant-numeric:tabular-nums; padding-top:6px;
+  border-top:1px solid var(--stroke); }
 .card .dates b { color:var(--teal); }
 .card .dates .e b { color:var(--green); }
-.card .empty { margin-top:auto; padding-top:10px; font-size:11px; color:var(--txt3); font-weight:500; }
+.card .empty { margin-top:auto; padding-top:10px; font-size:11px; color:var(--txt3); font-weight:500;
+  border-top:1px solid var(--stroke); }
 
 /* grupos (standby) */
 .groups { flex:1; min-height:0; display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
@@ -316,11 +387,15 @@ const CSS_GLASS = `
 `;
 
 // ── Card de máquina (usado em ANDAMENTO e PRIORITÁRIAS) ─────────────────────
+// Layout denso: tipo (NTS/RECON/ACP) em destaque, NS gigante, timer REGRESSIVO,
+// meta, técnico, tarefa activa, datas. Sem espaço morto.
 function MachineCard({ m }) {
   const elapsed = useLiveTimer(m);
   const meta    = Number(m.tempo_estimado_segundos) || 0;
   const ratio   = meta > 0 ? elapsed / meta : 0;
-  const st      = ratio >= 1 ? "var(--red)" : ratio >= 0.9 ? "var(--orange)" : "var(--green)";
+  const restante = meta > 0 ? meta - elapsed : null; // ← TIMER REGRESSIVO
+  const isLate  = restante !== null && restante < 0;
+  const st      = isLate ? "var(--red)" : ratio >= 0.9 ? "var(--orange)" : "var(--green)";
   const run     = m.timer_status === "running";
   const paused  = m.timer_status?.startsWith("paused");
   const tier    = tierRecon(m);
@@ -329,51 +404,99 @@ function MachineCard({ m }) {
   const activeTask = tasks.find(t => !t.concluida) || tasks[0];
   const over    = isOverdue(m);
   const cringP  = Math.min(100, Math.max(0, ratio * 100));
-  const totH    = meta > 0 ? Math.round(meta / 3600) + "h" : "—";
+  const metaH   = meta > 0 ? (() => {
+    const h = Math.floor(meta / 3600), mn = Math.floor((meta % 3600) / 60);
+    return mn === 0 ? `${h}h` : `${h}h${String(mn).padStart(2,"0")}`;
+  })() : "—";
+  const tipo    = tipoIntervencao(m);
+
+  // Sinal +/- no timer regressivo
+  const timerLabel = restante !== null
+    ? (isLate ? `+${fmtHMS(-restante)}` : fmtHMS(restante))
+    : fmtHMS(elapsed);
 
   return (
-    <div className="card glass" style={{ "--st": st, "--p": cringP }}>
+    <div className="card glass"
+         style={{ "--st": st, "--p": cringP, "--type": tipo.color }}>
+      <span className="typestrip" />
+
+      {/* TOPO: badges + anel de progresso */}
       <div className="top">
         <div className="badges">
-          {run    && <span className="bdg run"><i>● </i>RUN</span>}
-          {paused && <span className="bdg paused">PAUSED</span>}
-          {!run && !paused && <span className="bdg idle">IDLE</span>}
-          {m.prioridade && <span className="bdg prio">PRIORITÁRIA</span>}
-          {tier && <span className="bdg recon">RECON</span>}
+          <span className="bdg type">{tipo.label}</span>
           {tier && <span className="bdg tier">{tier}</span>}
-          {m.tipo === "nova" && <span className="bdg nts">NTS</span>}
-          {over && <span className="bdg over">ATRAS.</span>}
+          {run    && <span className="bdg run"><i>● </i>RUN</span>}
+          {paused && <span className="bdg paused">PAUSADO</span>}
+          {!run && !paused && <span className="bdg idle">IDLE</span>}
+          {m.prioridade && <span className="bdg prio">⚡ PRIO</span>}
+          {over && <span className="bdg over">ATRASADA</span>}
         </div>
         {meta > 0 && (
           <div className="cring">
             <div className="cc">
-              <b>{fmtHMS(elapsed)}</b>
-              <span>/ {totH}</span>
+              <b>{Math.round(ratio * 100)}%</b>
+              <span>concluído</span>
             </div>
           </div>
         )}
       </div>
-      <div className="ns">{ns.main}{ns.sub && <small> · {ns.sub}</small>}</div>
-      <div className="mo">{m.modelo || "—"}</div>
-      {activeTask && <div className="task"><span>{activeTask.texto}</span></div>}
+
+      {/* CENTRAL: NS gigante + modelo + técnico */}
+      <div className="central">
+        <div className="ns">{ns.main}{ns.sub && <small> · {ns.sub}</small>}</div>
+        <div className="mo">{m.modelo || "—"}</div>
+        {m.tecnico && <div className="tech">técnico · <b>{m.tecnico}</b></div>}
+      </div>
+
+      {/* TIMER REGRESSIVO — protagonista do card */}
+      {meta > 0 && (
+        <div className={`timer${isLate ? " late" : ""}`}>
+          <div>
+            <div className="lbl">{isLate ? "ATRASO" : "RESTANTE"}</div>
+            <div className="val">{timerLabel}</div>
+          </div>
+          <div className="meta">meta {metaH}</div>
+        </div>
+      )}
+      {meta === 0 && (
+        <div className="timer">
+          <div>
+            <div className="lbl">DECORRIDO</div>
+            <div className="val" style={{ color: "var(--teal)" }}>{fmtHMS(elapsed)}</div>
+          </div>
+          <div className="meta">sem meta</div>
+        </div>
+      )}
+
+      {/* TAREFA ACTIVA */}
+      {activeTask && (
+        <div className="task">
+          <span className="icon">▸</span>
+          <span>{activeTask.texto}</span>
+        </div>
+      )}
+
+      {/* DATAS */}
       {(m.previsao_inicio || m.previsao_fim) ? (
         <div className="dates">
-          {m.previsao_inicio && <span>▸ <b>{fmtDateShort(m.previsao_inicio)}</b></span>}
-          {m.previsao_fim    && <span className="e">✓ <b>{fmtDateShort(m.previsao_fim)}</b></span>}
+          {m.previsao_inicio && <span>início <b>{fmtDateShort(m.previsao_inicio)}</b></span>}
+          {m.previsao_fim    && <span className="e">entrega <b>{fmtDateShort(m.previsao_fim)}</b></span>}
         </div>
-      ) : <div className="empty">— sem previsão —</div>}
+      ) : <div className="empty">— sem previsão definida —</div>}
     </div>
   );
 }
 
 // ── Slide: EM ANDAMENTO ─────────────────────────────────────────────────────
-function SlideAndamento({ andamento, conHoje, totalCon, avgH, machines }) {
+function SlideAndamento({ andamento, conHoje, totalCon, avgH, machines, standby, prioritarias }) {
   // Stats reais (sem inventar campos)
-  const emCurso     = andamento.length;
-  const concHoje    = conHoje.length;
+  const emCurso      = andamento.length;
+  const concHoje     = conHoje.length;
+  const emPausa      = standby.length;
+  const emPrio       = prioritarias.length;
   const emAndOverdue = andamento.filter(isOverdue).length;
-  const noPrazoPct  = emCurso > 0 ? Math.round((1 - emAndOverdue / emCurso) * 100) : 100;
-  // Anéis: 3 métricas reais → concluídas-hoje (vs em-curso+hoje), no-prazo, em-curso
+  const noPrazoPct   = emCurso > 0 ? Math.round((1 - emAndOverdue / emCurso) * 100) : 100;
+  // Anéis: 3 métricas reais
   const ringMax = Math.max(emCurso + concHoje, 1);
   const rings = [
     { r: 86, c: "var(--green)",  p: concHoje / ringMax },
@@ -383,7 +506,16 @@ function SlideAndamento({ andamento, conHoje, totalCon, avgH, machines }) {
   return (
     <div className="andamento">
       <div className="ringspanel glass">
-        <div className="rt">Hoje na oficina</div>
+        {/* Logo do mascote como brasão no topo do painel */}
+        <div className="rhead">
+          <div className="rlogo">
+            <img src={JORDAN_URL} alt="" />
+          </div>
+          <div>
+            <div className="rt">Hoje na oficina</div>
+            <div className="rts">Tempo real · {new Date().toLocaleDateString("pt-PT",{weekday:"long"}).toUpperCase()}</div>
+          </div>
+        </div>
         <div className="rmid">
           <div className="ringwrap">
             <svg width="200" height="200" viewBox="0 0 200 200">
@@ -412,9 +544,12 @@ function SlideAndamento({ andamento, conHoje, totalCon, avgH, machines }) {
             </div>
           </div>
         </div>
-        <div className="rfoot">
-          <span>Méd. <b>{avgH}h</b>/máq</span>
-          <span>Total 2026 · <b>{totalCon.length}</b></span>
+        {/* KPIs extra dentro do painel — mais informação real, sem inventar */}
+        <div className="rkpis">
+          <div><b>{emPausa}</b><span>Pausadas</span></div>
+          <div><b>{emPrio}</b><span>Prioritárias</span></div>
+          <div><b>{avgH}<i>h</i></b><span>Média/máq</span></div>
+          <div><b>{totalCon.length}</b><span>Total 2026</span></div>
         </div>
       </div>
       <div className="cards">
@@ -759,22 +894,8 @@ export default function AoVivoGlass({
           ntsAnd, ntsAF, reconAnd, reconAF, reconCon,
           conSemana, totalCon, conHoje, avgH } = data;
 
-  // Fit-to-screen 1920×1080
-  useEffect(() => {
-    const fit = () => {
-      const el = document.getElementById("glass-screen");
-      if (!el) return;
-      const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
-      el.style.transform = `translate(-50%,-50%) scale(${s})`;
-    };
-    window.addEventListener("resize", fit);
-    document.addEventListener("fullscreenchange", fit);
-    fit();
-    return () => {
-      window.removeEventListener("resize", fit);
-      document.removeEventListener("fullscreenchange", fit);
-    };
-  }, []);
+  // Sem fit-to-screen — o #glass-screen agora usa 100vw/100vh directos.
+  // Mantemos um listener vazio para futuras adaptações de breakpoint.
 
   // Relógio
   const [now, setNow] = useState(new Date());
@@ -819,7 +940,11 @@ export default function AoVivoGlass({
 
           {/* CHROME */}
           <div className="chrome">
-            <div className="wm"><div className="ic">W</div><div className="tt">WATCHER</div></div>
+            <div className="wm">
+              <div className="ic"><img src={JORDAN_URL} alt="" /></div>
+              <div className="tt">WATCHER</div>
+              <div className="tt2">OFICINA</div>
+            </div>
             <div className={`live glass${paused ? " paused-pill" : ""}`}>
               <span className="d" /><span>{paused ? "PAUSA" : "LIVE"}</span>
             </div>
@@ -845,48 +970,48 @@ export default function AoVivoGlass({
 
           {/* STAGE */}
           <div className="stage">
-            <section className={`slide${slideId === "andamento" ? " on" : ""}`} style={{ "--ac": "var(--green)" }}>
+            <section className={`slide${slideId === "andamento" ? " on" : ""}`} style={{ "--ac": "var(--green)" }}><div className="watermark" />
               <div className="stitle"><span className="g" /><h2>EM ANDAMENTO</h2><span className="ct">×{pad2(andamento.length)}</span></div>
-              <SlideAndamento andamento={andamento} conHoje={conHoje} totalCon={totalCon} avgH={avgH} machines={machines} />
+              <SlideAndamento andamento={andamento} conHoje={conHoje} totalCon={totalCon} avgH={avgH} machines={machines} standby={standby} prioritarias={prioritarias} />
             </section>
 
-            <section className={`slide${slideId === "standby" ? " on" : ""}`} style={{ "--ac": "var(--orange)" }}>
+            <section className={`slide${slideId === "standby" ? " on" : ""}`} style={{ "--ac": "var(--orange)" }}><div className="watermark" />
               <div className="stitle"><span className="g" /><h2>STANDBY</h2><span className="ct">×{pad2(standby.length)}</span></div>
               <SlideStandby standby={standby} />
             </section>
 
-            <section className={`slide${slideId === "prioritarias" ? " on" : ""}`} style={{ "--ac": "var(--orange)" }}>
+            <section className={`slide${slideId === "prioritarias" ? " on" : ""}`} style={{ "--ac": "var(--orange)" }}><div className="watermark" />
               <div className="stitle"><span className="g" /><h2>PRIORITÁRIAS</h2><span className="ct">×{pad2(prioritarias.length)}</span></div>
               <SlidePrioritarias prioritarias={prioritarias} />
             </section>
 
-            <section className={`slide${slideId === "timeline" ? " on" : ""}`} style={{ "--ac": "var(--blue)" }}>
+            <section className={`slide${slideId === "timeline" ? " on" : ""}`} style={{ "--ac": "var(--blue)" }}><div className="watermark" />
               <div className="stitle"><span className="g" /><h2>TIMELINE · 14 DIAS</h2><span className="ct">×{pad2(machines.filter(m => m.previsao_inicio && m.previsao_fim).length)}</span></div>
               <SlideTimeline machines={machines} />
             </section>
 
-            <section className={`slide${slideId === "proximas" ? " on" : ""}`} style={{ "--ac": "var(--blue)" }}>
+            <section className={`slide${slideId === "proximas" ? " on" : ""}`} style={{ "--ac": "var(--blue)" }}><div className="watermark" />
               <div className="stitle"><span className="g" /><h2>PRÓXIMAS</h2><span className="ct">×{pad2(proximas.length)}</span></div>
               <SlideProximas proximas={proximas} />
             </section>
 
-            <section className={`slide${slideId === "nts" ? " on" : ""}`} style={{ "--ac": "var(--red)" }}>
+            <section className={`slide${slideId === "nts" ? " on" : ""}`} style={{ "--ac": "var(--red)" }}><div className="watermark" />
               <div className="stitle"><span className="g" /><h2>NTS</h2><span className="ct">×{pad2(ntsAnd.length + ntsAF.length)}</span></div>
               <SlideNTS ntsAnd={ntsAnd} ntsAF={ntsAF} />
             </section>
 
-            <section className={`slide${slideId === "recon" ? " on" : ""}`} style={{ "--ac": "var(--purple)" }}>
+            <section className={`slide${slideId === "recon" ? " on" : ""}`} style={{ "--ac": "var(--purple)" }}><div className="watermark" />
               <div className="stitle"><span className="g" /><h2>RECONDICIONAMENTO</h2><span className="ct">×{pad2(reconAnd.length + reconAF.length)}</span></div>
               <SlideRecon reconAnd={reconAnd} reconAF={reconAF} reconCon={reconCon} />
             </section>
 
-            <section className={`slide${slideId === "concluidas" ? " on" : ""}`} style={{ "--ac": "var(--green)" }}>
+            <section className={`slide${slideId === "concluidas" ? " on" : ""}`} style={{ "--ac": "var(--green)" }}><div className="watermark" />
               <div className="stitle"><span className="g" /><h2>CONCLUÍDAS · ESTA SEMANA</h2><span className="ct">×{pad2(conSemana.length)}</span></div>
               <SlideConcluidas conSemana={conSemana} />
             </section>
           </div>
 
-          {/* FOOTER */}
+          {/* FOOTER — slide actual + progresso + pips (sem assinatura) */}
           <div className="foot">
             <span className="lab">{slideLabel || "—"}</span>
             <span className="prog"><div style={{ width: `${(prog || 0) * 100}%` }} /></span>
@@ -895,7 +1020,6 @@ export default function AoVivoGlass({
                 <span key={s.id} className={`pip${slide === i ? " on" : ""}`} />
               ))}
             </span>
-            <span className="org">STILL OFICINA <em>·</em> FROTA ACP</span>
           </div>
 
         </div>

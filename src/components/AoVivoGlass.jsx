@@ -91,6 +91,8 @@ const CSS_GLASS = `
   --blue:#0A84FF; --teal:#64D2FF; --yellow:#FFD60A; --pink:#FF6482;
   /* Azul bem claro — identidade de "concluídas" em toda a UI */
   --sky:#7DD3FC;
+  --dgreen:#15803D; /* verde escuro — "no prazo" */
+  --shock:#FF2D78;  /* rosa choque — total de máquinas 2026 */
   --glass:rgba(255,255,255,.08); --glass2:rgba(255,255,255,.045);
   --stroke:rgba(255,255,255,.14); --spec:rgba(255,255,255,.34);
   font-family:'Inter',-apple-system,system-ui,sans-serif;
@@ -170,6 +172,7 @@ const CSS_GLASS = `
 .c-grn .v { color:var(--green); } .c-amb .v { color:var(--orange); } .c-red .v { color:var(--red); }
 .c-pur .v { color:var(--purple); } .c-blu .v { color:var(--blue); } .c-pnk .v { color:var(--pink); } .c-ink .v { color:var(--txt); }
 .c-sky .v { color:var(--sky); }
+.c-shock .v { color:var(--shock); }
 
 /* stage */
 .stage { flex:1; min-height:0; position:relative; }
@@ -354,21 +357,27 @@ const CSS_GLASS = `
 .ntc .gi .v { font-size:15px; font-weight:700; margin-top:3px; }
 .gi .v.amb { color:var(--orange); } .gi .v.red { color:var(--red); } .gi .v.grn { color:var(--green); }
 
-/* recon */
-.recon { flex:1; min-height:0; display:flex; flex-direction:column; gap:10px; overflow:hidden; padding:20px 24px; }
-.rs { font-size:12px; font-weight:700; letter-spacing:.06em; color:var(--txt2); display:flex; align-items:center; gap:10px; flex-shrink:0; }
-.rs b { color:var(--purple); font-family:'Orbitron'; }
+/* recon — secções que preenchem todo o espaço vertical */
+.recon { flex:1; min-height:0; display:flex; flex-direction:column; gap:14px; overflow:hidden; padding:20px 24px; }
+.rsec { display:flex; flex-direction:column; gap:9px; min-height:0; }
+.rsec-grow { flex:1; }                 /* PRÓXIMAS cresce e ocupa o resto */
+.rs { font-size:13px; font-weight:700; letter-spacing:.08em; color:var(--txt2); display:flex; align-items:center; gap:10px; flex-shrink:0; }
+.rs b { color:var(--purple); font-family:'Orbitron'; font-size:15px; }
 .rs::after { content:''; flex:1; height:1px; background:var(--stroke); }
-.rg { display:grid; grid-template-columns:repeat(6,1fr); gap:9px; }
-.rt2 { padding:11px 13px; border-radius:16px; border-top:2px solid var(--purple); background:rgba(255,255,255,.05); }
+.rg { display:grid; gap:11px; }
+.rg-active { grid-auto-rows:minmax(0,1fr); height:clamp(110px, 16vh, 170px); }
+.rg-next { flex:1; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); grid-auto-rows:minmax(0,1fr); min-height:0; }
+.rt2 { padding:14px 16px; border-radius:16px; border-top:3px solid var(--purple); background:rgba(255,255,255,.05);
+  display:flex; flex-direction:column; justify-content:center; gap:5px; min-height:0; overflow:hidden; }
 .rt2.run { border-top-color:var(--green); }
 .rt2.paus { border-top-color:var(--orange); }
-.rt2 .t { font-size:9px; font-weight:700; color:var(--purple); letter-spacing:.06em; }
+.rt2 .t { font-size:11px; font-weight:800; color:var(--purple); letter-spacing:.1em; }
 .rt2.run .t { color:var(--green); } .rt2.paus .t { color:var(--orange); }
-.rt2 .n { font-family:'Orbitron'; font-weight:700; font-size:14px; margin-top:3px; line-height:1.05;
+.rt2 .n { font-family:'Orbitron'; font-weight:800; font-size:24px; line-height:1.04;
   word-break:break-word; overflow-wrap:anywhere; }
-.rt2 .m { font-size:9.5px; color:var(--txt2); margin-top:2px; display:flex; justify-content:space-between; }
-.rt2 .m .h { color:var(--orange); font-variant-numeric:tabular-nums; }
+.rt2 .m { font-size:13px; color:var(--txt2); display:flex; justify-content:space-between; gap:8px; align-items:baseline; }
+.rt2 .m span:first-child { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.rt2 .m .h { color:var(--orange); font-variant-numeric:tabular-nums; font-weight:700; flex:none; }
 .rdone { display:flex; gap:9px; flex-wrap:wrap; }
 .rchip { padding:8px 13px; border-radius:13px; background:rgba(52,199,89,.1); border:1px solid rgba(52,199,89,.26);
   font-size:11.5px; font-weight:600; color:var(--green); }
@@ -530,7 +539,7 @@ function SlideAndamento({ andamento, conHoje, totalCon, avgH, machines, standby,
   const ringMax = Math.max(emCurso + concHoje, 1);
   const rings = [
     { r: 86, c: "var(--sky)",    p: concHoje / ringMax },
-    { r: 64, c: "var(--teal)",   p: noPrazoPct / 100 },
+    { r: 64, c: "var(--dgreen)", p: noPrazoPct / 100 },
     { r: 42, c: "var(--orange)", p: Math.min(1, emCurso / 8) },
   ];
   return (
@@ -566,7 +575,7 @@ function SlideAndamento({ andamento, conHoje, totalCon, avgH, machines, standby,
             <div className="lg" style={{ color: "var(--sky)" }}>
               <span className="dot" /><div><b>{concHoje}</b><span>Concluídas hoje</span></div>
             </div>
-            <div className="lg" style={{ color: "var(--teal)" }}>
+            <div className="lg" style={{ color: "var(--dgreen)" }}>
               <span className="dot" /><div><b>{noPrazoPct}%</b><span>No prazo</span></div>
             </div>
             <div className="lg" style={{ color: "var(--orange)" }}>
@@ -579,7 +588,7 @@ function SlideAndamento({ andamento, conHoje, totalCon, avgH, machines, standby,
           <div><b>{emPausa}</b><span>Pausadas</span></div>
           <div><b>{emPrio}</b><span>Prioritárias</span></div>
           <div><b>{avgH}<i>h</i></b><span>Média/máq</span></div>
-          <div><b style={{ color: "var(--sky)" }}>{totalCon.length}</b><span>Total 2026</span></div>
+          <div><b style={{ color: "var(--shock)" }}>{totalCon.length}</b><span>Total 2026</span></div>
         </div>
       </div>
       <div className="cards">
@@ -835,50 +844,64 @@ function SlideRecon({ reconAnd, reconAF, reconCon }) {
   // As em-preparação IDLE caem para "PRÓXIMAS" junto com as a-fazer.
   const reconActive  = reconAnd.filter(m => m.timer_status === "running" || m.timer_status?.startsWith("paused"));
   const reconWaiting = [...reconAnd.filter(m => !(m.timer_status === "running" || m.timer_status?.startsWith("paused"))), ...reconAF];
+  const nNext = reconWaiting.length;
+  // Colunas das PRÓXIMAS adaptam-se à quantidade para encher a largura.
+  const nextCols = nNext <= 4 ? nNext || 1 : nNext <= 8 ? 4 : nNext <= 12 ? 5 : 6;
   return (
     <div className="recon glass">
-      <div className="rs">⚡ EM ANDAMENTO <b>{reconActive.length}</b></div>
-      <div className="rg" style={{ gridTemplateColumns: reconActive.length <= 2 ? "1fr 1fr" : "repeat(4,1fr)" }}>
-        {reconActive.length === 0
-          ? <div style={{ color: "var(--txt3)", fontSize: 12, padding: 8 }}>—</div>
-          : reconActive.slice(0, 4).map(m => {
-            const elapsed = (Number(m.timer_accumulated_seconds) || 0);
-            const run = m.timer_status === "running";
-            const paus = m.timer_status?.startsWith("paused");
-            const cls = run ? "run" : paus ? "paus" : "";
-            const tier = tierRecon(m);
-            return (
-              <div key={m.id} className={`rt2 ${cls}`}>
-                <div className="t">{run ? "EM CURSO" : paus ? "PAUSED" : "IDLE"}{tier ? ` · ${tier}` : ""}</div>
-                <div className="n" style={{ fontSize: nsFontSize(nsSplit(m.serie).main, 18, 12) + "px" }}>{nsSplit(m.serie).main}</div>
-                <div className="m"><span>{m.modelo}</span><span className="h">⏱ {fmtHMS(elapsed)}</span></div>
-              </div>
-            );
-          })}
+      {/* EM ANDAMENTO */}
+      <div className="rsec">
+        <div className="rs">⚡ EM ANDAMENTO <b>{reconActive.length}</b></div>
+        <div className="rg rg-active" style={{ gridTemplateColumns: `repeat(${Math.max(reconActive.length, 1)}, 1fr)` }}>
+          {reconActive.length === 0
+            ? <div style={{ color: "var(--txt3)", fontSize: 13, padding: 8, alignSelf: "center" }}>Nenhuma em curso</div>
+            : reconActive.slice(0, 4).map(m => {
+              const elapsed = (Number(m.timer_accumulated_seconds) || 0);
+              const run = m.timer_status === "running";
+              const paus = m.timer_status?.startsWith("paused");
+              const cls = run ? "run" : paus ? "paus" : "";
+              const tier = tierRecon(m);
+              return (
+                <div key={m.id} className={`rt2 ${cls}`}>
+                  <div className="t">{run ? "EM CURSO" : paus ? "PAUSED" : "IDLE"}{tier ? ` · ${tier}` : ""}</div>
+                  <div className="n">{nsSplit(m.serie).main}</div>
+                  <div className="m"><span>{m.modelo}</span><span className="h">⏱ {fmtHMS(elapsed)}</span></div>
+                </div>
+              );
+            })}
+        </div>
       </div>
-      <div className="rs">⧖ PRÓXIMAS <b>{reconWaiting.length}</b></div>
-      <div className="rg">
-        {reconWaiting.length === 0
-          ? <div style={{ color: "var(--txt3)", fontSize: 12, padding: 8 }}>—</div>
-          : reconWaiting.slice(0, 12).map(m => {
-            const meta = Number(m.tempo_estimado_segundos) || 0;
-            const h = meta > 0 ? `${Math.round(meta / 3600)}h` : "—";
-            return (
-              <div key={m.id} className="rt2">
-                <div className="t">{tierRecon(m) || "RECON"}</div>
-                <div className="n">{nsSplit(m.serie).main}</div>
-                <div className="m"><span>{m.modelo}</span><span className="h">{h}</span></div>
-              </div>
-            );
-          })}
+
+      {/* PRÓXIMAS — ocupa o espaço restante */}
+      <div className="rsec rsec-grow">
+        <div className="rs">⧖ PRÓXIMAS <b>{reconWaiting.length}</b></div>
+        <div className="rg rg-next" style={{ gridTemplateColumns: `repeat(${nextCols}, 1fr)` }}>
+          {reconWaiting.length === 0
+            ? <div style={{ color: "var(--txt3)", fontSize: 13, padding: 8 }}>—</div>
+            : reconWaiting.slice(0, 18).map(m => {
+              const meta = Number(m.tempo_estimado_segundos) || 0;
+              const h = meta > 0 ? `${Math.round(meta / 3600)}h` : "—";
+              return (
+                <div key={m.id} className="rt2">
+                  <div className="t">{tierRecon(m) || "RECON"}</div>
+                  <div className="n">{nsSplit(m.serie).main}</div>
+                  <div className="m"><span>{m.modelo}</span><span className="h">{h}</span></div>
+                </div>
+              );
+            })}
+        </div>
       </div>
-      <div className="rs">✓ CONCLUÍDAS · 30 DIAS <b>{reconCon.length}</b></div>
-      <div className="rdone">
-        {reconCon.length === 0
-          ? <div style={{ color: "var(--txt3)", fontSize: 11 }}>—</div>
-          : reconCon.slice(0, 10).map(m => (
-            <div key={m.id} className="rchip">✓ {nsSplit(m.serie).main} <b>{m.modelo}{tierRecon(m) ? ` · ${tierRecon(m)}` : ""}</b></div>
-          ))}
+
+      {/* CONCLUÍDAS 30 DIAS */}
+      <div className="rsec">
+        <div className="rs">✓ CONCLUÍDAS · 30 DIAS <b>{reconCon.length}</b></div>
+        <div className="rdone">
+          {reconCon.length === 0
+            ? <div style={{ color: "var(--txt3)", fontSize: 11 }}>—</div>
+            : reconCon.slice(0, 10).map(m => (
+              <div key={m.id} className="rchip">✓ {nsSplit(m.serie).main} <b>{m.modelo}{tierRecon(m) ? ` · ${tierRecon(m)}` : ""}</b></div>
+            ))}
+        </div>
       </div>
     </div>
   );
@@ -904,7 +927,9 @@ function SlideConcluidas({ conSemana }) {
           const tier = tierRecon(m);
           // Tarefas feitas (concluídas), ignorando marcadores reservados
           const RESERVED = new Set(["EXPRESS", "VPS", "IMPREVISTOS"]);
-          const feitas = (m.tarefas || []).filter(tk => tk.concluida && !RESERVED.has((tk.texto || "").trim()));
+          // Máquina concluída → todo o trabalho está feito; mostra todas as
+          // tarefas reais (a flag tk.concluida nem sempre é marcada na DB).
+          const feitas = (m.tarefas || []).filter(tk => (tk.texto || "").trim() && !RESERVED.has((tk.texto || "").trim()));
           const showTasks = feitas.slice(0, 4);
           const moreTasks = feitas.length - showTasks.length;
           return (
@@ -965,7 +990,7 @@ export default function AoVivoGlass({
     { v: conSemana.length,                   k: "ESTA SEMANA", c: "c-sky" },
     { v: conHoje.length,                     k: "HOJE",        c: "c-sky" },
     { v: avgH,                               k: "MÉD.H/MÁQ",   c: "c-ink" },
-    { v: totalCon.length,                    k: "TOTAL 2026",  c: "c-sky" },
+    { v: totalCon.length,                    k: "TOTAL 2026",  c: "c-shock" },
   ];
 
   const slideId    = SLIDES[slide]?.id;

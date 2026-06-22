@@ -89,6 +89,10 @@ const CSS_GLASS = `
   --txt:#F5F6FA; --txt2:rgba(245,246,250,.62); --txt3:rgba(245,246,250,.36);
   --green:#34C759; --orange:#FF9F0A; --red:#FF453A; --purple:#BF5AF2;
   --blue:#0A84FF; --teal:#64D2FF; --yellow:#FFD60A; --pink:#FF6482;
+  /* Paleta do logo STILL (cyber-dog): vermelho ferro, vermelho profundo,
+     prateado metálico, aço/gunmetal, âmbar STILL */
+  --logo-red:#E63329; --logo-deep:#C8102E; --logo-silver:#C7CCD6;
+  --logo-steel:#9AA3B0; --logo-amber:#FF8A1E;
   --glass:rgba(255,255,255,.08); --glass2:rgba(255,255,255,.045);
   --stroke:rgba(255,255,255,.14); --spec:rgba(255,255,255,.34);
   font-family:'Inter',-apple-system,system-ui,sans-serif;
@@ -261,9 +265,10 @@ const CSS_GLASS = `
   padding:10px 12px; border-radius:14px; background:rgba(255,255,255,.04);
   border:1px solid var(--stroke); }
 .card .timer .lbl { font-size:10px; font-weight:700; color:var(--txt3); letter-spacing:.16em; }
-.card .timer .val { font-family:'Orbitron'; font-weight:800; font-size:30px; letter-spacing:.04em;
+/* Timer secundário ao NS — fica menor para o NS ser sempre o protagonista */
+.card .timer .val { font-family:'Orbitron'; font-weight:800; font-size:22px; letter-spacing:.04em;
   font-variant-numeric:tabular-nums; color:var(--st);
-  text-shadow:0 0 12px var(--st); }
+  text-shadow:0 0 10px var(--st); }
 .card .timer .meta { font-size:11px; color:var(--txt2); font-weight:600; letter-spacing:.06em;
   font-variant-numeric:tabular-nums; }
 .card .timer.late .val { color:var(--red); text-shadow:0 0 14px var(--red); }
@@ -334,7 +339,7 @@ const CSS_GLASS = `
 .ntc .nn { font-family:'Orbitron'; font-weight:800; line-height:1.04;
   word-break:break-word; overflow-wrap:anywhere; }
 .ntc .nn small { font-size:.6em; color:var(--txt2); }
-.ntc .nm { font-size:13px; color:var(--txt2); margin-top:-6px; }
+.ntc .nm { font-size:20px; font-weight:600; color:var(--txt2); margin-top:2px; letter-spacing:.02em; }
 .ntc .nwhy { background:rgba(255,69,58,.1); color:#FFD9D6; border-radius:14px; padding:11px 14px;
   font-size:13px; font-weight:500; line-height:1.5;
   display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
@@ -454,7 +459,7 @@ function MachineCard({ m }) {
 
       {/* CENTRAL: NS gigante + modelo */}
       <div className="central">
-        <div className="ns" style={{ fontSize: nsFontSize(ns.main, 34) + "px" }}>{ns.main}{ns.sub && <small> · {ns.sub}</small>}</div>
+        <div className="ns" style={{ fontSize: nsFontSize(ns.main, 40, 24) + "px" }}>{ns.main}{ns.sub && <small> · {ns.sub}</small>}</div>
         <div className="mo">{m.modelo || "—"}</div>
       </div>
 
@@ -508,10 +513,11 @@ function SlideAndamento({ andamento, conHoje, totalCon, avgH, machines, standby,
   const noPrazoPct   = emCurso > 0 ? Math.round((1 - emAndOverdue / emCurso) * 100) : 100;
   // Anéis: 3 métricas reais
   const ringMax = Math.max(emCurso + concHoje, 1);
+  // Cores aproximadas ao logo STILL: prateado, vermelho ferro, âmbar
   const rings = [
-    { r: 86, c: "var(--green)",  p: concHoje / ringMax },
-    { r: 64, c: "var(--teal)",   p: noPrazoPct / 100 },
-    { r: 42, c: "var(--orange)", p: Math.min(1, emCurso / 8) },
+    { r: 86, c: "var(--logo-silver)", p: concHoje / ringMax },
+    { r: 64, c: "var(--logo-red)",    p: noPrazoPct / 100 },
+    { r: 42, c: "var(--logo-amber)",  p: Math.min(1, emCurso / 8) },
   ];
   return (
     <div className="andamento">
@@ -543,23 +549,23 @@ function SlideAndamento({ andamento, conHoje, totalCon, avgH, machines, standby,
             </svg>
           </div>
           <div className="rleg">
-            <div className="lg" style={{ color: "var(--green)" }}>
+            <div className="lg" style={{ color: "var(--logo-silver)" }}>
               <span className="dot" /><div><b>{concHoje}</b><span>Concluídas hoje</span></div>
             </div>
-            <div className="lg" style={{ color: "var(--teal)" }}>
+            <div className="lg" style={{ color: "var(--logo-red)" }}>
               <span className="dot" /><div><b>{noPrazoPct}%</b><span>No prazo</span></div>
             </div>
-            <div className="lg" style={{ color: "var(--orange)" }}>
+            <div className="lg" style={{ color: "var(--logo-amber)" }}>
               <span className="dot" /><div><b>{emCurso}</b><span>Em curso</span></div>
             </div>
           </div>
         </div>
         {/* KPIs extra dentro do painel — mais informação real, sem inventar */}
         <div className="rkpis">
-          <div><b>{emPausa}</b><span>Pausadas</span></div>
-          <div><b>{emPrio}</b><span>Prioritárias</span></div>
-          <div><b>{avgH}<i>h</i></b><span>Média/máq</span></div>
-          <div><b>{totalCon.length}</b><span>Total 2026</span></div>
+          <div><b style={{ color: "var(--logo-amber)" }}>{emPausa}</b><span>Pausadas</span></div>
+          <div><b style={{ color: "var(--logo-red)" }}>{emPrio}</b><span>Prioritárias</span></div>
+          <div><b style={{ color: "var(--logo-silver)" }}>{avgH}<i>h</i></b><span>Média/máq</span></div>
+          <div><b style={{ color: "var(--logo-deep)" }}>{totalCon.length}</b><span>Total 2026</span></div>
         </div>
       </div>
       <div className="cards">
@@ -758,7 +764,7 @@ function NTSCard({ m }) {
   return (
     <div className="ntc glass">
       <div>
-        <div className="nn" style={{ fontSize: nsFontSize(ns.main, 30) + "px" }}>{ns.main}{ns.sub && <small> · {ns.sub}</small>}</div>
+        <div className="nn" style={{ fontSize: nsFontSize(ns.main, 48, 30) + "px" }}>{ns.main}{ns.sub && <small> · {ns.sub}</small>}</div>
         <div className="nm">{m.modelo || "—"}</div>
       </div>
       {m.observacoes && <div className="nwhy">{m.observacoes}</div>}

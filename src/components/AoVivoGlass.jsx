@@ -365,18 +365,18 @@ const CSS_GLASS = `
 .rs b { color:var(--purple); font-family:'Orbitron'; font-size:15px; }
 .rs::after { content:''; flex:1; height:1px; background:var(--stroke); }
 .rg { display:grid; gap:11px; }
-.rg-active { grid-auto-rows:minmax(0,1fr); height:clamp(110px, 16vh, 170px); }
-.rg-next { flex:1; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); grid-auto-rows:minmax(0,1fr); min-height:0; }
-.rt2 { padding:14px 16px; border-radius:16px; border-top:3px solid var(--purple); background:rgba(255,255,255,.05);
-  display:flex; flex-direction:column; justify-content:center; gap:5px; min-height:0; overflow:hidden; }
+.rg-active { grid-auto-rows:minmax(0,1fr); height:clamp(96px, 13vh, 150px); }
+.rg-next { flex:1; grid-auto-rows:minmax(64px, 1fr); min-height:0; }
+.rt2 { padding:12px 16px; border-radius:16px; border-top:3px solid var(--purple); background:rgba(255,255,255,.05);
+  display:flex; flex-direction:column; justify-content:center; gap:6px; min-height:0; }
 .rt2.run { border-top-color:var(--green); }
 .rt2.paus { border-top-color:var(--orange); }
-.rt2 .t { font-size:11px; font-weight:800; color:var(--purple); letter-spacing:.1em; }
+.rt2 .t { font-size:11px; font-weight:800; color:var(--purple); letter-spacing:.1em; flex:none; }
 .rt2.run .t { color:var(--green); } .rt2.paus .t { color:var(--orange); }
-/* NS numa só linha — a fonte vem inline (adaptativa) e nunca quebra */
-.rt2 .n { font-family:'Orbitron'; font-weight:800; line-height:1.04;
-  white-space:nowrap; overflow:hidden; }
-.rt2 .m { font-size:13px; color:var(--txt2); display:flex; justify-content:space-between; gap:8px; align-items:baseline; }
+/* NS — protagonista, numa só linha; fonte adaptativa vem inline */
+.rt2 .n { font-family:'Orbitron'; font-weight:800; line-height:1; color:#fff;
+  white-space:nowrap; flex:none; }
+.rt2 .m { font-size:13px; color:var(--txt2); display:flex; justify-content:space-between; gap:8px; align-items:baseline; flex:none; }
 .rt2 .m span:first-child { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .rt2 .m .h { color:var(--orange); font-variant-numeric:tabular-nums; font-weight:700; flex:none; }
 .rdone { display:flex; gap:9px; flex-wrap:wrap; }

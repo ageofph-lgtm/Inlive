@@ -373,8 +373,9 @@ const CSS_GLASS = `
 .rt2.paus { border-top-color:var(--orange); }
 .rt2 .t { font-size:11px; font-weight:800; color:var(--purple); letter-spacing:.1em; }
 .rt2.run .t { color:var(--green); } .rt2.paus .t { color:var(--orange); }
-.rt2 .n { font-family:'Orbitron'; font-weight:800; font-size:24px; line-height:1.04;
-  word-break:break-word; overflow-wrap:anywhere; }
+/* NS numa só linha — a fonte vem inline (adaptativa) e nunca quebra */
+.rt2 .n { font-family:'Orbitron'; font-weight:800; line-height:1.04;
+  white-space:nowrap; overflow:hidden; }
 .rt2 .m { font-size:13px; color:var(--txt2); display:flex; justify-content:space-between; gap:8px; align-items:baseline; }
 .rt2 .m span:first-child { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .rt2 .m .h { color:var(--orange); font-variant-numeric:tabular-nums; font-weight:700; flex:none; }
@@ -845,8 +846,8 @@ function SlideRecon({ reconAnd, reconAF, reconCon }) {
   const reconActive  = reconAnd.filter(m => m.timer_status === "running" || m.timer_status?.startsWith("paused"));
   const reconWaiting = [...reconAnd.filter(m => !(m.timer_status === "running" || m.timer_status?.startsWith("paused"))), ...reconAF];
   const nNext = reconWaiting.length;
-  // Colunas das PRÓXIMAS adaptam-se à quantidade para encher a largura.
-  const nextCols = nNext <= 4 ? nNext || 1 : nNext <= 8 ? 4 : nNext <= 12 ? 5 : 6;
+  // Colunas das PRÓXIMAS: largas o suficiente para o NS caber numa só linha.
+  const nextCols = nNext <= 3 ? (nNext || 1) : nNext <= 8 ? 4 : 5;
   return (
     <div className="recon glass">
       {/* EM ANDAMENTO */}
@@ -864,7 +865,7 @@ function SlideRecon({ reconAnd, reconAF, reconCon }) {
               return (
                 <div key={m.id} className={`rt2 ${cls}`}>
                   <div className="t">{run ? "EM CURSO" : paus ? "PAUSED" : "IDLE"}{tier ? ` · ${tier}` : ""}</div>
-                  <div className="n">{nsSplit(m.serie).main}</div>
+                  <div className="n" style={{ fontSize: nsFontSize(nsSplit(m.serie).main, 30, 18) + "px" }}>{nsSplit(m.serie).main}</div>
                   <div className="m"><span>{m.modelo}</span><span className="h">⏱ {fmtHMS(elapsed)}</span></div>
                 </div>
               );
@@ -884,7 +885,7 @@ function SlideRecon({ reconAnd, reconAF, reconCon }) {
               return (
                 <div key={m.id} className="rt2">
                   <div className="t">{tierRecon(m) || "RECON"}</div>
-                  <div className="n">{nsSplit(m.serie).main}</div>
+                  <div className="n" style={{ fontSize: nsFontSize(nsSplit(m.serie).main, 22, 13) + "px" }}>{nsSplit(m.serie).main}</div>
                   <div className="m"><span>{m.modelo}</span><span className="h">{h}</span></div>
                 </div>
               );

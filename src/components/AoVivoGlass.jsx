@@ -441,11 +441,10 @@ function MachineCard({ m }) {
         )}
       </div>
 
-      {/* CENTRAL: NS gigante + modelo + técnico */}
+      {/* CENTRAL: NS gigante + modelo */}
       <div className="central">
         <div className="ns">{ns.main}{ns.sub && <small> · {ns.sub}</small>}</div>
         <div className="mo">{m.modelo || "—"}</div>
-        {m.tecnico && <div className="tech">técnico · <b>{m.tecnico}</b></div>}
       </div>
 
       {/* TIMER REGRESSIVO — protagonista do card */}
@@ -756,7 +755,6 @@ function NTSCard({ m }) {
         <div className="tl">{fmtHMS(elapsed)}</div>
         <div className="meta">
           {meta > 0 ? `de ${Math.round(meta/3600)}h estimadas` : "sem estimativa"}
-          {m.tecnico && ` · ${m.tecnico}`}
         </div>
       </div>
       {tasks.length > 0 && (
@@ -802,7 +800,10 @@ function SlideNTS({ ntsAnd, ntsAF }) {
 
 // ── Slide: RECON ────────────────────────────────────────────────────────────
 function SlideRecon({ reconAnd, reconAF, reconCon }) {
-  const reconActive = reconAnd; // em preparação
+  // Espelha o AoVivo principal: "EM ANDAMENTO" = só running/paused.
+  // As em-preparação IDLE caem para "PRÓXIMAS" junto com as a-fazer.
+  const reconActive  = reconAnd.filter(m => m.timer_status === "running" || m.timer_status?.startsWith("paused"));
+  const reconWaiting = [...reconAnd.filter(m => !(m.timer_status === "running" || m.timer_status?.startsWith("paused"))), ...reconAF];
   return (
     <div className="recon glass">
       <div className="rs">⚡ EM ANDAMENTO <b>{reconActive.length}</b></div>
@@ -824,11 +825,11 @@ function SlideRecon({ reconAnd, reconAF, reconCon }) {
             );
           })}
       </div>
-      <div className="rs">⧖ PRÓXIMAS <b>{reconAF.length}</b></div>
+      <div className="rs">⧖ PRÓXIMAS <b>{reconWaiting.length}</b></div>
       <div className="rg">
-        {reconAF.length === 0
+        {reconWaiting.length === 0
           ? <div style={{ color: "var(--txt3)", fontSize: 12, padding: 8 }}>—</div>
-          : reconAF.slice(0, 12).map(m => {
+          : reconWaiting.slice(0, 12).map(m => {
             const meta = Number(m.tempo_estimado_segundos) || 0;
             const h = meta > 0 ? `${Math.round(meta / 3600)}h` : "—";
             return (

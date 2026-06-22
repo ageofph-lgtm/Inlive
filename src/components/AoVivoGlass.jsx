@@ -89,10 +89,8 @@ const CSS_GLASS = `
   --txt:#F5F6FA; --txt2:rgba(245,246,250,.62); --txt3:rgba(245,246,250,.36);
   --green:#34C759; --orange:#FF9F0A; --red:#FF453A; --purple:#BF5AF2;
   --blue:#0A84FF; --teal:#64D2FF; --yellow:#FFD60A; --pink:#FF6482;
-  /* Paleta do logo STILL (cyber-dog): vermelho ferro, vermelho profundo,
-     prateado metálico, aço/gunmetal, âmbar STILL */
-  --logo-red:#E63329; --logo-deep:#C8102E; --logo-silver:#C7CCD6;
-  --logo-steel:#9AA3B0; --logo-amber:#FF8A1E;
+  /* Azul bem claro — identidade de "concluídas" em toda a UI */
+  --sky:#7DD3FC;
   --glass:rgba(255,255,255,.08); --glass2:rgba(255,255,255,.045);
   --stroke:rgba(255,255,255,.14); --spec:rgba(255,255,255,.34);
   font-family:'Inter',-apple-system,system-ui,sans-serif;
@@ -171,6 +169,7 @@ const CSS_GLASS = `
 .kpi.act .k { color:var(--txt); }
 .c-grn .v { color:var(--green); } .c-amb .v { color:var(--orange); } .c-red .v { color:var(--red); }
 .c-pur .v { color:var(--purple); } .c-blu .v { color:var(--blue); } .c-pnk .v { color:var(--pink); } .c-ink .v { color:var(--txt); }
+.c-sky .v { color:var(--sky); }
 
 /* stage */
 .stage { flex:1; min-height:0; position:relative; }
@@ -376,17 +375,33 @@ const CSS_GLASS = `
 .rchip b { color:#cfd3dc; font-weight:600; margin-left:5px; }
 
 /* concluídas */
-.donec { flex:1; min-height:0; display:grid; grid-template-columns:1fr 1fr; grid-auto-rows:1fr; gap:14px; overflow:hidden; }
-.dc { padding:18px 22px; display:flex; align-items:center; gap:18px; overflow:hidden; border:1px solid rgba(52,199,89,.22); }
-.dc .ck { width:46px; height:46px; border-radius:50%; background:var(--green); display:grid; place-items:center;
-  font-size:22px; color:#06070c; flex:none; font-weight:900; }
-.dc .dn { font-family:'Orbitron'; font-weight:700; font-size:20px; line-height:1.05;
-  word-break:break-word; overflow-wrap:anywhere; }
-.dc .dm { font-size:12px; color:var(--txt2); margin-top:3px;
-  word-break:break-word; overflow-wrap:anywhere; line-height:1.2; }
+.donec { flex:1; min-height:0; display:grid; grid-template-columns:repeat(auto-fit, minmax(360px, 1fr));
+  grid-auto-rows:minmax(0, 1fr); gap:14px; overflow:hidden; }
+/* Card concluída — tema azul claro, NS protagonista, tipo + tarefas feitas */
+.dc { padding:16px 20px; display:flex; flex-direction:column; gap:10px; overflow:hidden;
+  border:1px solid rgba(125,211,252,.28); position:relative; }
+.dc .dctop { display:flex; align-items:center; gap:10px; }
+.dc .ck { width:40px; height:40px; border-radius:50%; background:var(--sky); display:grid; place-items:center;
+  font-size:20px; color:#06121c; flex:none; font-weight:900; box-shadow:0 0 16px rgba(125,211,252,.4); }
+.dc .badges { display:flex; gap:6px; flex-wrap:wrap; }
+.dc .bdg { font-size:10px; font-weight:800; padding:3px 9px; border-radius:100px; letter-spacing:.08em; }
+.dc .bdg.type { color:var(--type,var(--sky)); background:rgba(255,255,255,.04); border:1px solid var(--type,var(--sky)); }
+.dc .bdg.tier { color:var(--purple); background:rgba(191,90,242,.16); }
 .dc .dt { margin-left:auto; text-align:right; flex:none; }
-.dc .dt b { font-family:'Orbitron'; font-weight:700; font-size:22px; color:var(--green); font-variant-numeric:tabular-nums; }
+.dc .dt b { font-family:'Orbitron'; font-weight:800; font-size:20px; color:var(--sky); font-variant-numeric:tabular-nums; }
 .dc .dt span { display:block; font-size:11px; color:var(--txt2); }
+.dc .dcmid { display:flex; flex-direction:column; gap:3px; }
+.dc .dn { font-family:'Orbitron'; font-weight:800; line-height:1.04; color:#E3F4FF;
+  word-break:break-word; overflow-wrap:anywhere; }
+.dc .dm { font-size:16px; font-weight:600; color:var(--txt2);
+  word-break:break-word; overflow-wrap:anywhere; line-height:1.2; }
+.dc .dtasks { display:flex; flex-wrap:wrap; gap:5px; margin-top:auto; }
+.dc .dtasks .tk { font-size:11px; font-weight:500; padding:3px 9px; border-radius:8px;
+  background:rgba(125,211,252,.1); color:#BEE6FB; border:1px solid rgba(125,211,252,.22);
+  display:inline-flex; align-items:center; gap:5px; max-width:100%;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dc .dtasks .tk::before { content:'✓'; color:var(--sky); font-weight:800; }
+.dc .dtasks .more { font-size:11px; color:var(--txt3); font-weight:600; align-self:center; }
 
 /* footer */
 .foot { display:flex; align-items:center; gap:18px; font-size:10.5px; color:var(--txt3); font-weight:500; letter-spacing:.06em; }
@@ -513,11 +528,10 @@ function SlideAndamento({ andamento, conHoje, totalCon, avgH, machines, standby,
   const noPrazoPct   = emCurso > 0 ? Math.round((1 - emAndOverdue / emCurso) * 100) : 100;
   // Anéis: 3 métricas reais
   const ringMax = Math.max(emCurso + concHoje, 1);
-  // Cores aproximadas ao logo STILL: prateado, vermelho ferro, âmbar
   const rings = [
-    { r: 86, c: "var(--logo-silver)", p: concHoje / ringMax },
-    { r: 64, c: "var(--logo-red)",    p: noPrazoPct / 100 },
-    { r: 42, c: "var(--logo-amber)",  p: Math.min(1, emCurso / 8) },
+    { r: 86, c: "var(--sky)",    p: concHoje / ringMax },
+    { r: 64, c: "var(--teal)",   p: noPrazoPct / 100 },
+    { r: 42, c: "var(--orange)", p: Math.min(1, emCurso / 8) },
   ];
   return (
     <div className="andamento">
@@ -549,23 +563,23 @@ function SlideAndamento({ andamento, conHoje, totalCon, avgH, machines, standby,
             </svg>
           </div>
           <div className="rleg">
-            <div className="lg" style={{ color: "var(--logo-silver)" }}>
+            <div className="lg" style={{ color: "var(--sky)" }}>
               <span className="dot" /><div><b>{concHoje}</b><span>Concluídas hoje</span></div>
             </div>
-            <div className="lg" style={{ color: "var(--logo-red)" }}>
+            <div className="lg" style={{ color: "var(--teal)" }}>
               <span className="dot" /><div><b>{noPrazoPct}%</b><span>No prazo</span></div>
             </div>
-            <div className="lg" style={{ color: "var(--logo-amber)" }}>
+            <div className="lg" style={{ color: "var(--orange)" }}>
               <span className="dot" /><div><b>{emCurso}</b><span>Em curso</span></div>
             </div>
           </div>
         </div>
         {/* KPIs extra dentro do painel — mais informação real, sem inventar */}
         <div className="rkpis">
-          <div><b style={{ color: "var(--logo-amber)" }}>{emPausa}</b><span>Pausadas</span></div>
-          <div><b style={{ color: "var(--logo-red)" }}>{emPrio}</b><span>Prioritárias</span></div>
-          <div><b style={{ color: "var(--logo-silver)" }}>{avgH}<i>h</i></b><span>Média/máq</span></div>
-          <div><b style={{ color: "var(--logo-deep)" }}>{totalCon.length}</b><span>Total 2026</span></div>
+          <div><b>{emPausa}</b><span>Pausadas</span></div>
+          <div><b>{emPrio}</b><span>Prioritárias</span></div>
+          <div><b>{avgH}<i>h</i></b><span>Média/máq</span></div>
+          <div><b style={{ color: "var(--sky)" }}>{totalCon.length}</b><span>Total 2026</span></div>
         </div>
       </div>
       <div className="cards">
@@ -885,17 +899,37 @@ function SlideConcluidas({ conSemana }) {
               ts = `${pad2(d.getDate())}/${pad2(d.getMonth()+1)} · ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
             } catch { /* ignore */ }
           }
+          const ns = nsSplit(m.serie);
+          const tipo = tipoIntervencao(m);
+          const tier = tierRecon(m);
+          // Tarefas feitas (concluídas), ignorando marcadores reservados
+          const RESERVED = new Set(["EXPRESS", "VPS", "IMPREVISTOS"]);
+          const feitas = (m.tarefas || []).filter(tk => tk.concluida && !RESERVED.has((tk.texto || "").trim()));
+          const showTasks = feitas.slice(0, 4);
+          const moreTasks = feitas.length - showTasks.length;
           return (
-            <div key={m.id} className="dc glass">
-              <div className="ck">✓</div>
-              <div style={{ minWidth: 0, flex: 1 }}>
-                <div className="dn" style={{ fontSize: nsFontSize(nsSplit(m.serie).main, 20, 13) + "px" }}>{nsSplit(m.serie).main}</div>
-                <div className="dm">{m.modelo}</div>
+            <div key={m.id} className="dc glass" style={{ "--type": tipo.color }}>
+              <div className="dctop">
+                <div className="ck">✓</div>
+                <div className="badges">
+                  <span className="bdg type">{tipo.label}</span>
+                  {tier && <span className="bdg tier">{tier}</span>}
+                </div>
+                <div className="dt">
+                  <b>{t}</b>
+                  <span>{ts}</span>
+                </div>
               </div>
-              <div className="dt">
-                <b>{t}</b>
-                <span>{ts}</span>
+              <div className="dcmid">
+                <div className="dn" style={{ fontSize: nsFontSize(ns.main, 30, 18) + "px" }}>{ns.main}{ns.sub && <small style={{ fontSize: "0.6em", color: "var(--txt2)" }}> · {ns.sub}</small>}</div>
+                <div className="dm">{m.modelo || "—"}</div>
               </div>
+              {showTasks.length > 0 && (
+                <div className="dtasks">
+                  {showTasks.map((tk, i) => <span key={i} className="tk">{tk.texto}</span>)}
+                  {moreTasks > 0 && <span className="more">+{moreTasks}</span>}
+                </div>
+              )}
             </div>
           );
         })}
@@ -928,10 +962,10 @@ export default function AoVivoGlass({
     { v: proximas.length,                    k: "PRÓXIMAS",    c: "c-ink" },
     { v: ntsAnd.length + ntsAF.length,       k: "NTS",         c: "c-red" },
     { v: reconAnd.length + reconAF.length,   k: "RECON",       c: "c-pur" },
-    { v: conSemana.length,                   k: "ESTA SEMANA", c: "c-grn" },
-    { v: conHoje.length,                     k: "HOJE",        c: "c-ink" },
+    { v: conSemana.length,                   k: "ESTA SEMANA", c: "c-sky" },
+    { v: conHoje.length,                     k: "HOJE",        c: "c-sky" },
     { v: avgH,                               k: "MÉD.H/MÁQ",   c: "c-ink" },
-    { v: totalCon.length,                    k: "TOTAL 2026",  c: "c-pnk" },
+    { v: totalCon.length,                    k: "TOTAL 2026",  c: "c-sky" },
   ];
 
   const slideId    = SLIDES[slide]?.id;
@@ -941,7 +975,7 @@ export default function AoVivoGlass({
   const SLIDE_ACCENT = {
     andamento: "var(--green)", standby: "var(--orange)", prioritarias: "var(--orange)",
     timeline: "var(--blue)", proximas: "var(--blue)", nts: "var(--red)",
-    recon: "var(--purple)", concluidas: "var(--green)",
+    recon: "var(--purple)", concluidas: "var(--sky)",
   };
 
   return (
@@ -1023,7 +1057,7 @@ export default function AoVivoGlass({
               <SlideRecon reconAnd={reconAnd} reconAF={reconAF} reconCon={reconCon} />
             </section>
 
-            <section className={`slide${slideId === "concluidas" ? " on" : ""}`} style={{ "--ac": "var(--green)" }}><div className="watermark" />
+            <section className={`slide${slideId === "concluidas" ? " on" : ""}`} style={{ "--ac": "var(--sky)" }}><div className="watermark" />
               <div className="stitle"><span className="g" /><h2>CONCLUÍDAS · ESTA SEMANA</h2><span className="ct">×{pad2(conSemana.length)}</span></div>
               <SlideConcluidas conSemana={conSemana} />
             </section>

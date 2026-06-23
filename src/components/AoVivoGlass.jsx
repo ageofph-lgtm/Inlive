@@ -207,15 +207,15 @@ const CSS_GLASS = `
   mix-blend-mode:multiply; filter:brightness(1.45) contrast(1.15) drop-shadow(0 0 6px rgba(255,69,58,0.4)); }
 .ringspanel .rt { font-family:'Orbitron'; font-size:clamp(13px,1.3vw,17px); font-weight:800; letter-spacing:.06em; line-height:1.1; }
 .ringspanel .rts { font-size:11px; font-weight:600; color:var(--txt3); letter-spacing:.14em; margin-top:3px; }
-.ringspanel .rmid { flex:1; display:flex; align-items:center; justify-content:center; gap:clamp(8px,1.2vw,20px); overflow:visible; min-width:0; min-height:0; }
-.ringwrap { width:clamp(90px, 9vw, 160px); height:clamp(90px, 9vw, 160px); position:relative; flex:none; }
+.ringspanel .rmid { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:clamp(8px,1vw,16px); overflow:visible; min-width:0; min-height:0; }
+.ringwrap { width:clamp(100px, 10vw, 170px); height:clamp(100px, 10vw, 170px); position:relative; flex:none; padding:8px; box-sizing:content-box; }
 .ringwrap svg { width:100%; height:100%; overflow:visible; }
 .ringwrap svg { transform:rotate(-90deg); }
-.rleg { display:flex; flex-direction:column; gap:clamp(6px,0.8vh,14px); min-width:0; overflow:hidden; }
-.lg { display:flex; align-items:center; gap:8px; min-width:0; overflow:hidden; }
-.lg .dot { width:13px; height:13px; border-radius:50%; box-shadow:0 0 10px currentColor; flex:none; }
-.lg b { display:block; font-size:clamp(14px,1.5vw,20px); font-weight:800; line-height:1; font-variant-numeric:tabular-nums; white-space:nowrap; }
-.lg span { font-size:clamp(9px,0.85vw,11px); color:var(--txt2); font-weight:500; white-space:nowrap; }
+.rleg { display:flex; flex-direction:row; flex-wrap:wrap; justify-content:center; gap:clamp(8px,1.2vw,18px); min-width:0; }
+.lg { display:flex; flex-direction:column; align-items:center; gap:3px; min-width:0; }
+.lg .dot { width:8px; height:8px; border-radius:50%; box-shadow:0 0 8px currentColor; flex:none; margin-bottom:2px; }
+.lg b { display:block; font-size:clamp(16px,1.6vw,22px); font-weight:800; line-height:1; font-variant-numeric:tabular-nums; white-space:nowrap; text-align:center; }
+.lg span { font-size:clamp(9px,0.8vw,10px); color:var(--txt2); font-weight:600; text-align:center; letter-spacing:.04em; text-transform:uppercase; }
 /* Bloco KPIs extra — 4 colunas */
 .rkpis { display:grid; grid-template-columns:repeat(2,1fr); gap:clamp(4px,0.5vw,8px); padding-top:clamp(6px,0.7vh,12px);
   border-top:1px solid var(--stroke); min-width:0; }
@@ -563,18 +563,19 @@ function MachineCard({ m }) {
 }
 
 // ── Slide: EM ANDAMENTO ─────────────────────────────────────────────────────
-function SlideAndamento({ andamento, conHoje, totalCon, avgH, machines, standby, prioritarias }) {
+function SlideAndamento({ andamento, conHoje, conSemana, totalCon, avgH, machines, standby, prioritarias }) {
   // Stats reais (sem inventar campos)
   const emCurso      = andamento.length;
   const concHoje     = conHoje.length;
+  const concSemana   = (conSemana || []).length;
   const emPausa      = standby.length;
   const emPrio       = prioritarias.length;
   const emAndOverdue = andamento.filter(isOverdue).length;
   const noPrazoPct   = emCurso > 0 ? Math.round((1 - emAndOverdue / emCurso) * 100) : 100;
   // Anéis: 3 métricas reais
-  const ringMax = Math.max(emCurso + concHoje, 1);
+  const ringMax = Math.max(emCurso + concSemana, 1);
   const rings = [
-    { r: 86, c: "var(--sky)",    p: concHoje / ringMax },
+    { r: 86, c: "var(--sky)",    p: concSemana / Math.max(concSemana + emCurso, 1) },
     { r: 64, c: "var(--dgreen)", p: noPrazoPct / 100 },
     { r: 42, c: "var(--orange)", p: Math.min(1, emCurso / 8) },
   ];
@@ -598,10 +599,10 @@ function SlideAndamento({ andamento, conHoje, totalCon, avgH, machines, standby,
                 const C = 2 * Math.PI * r;
                 return (
                   <g key={i}>
-                    <circle cx="100" cy="100" r={r} fill="none" stroke="rgba(255,255,255,.09)" strokeWidth="16" />
-                    <circle cx="100" cy="100" r={r} fill="none" stroke={c} strokeWidth="16" strokeLinecap="round"
+                    <circle cx="100" cy="100" r={r} fill="none" stroke="rgba(255,255,255,.07)" strokeWidth="14" />
+                    <circle cx="100" cy="100" r={r} fill="none" stroke={c} strokeWidth="14" strokeLinecap="round"
                       strokeDasharray={C} strokeDashoffset={C * (1 - p)}
-                      style={{ filter: `drop-shadow(0 0 6px ${c})` }} />
+                      style={{ filter: `drop-shadow(0 0 8px ${c}) drop-shadow(0 0 16px ${c})` }} />
                   </g>
                 );
               })}
@@ -609,7 +610,7 @@ function SlideAndamento({ andamento, conHoje, totalCon, avgH, machines, standby,
           </div>
           <div className="rleg">
             <div className="lg" style={{ color: "var(--sky)" }}>
-              <span className="dot" /><div><b>{concHoje}</b><span>Concluídas hoje</span></div>
+              <span className="dot" /><div><b>{concSemana}</b><span>Esta semana</span></div>
             </div>
             <div className="lg" style={{ color: "var(--dgreen)" }}>
               <span className="dot" /><div><b>{noPrazoPct}%</b><span>No prazo</span></div>
@@ -1085,7 +1086,7 @@ export default function AoVivoGlass({
           <div className="stage">
             <section className={`slide${slideId === "andamento" ? " on" : ""}`} style={{ "--ac": "var(--green)" }}><div className="watermark" />
               <div className="stitle"><span className="g" /><h2>EM ANDAMENTO</h2><span className="ct">×{pad2(andamento.length)}</span></div>
-              <SlideAndamento andamento={andamento} conHoje={conHoje} totalCon={totalCon} avgH={avgH} machines={machines} standby={standby} prioritarias={prioritarias} />
+              <SlideAndamento andamento={andamento} conHoje={conHoje} conSemana={conSemana} totalCon={totalCon} avgH={avgH} machines={machines} standby={standby} prioritarias={prioritarias} />
             </section>
 
             <section className={`slide${slideId === "standby" ? " on" : ""}`} style={{ "--ac": "var(--orange)" }}><div className="watermark" />

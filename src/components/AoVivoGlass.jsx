@@ -393,16 +393,16 @@ const CSS_GLASS = `
 
 /* recon — secções que preenchem todo o espaço vertical */
 .recon { flex:1; min-height:0; display:flex; flex-direction:column;
-  gap:clamp(6px, 0.8vw, 12px); overflow:hidden;
-  padding:clamp(8px, 1vw, 16px) clamp(10px, 1.2vw, 20px); }
+  gap:clamp(5px, 0.6vw, 10px); overflow:hidden;
+  padding:clamp(8px, 1vw, 14px) clamp(10px, 1.2vw, 18px); }
 .rsec { display:flex; flex-direction:column; gap:clamp(4px,0.5vh,8px); min-height:0; overflow:hidden; flex-shrink:0; }
-.rsec-grow { flex:1; min-height:0; overflow:hidden; display:flex; flex-direction:column; gap:clamp(4px,0.5vh,8px); } /* PRÓXIMAS cresce e ocupa o resto */
+.rsec-grow { flex:1; height:0; overflow:hidden; display:flex; flex-direction:column; gap:clamp(4px,0.5vh,8px); } /* PRÓXIMAS cresce: height:0+flex:1 força containment correcto */
 .rs { font-size:clamp(9px,0.85vw,12px); font-weight:700; letter-spacing:.08em; color:var(--txt2); display:flex; align-items:center; gap:8px; flex-shrink:0; line-height:1; }
 .rs b { color:var(--purple); font-family:'Orbitron'; font-size:clamp(12px,1.1vw,15px); }
 .rs::after { content:''; flex:1; height:1px; background:var(--stroke); }
 .rg { display:grid; gap:clamp(5px,0.6vw,11px); }
 .rg-active { grid-auto-rows:minmax(0,1fr); height:clamp(84px, 11vh, 130px); overflow:hidden; flex-shrink:0; }
-.rg-next { flex:1; min-height:0; grid-auto-rows:minmax(clamp(52px,7vh,76px), auto); overflow-y:auto; overflow-x:hidden; align-content:start; }
+.rg-next { flex:1; height:0; min-height:0; grid-auto-rows:minmax(clamp(52px,7vh,76px), auto); overflow-y:auto; overflow-x:hidden; align-content:start; }
 .rt2 { padding:clamp(8px,0.9vh,12px) clamp(10px,1vw,16px); border-radius:14px; border-top:3px solid var(--purple); background:rgba(255,255,255,.05);
   display:flex; flex-direction:column; justify-content:center; gap:clamp(3px,0.4vh,6px); min-height:0; overflow:hidden; }
 .rt2.run { border-top-color:var(--green); }
@@ -415,7 +415,7 @@ const CSS_GLASS = `
 .rt2 .m { font-size:clamp(10px,0.9vw,13px); color:var(--txt2); display:flex; justify-content:space-between; gap:6px; align-items:baseline; flex:none; }
 .rt2 .m span:first-child { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .rt2 .m .h { color:var(--orange); font-variant-numeric:tabular-nums; font-weight:700; flex:none; }
-.rdone { display:flex; gap:5px; flex-wrap:wrap; max-height:clamp(54px,7vh,90px); overflow:hidden; align-content:flex-start; flex-shrink:0; }
+.rdone { display:flex; gap:5px; flex-wrap:wrap; max-height:clamp(58px,8vh,96px); overflow:hidden; align-content:flex-start; flex-shrink:0; }
 .rchip { padding:5px 10px; border-radius:10px; background:rgba(52,199,89,.1); border:1px solid rgba(52,199,89,.26);
   font-size:clamp(10px,0.9vw,11.5px); font-weight:600; color:var(--green); white-space:nowrap; }
 .rchip b { color:#cfd3dc; font-weight:600; margin-left:5px; }

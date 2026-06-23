@@ -229,12 +229,12 @@ const CSS_GLASS = `
    cards alargam, com muitos quebram em mais colunas. Garante espaço p/ o NS. */
 /* Cards: minimo reduzido para caber 3 colunas mesmo em viewports menores */
 .cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(clamp(260px, 22vw, 380px), 1fr));
-  grid-auto-rows:minmax(0, 1fr); gap:clamp(6px, 0.8vw, 12px); min-height:0; align-content:stretch; }
+  grid-auto-rows:minmax(clamp(140px,18vh,260px), 1fr); gap:clamp(6px, 0.8vw, 12px); min-height:0; align-content:start; overflow-y:auto; overflow-x:hidden; }
 
 /* CARDS — denso, sem espaço morto, com timer regressivo destacado */
 /* Card: blocos distribuídos (space-between) para preencher a altura sem
    void. NS/modelo/timer ficam agrupados em .mid e nunca encolhem/cortam. */
-.card { padding:clamp(10px,1.1vh,18px) clamp(12px,1.2vw,20px); display:flex; flex-direction:column; min-height:0;
+.card { padding:clamp(10px,1.1vh,18px) clamp(12px,1.2vw,20px); display:flex; flex-direction:column; min-height:clamp(140px,18vh,260px);
   position:relative; overflow:hidden; border-radius:clamp(14px,1.4vw,24px); --st:var(--green);
   gap:clamp(6px,0.7vh,12px); justify-content:space-between; }
 /* Faixa de tipo (NTS/RECON/ACP) no topo do card */
@@ -277,8 +277,8 @@ const CSS_GLASS = `
   display:flex; align-items:center; gap:6px; }
 .card .tech b { color:var(--teal); font-weight:700; }
 /* Timer regressivo — protagonista */
-.card .timer { display:flex; align-items:baseline; justify-content:space-between; gap:10px;
-  padding:10px 12px; border-radius:14px; background:rgba(255,255,255,.04);
+.card .timer { display:flex; align-items:baseline; justify-content:space-between; gap:8px;
+  padding:clamp(6px,0.7vh,10px) clamp(8px,0.9vw,12px); border-radius:12px; background:rgba(255,255,255,.04);
   border:1px solid var(--stroke); }
 .card .timer .lbl { font-size:10px; font-weight:700; color:var(--txt3); letter-spacing:.16em; }
 /* Timer secundário ao NS — fica menor para o NS ser sempre o protagonista */
@@ -291,21 +291,21 @@ const CSS_GLASS = `
 /* Lista de tarefas — ELEMENTO FLEXÍVEL: cresce para encher o espaço livre.
    É o único que pode desaparecer (overflow:hidden) quando falta espaço;
    NS/modelo/timer/datas ficam sempre intactos. */
-.card .tasks { flex:0 1 auto; min-height:0; display:flex; flex-direction:column; gap:clamp(3px,0.4vh,7px);
-  overflow:hidden; align-content:flex-start; max-height:clamp(55px,12vh,180px); }
+.card .tasks { flex:0 1 auto; min-height:0; display:flex; flex-direction:column; gap:clamp(3px,0.4vh,6px);
+  overflow:hidden; align-content:flex-start; max-height:clamp(70px,14vh,200px); }
 .card .tasklbl { font-size:10px; font-weight:700; letter-spacing:.14em; color:var(--txt3);
   text-transform:uppercase; flex:none; }
-.card .tk { display:flex; align-items:center; gap:8px; flex:none;
-  font-size:13px; font-weight:500; color:#dfe2ea;
-  background:rgba(255,255,255,.05); padding:5px 11px; border-radius:8px;
+.card .tk { display:flex; align-items:center; gap:6px; flex:none;
+  font-size:clamp(11px,1vw,13px); font-weight:500; color:#dfe2ea;
+  background:rgba(255,255,255,.05); padding:clamp(3px,0.4vh,5px) clamp(8px,0.9vw,11px); border-radius:8px;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .card .tk .icon { flex:none; font-size:11px; color:var(--st); }
 .card .tk.done { color:var(--txt2); }
 .card .tk.done .txt { text-decoration:line-through; text-decoration-color:rgba(255,255,255,.3); }
 .card .tk.done .icon { color:var(--green); }
 .card .tk .txt { overflow:hidden; text-overflow:ellipsis; }
-.card .dates { display:flex; gap:14px; font-size:12px; font-weight:600; color:var(--txt2);
-  font-variant-numeric:tabular-nums; padding-top:8px; flex:none;
+.card .dates { display:flex; gap:10px; font-size:clamp(10px,0.9vw,12px); font-weight:600; color:var(--txt2);
+  font-variant-numeric:tabular-nums; padding-top:clamp(5px,0.6vh,8px); flex:none;
   border-top:1px solid var(--stroke); }
 .card .dates b { color:var(--teal); }
 .card .dates .e b { color:var(--green); }
@@ -384,31 +384,31 @@ const CSS_GLASS = `
 
 /* recon — secções que preenchem todo o espaço vertical */
 .recon { flex:1; min-height:0; display:flex; flex-direction:column;
-  gap:clamp(8px, 1vw, 14px); overflow:hidden;
-  padding:clamp(10px, 1.2vw, 20px) clamp(12px, 1.4vw, 24px); }
-.rsec { display:flex; flex-direction:column; gap:9px; min-height:0; }
+  gap:clamp(6px, 0.8vw, 12px); overflow:hidden;
+  padding:clamp(8px, 1vw, 16px) clamp(10px, 1.2vw, 20px); }
+.rsec { display:flex; flex-direction:column; gap:clamp(5px,0.6vh,9px); min-height:0; overflow:hidden; }
 .rsec-grow { flex:1; }                 /* PRÓXIMAS cresce e ocupa o resto */
-.rs { font-size:13px; font-weight:700; letter-spacing:.08em; color:var(--txt2); display:flex; align-items:center; gap:10px; flex-shrink:0; }
-.rs b { color:var(--purple); font-family:'Orbitron'; font-size:15px; }
+.rs { font-size:clamp(10px,0.9vw,13px); font-weight:700; letter-spacing:.08em; color:var(--txt2); display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.rs b { color:var(--purple); font-family:'Orbitron'; font-size:clamp(12px,1.1vw,15px); }
 .rs::after { content:''; flex:1; height:1px; background:var(--stroke); }
-.rg { display:grid; gap:11px; }
-.rg-active { grid-auto-rows:minmax(0,1fr); height:clamp(96px, 13vh, 150px); }
-.rg-next { flex:1; grid-auto-rows:minmax(64px, 1fr); min-height:0; }
-.rt2 { padding:12px 16px; border-radius:16px; border-top:3px solid var(--purple); background:rgba(255,255,255,.05);
-  display:flex; flex-direction:column; justify-content:center; gap:6px; min-height:0; }
+.rg { display:grid; gap:clamp(5px,0.6vw,11px); }
+.rg-active { grid-auto-rows:minmax(0,1fr); height:clamp(80px, 11vh, 130px); overflow:hidden; }
+.rg-next { flex:1; grid-auto-rows:minmax(clamp(50px,7vh,72px), auto); min-height:0; overflow-y:auto; overflow-x:hidden; align-content:start; }
+.rt2 { padding:clamp(8px,0.9vh,12px) clamp(10px,1vw,16px); border-radius:14px; border-top:3px solid var(--purple); background:rgba(255,255,255,.05);
+  display:flex; flex-direction:column; justify-content:center; gap:clamp(3px,0.4vh,6px); min-height:0; overflow:hidden; }
 .rt2.run { border-top-color:var(--green); }
 .rt2.paus { border-top-color:var(--orange); }
 .rt2 .t { font-size:11px; font-weight:800; color:var(--purple); letter-spacing:.1em; flex:none; }
 .rt2.run .t { color:var(--green); } .rt2.paus .t { color:var(--orange); }
 /* NS — protagonista, numa só linha; fonte adaptativa vem inline */
 .rt2 .n { font-family:'Orbitron'; font-weight:800; line-height:1; color:#fff;
-  white-space:nowrap; flex:none; }
-.rt2 .m { font-size:13px; color:var(--txt2); display:flex; justify-content:space-between; gap:8px; align-items:baseline; flex:none; }
+  white-space:nowrap; flex:none; overflow:hidden; text-overflow:ellipsis; }
+.rt2 .m { font-size:clamp(10px,0.9vw,13px); color:var(--txt2); display:flex; justify-content:space-between; gap:6px; align-items:baseline; flex:none; }
 .rt2 .m span:first-child { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .rt2 .m .h { color:var(--orange); font-variant-numeric:tabular-nums; font-weight:700; flex:none; }
-.rdone { display:flex; gap:9px; flex-wrap:wrap; }
-.rchip { padding:8px 13px; border-radius:13px; background:rgba(52,199,89,.1); border:1px solid rgba(52,199,89,.26);
-  font-size:11.5px; font-weight:600; color:var(--green); }
+.rdone { display:flex; gap:6px; flex-wrap:wrap; max-height:clamp(60px,9vh,110px); overflow:hidden; align-content:flex-start; }
+.rchip { padding:5px 10px; border-radius:10px; background:rgba(52,199,89,.1); border:1px solid rgba(52,199,89,.26);
+  font-size:clamp(10px,0.9vw,11.5px); font-weight:600; color:var(--green); white-space:nowrap; }
 .rchip b { color:#cfd3dc; font-weight:600; margin-left:5px; }
 
 /* concluídas */

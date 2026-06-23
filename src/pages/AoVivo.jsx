@@ -1785,10 +1785,10 @@ function AlmocoClock(){
 
 export default function AoVivo(){
   // Tema: dark | light | glass. `dark` derivado para preservar toda a lógica existente.
-  const [theme,sTheme] = useState(()=>{ try{const t=localStorage.getItem("theme");return ["dark","light","glass","stark-light"].includes(t)?t:"dark";}catch{return "dark";} });
+  const [theme,sTheme] = useState(()=>{ try{const t=localStorage.getItem("theme");return ["dark","light","glass","stark-light","red-light"].includes(t)?t:"dark";}catch{return "dark";} });
   const dark = theme === "dark";
   const cycleTheme = () => {
-    const order = ["dark","light","glass","stark-light"];
+    const order = ["dark","light","glass","stark-light","red-light"];
     const next = order[(order.indexOf(theme)+1)%order.length];
     sTheme(next);
     try{localStorage.setItem("theme",next);}catch{ /* ignore */ }
@@ -2403,7 +2403,7 @@ export default function AoVivo(){
   // Componente standalone que recebe dados já calculados. Quando theme!=="glass"
   // esta linha é ignorada. Durante o almoço cai para o return principal, que
   // sobrepõe o overlay de almoço (zIndex 9999) — funciona nos 3 modos.
-  if((theme==="glass" || theme==="stark-light") && !isAlmoco) return(
+  if((theme==="glass" || theme==="stark-light" || theme==="red-light") && !isAlmoco) return(
     <AoVivoGlass
       key="aovivo-glass"
       loading={loading}
@@ -2602,7 +2602,7 @@ export default function AoVivo(){
           border:`1px solid ${dark?D.line:"rgba(13,13,15,0.08)"}`,
           padding:"3px 6px",cursor:"pointer",color:D.text,display:"flex",borderRadius:dark?0:"8px",
           marginLeft:"auto"}}>
-          {theme==="dark"?<Sun size={11}/>:theme==="light"?<Layers size={11}/>:theme==="glass"?<Moon size={11}/>:<Sun size={11} style={{color:"#D9A441"}}/>}
+          {theme==="dark"?<Sun size={11}/>:theme==="light"?<Layers size={11}/>:theme==="glass"?<Moon size={11}/>:theme==="stark-light"?<Sun size={11} style={{color:"#D9A441"}}/>:<Sun size={11} style={{color:"#DC2626"}}/>}
         </button>
       </div>
       {/* PROGRESS BAR */}

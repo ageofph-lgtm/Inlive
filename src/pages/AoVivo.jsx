@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import { Activity, Flag, CheckCircle2, ListOrdered, Sun, Moon, Layers,
          ChevronLeft, ChevronRight, Pause, Play, Wrench, CalendarDays } from "lucide-react";
 import AoVivoGlass from "@/components/AoVivoGlass";
@@ -1794,7 +1793,6 @@ export default function AoVivo(){
     sTheme(next);
     try{localStorage.setItem("theme",next);}catch{ /* ignore */ }
   };
-  const navigate = useNavigate();
   const [machines,sM] = useState([]);
   const [loading,sL]  = useState(true);
   const [slide,sSlide]= useState(0);
@@ -1838,13 +1836,12 @@ export default function AoVivo(){
 
   useEffect(()=>{
     const h=e=>{
-      if(e.key==="Escape")navigate("/");
       if(e.key==="ArrowRight")next();
       if(e.key==="ArrowLeft")prev();
       if(e.key===" "){e.preventDefault();sPaused(p=>!p);}
     };
     window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h);
-  },[navigate,next,prev]);
+  },[next,prev]);
 
   // ── Filtros ──────────────────────────────────────────────────────────────
   const monday=getMondayUTC();

@@ -195,7 +195,7 @@ const CSS_GLASS = `
 /* Painel "Hoje na oficina" usa proporção do viewport — em ecrãs pequenos
    (Chromecast 1280×720) não come metade da tela. */
 .andamento { flex:1; min-height:0; display:grid;
-  grid-template-columns:clamp(220px, 18vw, 340px) 1fr; gap:clamp(6px, 0.8vw, 14px); isolation:isolate; }
+  grid-template-columns:clamp(200px, 17vw, 320px) 1fr; gap:clamp(6px, 0.8vw, 14px); isolation:isolate; }
 .ringspanel { padding:clamp(10px, 1.1vw, 18px) clamp(12px, 1.2vw, 20px); display:flex; flex-direction:column; gap:clamp(6px, 0.7vw, 12px); min-width:0; }
 /* Cabeçalho com logo mascote */
 .rhead { display:flex; align-items:center; gap:10px; padding-bottom:clamp(8px,0.8vh,14px); border-bottom:1px solid var(--stroke); }
@@ -228,15 +228,23 @@ const CSS_GLASS = `
 /* Colunas adaptativas: cada card nunca fica mais estreito que 330px; com poucos
    cards alargam, com muitos quebram em mais colunas. Garante espaço p/ o NS. */
 /* Cards: minimo reduzido para caber 3 colunas mesmo em viewports menores */
-.cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(clamp(260px, 22vw, 380px), 1fr));
-  grid-auto-rows:minmax(clamp(140px,18vh,260px), 1fr); gap:clamp(6px, 0.8vw, 12px); min-height:0; align-content:start; overflow-y:auto; overflow-x:hidden; }
+.cards { display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(clamp(280px, 24vw, 420px), 1fr));
+  grid-auto-rows:auto;
+  gap:clamp(6px, 0.8vw, 12px);
+  align-content:start;
+  overflow-y:auto; overflow-x:hidden;
+  min-height:0; height:100%; }
 
 /* CARDS — denso, sem espaço morto, com timer regressivo destacado */
 /* Card: blocos distribuídos (space-between) para preencher a altura sem
    void. NS/modelo/timer ficam agrupados em .mid e nunca encolhem/cortam. */
-.card { padding:clamp(10px,1.1vh,18px) clamp(12px,1.2vw,20px); display:flex; flex-direction:column; min-height:clamp(140px,18vh,260px);
-  position:relative; overflow:hidden; border-radius:clamp(14px,1.4vw,24px); --st:var(--green);
-  gap:clamp(6px,0.7vh,12px); justify-content:space-between; }
+.card { padding:clamp(10px,1.2vh,18px) clamp(12px,1.2vw,20px);
+  display:flex; flex-direction:column;
+  min-height:clamp(160px,22vh,280px);
+  position:relative; overflow:hidden;
+  border-radius:clamp(14px,1.4vw,24px); --st:var(--green);
+  gap:clamp(6px,0.8vh,12px); justify-content:space-between; }
 /* Faixa de tipo (NTS/RECON/ACP) no topo do card */
 .card .typestrip { position:absolute; top:0; left:0; right:0; height:4px;
   background:var(--type,var(--teal)); box-shadow:0 0 12px var(--type,var(--teal)); }
@@ -291,8 +299,9 @@ const CSS_GLASS = `
 /* Lista de tarefas — ELEMENTO FLEXÍVEL: cresce para encher o espaço livre.
    É o único que pode desaparecer (overflow:hidden) quando falta espaço;
    NS/modelo/timer/datas ficam sempre intactos. */
-.card .tasks { flex:0 1 auto; min-height:0; display:flex; flex-direction:column; gap:clamp(3px,0.4vh,6px);
-  overflow:hidden; align-content:flex-start; max-height:clamp(70px,14vh,200px); }
+.card .tasks { flex:1; min-height:0; display:flex; flex-direction:column;
+  gap:clamp(3px,0.4vh,6px);
+  overflow:hidden; align-content:flex-start; }
 .card .tasklbl { font-size:10px; font-weight:700; letter-spacing:.14em; color:var(--txt3);
   text-transform:uppercase; flex:none; }
 .card .tk { display:flex; align-items:center; gap:6px; flex:none;
@@ -386,14 +395,14 @@ const CSS_GLASS = `
 .recon { flex:1; min-height:0; display:flex; flex-direction:column;
   gap:clamp(6px, 0.8vw, 12px); overflow:hidden;
   padding:clamp(8px, 1vw, 16px) clamp(10px, 1.2vw, 20px); }
-.rsec { display:flex; flex-direction:column; gap:clamp(5px,0.6vh,9px); min-height:0; overflow:hidden; }
-.rsec-grow { flex:1; }                 /* PRÓXIMAS cresce e ocupa o resto */
-.rs { font-size:clamp(10px,0.9vw,13px); font-weight:700; letter-spacing:.08em; color:var(--txt2); display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.rsec { display:flex; flex-direction:column; gap:clamp(4px,0.5vh,8px); min-height:0; overflow:hidden; flex-shrink:0; }
+.rsec-grow { flex:1; min-height:0; overflow:hidden; display:flex; flex-direction:column; gap:clamp(4px,0.5vh,8px); } /* PRÓXIMAS cresce e ocupa o resto */
+.rs { font-size:clamp(9px,0.85vw,12px); font-weight:700; letter-spacing:.08em; color:var(--txt2); display:flex; align-items:center; gap:8px; flex-shrink:0; line-height:1; }
 .rs b { color:var(--purple); font-family:'Orbitron'; font-size:clamp(12px,1.1vw,15px); }
 .rs::after { content:''; flex:1; height:1px; background:var(--stroke); }
 .rg { display:grid; gap:clamp(5px,0.6vw,11px); }
-.rg-active { grid-auto-rows:minmax(0,1fr); height:clamp(80px, 11vh, 130px); overflow:hidden; }
-.rg-next { flex:1; grid-auto-rows:minmax(clamp(50px,7vh,72px), auto); min-height:0; overflow-y:auto; overflow-x:hidden; align-content:start; }
+.rg-active { grid-auto-rows:minmax(0,1fr); height:clamp(84px, 11vh, 130px); overflow:hidden; flex-shrink:0; }
+.rg-next { flex:1; min-height:0; grid-auto-rows:minmax(clamp(52px,7vh,76px), auto); overflow-y:auto; overflow-x:hidden; align-content:start; }
 .rt2 { padding:clamp(8px,0.9vh,12px) clamp(10px,1vw,16px); border-radius:14px; border-top:3px solid var(--purple); background:rgba(255,255,255,.05);
   display:flex; flex-direction:column; justify-content:center; gap:clamp(3px,0.4vh,6px); min-height:0; overflow:hidden; }
 .rt2.run { border-top-color:var(--green); }
@@ -406,7 +415,7 @@ const CSS_GLASS = `
 .rt2 .m { font-size:clamp(10px,0.9vw,13px); color:var(--txt2); display:flex; justify-content:space-between; gap:6px; align-items:baseline; flex:none; }
 .rt2 .m span:first-child { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .rt2 .m .h { color:var(--orange); font-variant-numeric:tabular-nums; font-weight:700; flex:none; }
-.rdone { display:flex; gap:6px; flex-wrap:wrap; max-height:clamp(60px,9vh,110px); overflow:hidden; align-content:flex-start; }
+.rdone { display:flex; gap:5px; flex-wrap:wrap; max-height:clamp(54px,7vh,90px); overflow:hidden; align-content:flex-start; flex-shrink:0; }
 .rchip { padding:5px 10px; border-radius:10px; background:rgba(52,199,89,.1); border:1px solid rgba(52,199,89,.26);
   font-size:clamp(10px,0.9vw,11.5px); font-weight:600; color:var(--green); white-space:nowrap; }
 .rchip b { color:#cfd3dc; font-weight:600; margin-left:5px; }

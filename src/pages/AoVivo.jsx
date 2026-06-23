@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Activity, Flag, CheckCircle2, ListOrdered, Sun, Moon, Layers,
          ChevronLeft, ChevronRight, Pause, Play, Wrench, CalendarDays } from "lucide-react";
 import AoVivoGlass from "@/components/AoVivoGlass";
+import AoVivoGlassLight from "@/components/AoVivoGlassLight";
 import ArcReactorGauge from "@/components/ArcReactorGauge";
 // ── Config ────────────────────────────────────────────────────────────────────
 // Chama directamente a saganBridge do Watcher com segredo read-only.
@@ -1784,11 +1785,11 @@ function AlmocoClock(){
 }
 
 export default function AoVivo(){
-  // Tema: dark | light | glass. `dark` derivado para preservar toda a lógica existente.
-  const [theme,sTheme] = useState(()=>{ try{const t=localStorage.getItem("theme");return ["dark","light","glass"].includes(t)?t:"dark";}catch{return "dark";} });
+  // Tema: dark | light | glass | glass-light. `dark` derivado para preservar toda a lógica existente.
+  const [theme,sTheme] = useState(()=>{ try{const t=localStorage.getItem("theme");return ["dark","light","glass","glass-light"].includes(t)?t:"dark";}catch{return "dark";} });
   const dark = theme === "dark";
   const cycleTheme = () => {
-    const order = ["dark","light","glass"];
+    const order = ["dark","light","glass","glass-light"];
     const next = order[(order.indexOf(theme)+1)%order.length];
     sTheme(next);
     try{localStorage.setItem("theme",next);}catch{ /* ignore */ }
@@ -2406,6 +2407,21 @@ export default function AoVivo(){
   if(theme==="glass" && !isAlmoco) return(
     <AoVivoGlass
       key="aovivo-glass"
+      loading={loading}
+      slide={slide} prog={prog} paused={paused}
+      SLIDES={SLIDES} next={next} prev={prev} sPaused={sPaused}
+      cycleTheme={cycleTheme} theme={theme}
+      data={{
+        machines, andamento, standby, prioritarias, proximas,
+        ntsAnd, ntsAF, reconAnd, reconAF, reconCon,
+        conSemana, totalCon, conHoje, avgH,
+      }}
+    />
+  );
+
+  if(theme==="glass-light" && !isAlmoco) return(
+    <AoVivoGlassLight
+      key="aovivo-glasslight"
       loading={loading}
       slide={slide} prog={prog} paused={paused}
       SLIDES={SLIDES} next={next} prev={prev} sPaused={sPaused}

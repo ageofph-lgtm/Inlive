@@ -385,6 +385,15 @@ const CSS_GLASS = `
 .ntc .ntags { display:flex; flex-wrap:wrap; gap:6px; }
 .ntc .ntags .t { font-size:11px; font-weight:500; padding:4px 10px; border-radius:8px; background:rgba(255,255,255,.06); color:#dfe2ea; }
 .ntc .ntags .t.done { background:rgba(52,199,89,.14); color:var(--green); text-decoration:line-through; }
+.ntc .nhead { display:flex; flex-direction:column; gap:4px; }
+.ntc .nhead .nn { font-family:'Orbitron'; font-weight:800; line-height:1.04; word-break:break-word; overflow-wrap:anywhere; }
+.ntc .nhead .nm { font-size:13px; font-weight:500; color:var(--txt2); }
+.ntc .ntm { display:flex; align-items:center; gap:12px; padding:14px; background:rgba(255,69,58,.08); border-radius:12px; border:1px solid rgba(255,69,58,.15); }
+.ntc .ntm svg { flex-shrink:0; }
+.ntc .ntmdata { display:flex; flex-direction:column; gap:2px; }
+.ntc .ntmdata .tl { font-family:'Orbitron'; font-weight:800; font-size:20px; color:var(--red); }
+.ntc .ntmdata .meta { font-size:10px; color:var(--txt2); }
+.ntc .nover { position:absolute; top:12px; right:14px; padding:"3px 8px"; border-radius:100px; background:var(--red); color:#fff; font-size:9px; font-weight:800; letter-spacing:.05em; }
 .ntc .ng { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:auto; }
 .ntc .gi { background:rgba(255,255,255,.05); border-radius:13px; padding:11px 12px; }
 .ntc .gi .k { font-size:10px; color:var(--txt2); font-weight:600; letter-spacing:.04em; }
@@ -1186,17 +1195,30 @@ function NTSCard({ m }) {
 
   return (
     <div className="ntc glass">
-      <div>
+      {/* Topo — Série + Modelo */}
+      <div className="nhead">
         <div className="nn" style={{ fontSize: nsFontSize(ns.main, 48, 30) + "px" }}>{ns.main}{ns.sub && <small> · {ns.sub}</small>}</div>
         <div className="nm">{m.modelo || "—"}</div>
       </div>
+      
+      {/* Observações — se existem */}
       {m.observacoes && <div className="nwhy">{m.observacoes}</div>}
+      
+      {/* Timer + Meta */}
       <div className="ntm">
-        <div className="tl">{fmtHMS(elapsed)}</div>
-        <div className="meta">
-          {meta > 0 ? `de ${Math.round(meta/3600)}h estimadas` : "sem estimativa"}
+        <svg width="48" height="48" viewBox="0 0 48 48" style={{flexShrink:0}}>
+          <circle cx="24" cy="24" r="22" fill="none" stroke="rgba(255,69,58,.1)" strokeWidth="2"/>
+          <circle cx="24" cy="24" r="22" fill="none" stroke="var(--red)" strokeWidth="2" 
+            strokeDasharray={`${(elapsed/meta)*138.2} 138.2`} strokeLinecap="round" style={{transform:"rotate(-90deg)", transformOrigin:"24px 24px"}}/>
+          <text x="24" y="26" textAnchor="middle" fill="var(--red)" fontSize="10" fontWeight="800" fontFamily="Orbitron">⚛</text>
+        </svg>
+        <div className="ntmdata">
+          <div className="tl">{fmtHMS(elapsed)}</div>
+          <div className="meta">{meta > 0 ? `de ${Math.round(meta/3600)}h` : "—"}</div>
         </div>
       </div>
+      
+      {/* Tarefas */}
       {tasks.length > 0 && (
         <div className="ntags">
           {tasks.slice(0, 8).map((t, i) => (
@@ -1204,6 +1226,8 @@ function NTSCard({ m }) {
           ))}
         </div>
       )}
+      
+      {/* Grid KPIs */}
       <div className="ng">
         <div className="gi">
           <div className="k">EM OFICINA</div>
@@ -1222,7 +1246,8 @@ function NTSCard({ m }) {
           <div className={`v ${tasks.length > 0 && done === tasks.length ? "grn" : ""}`}>{done}/{tasks.length || 0}</div>
         </div>
       </div>
-      {over && <div style={{ position: "absolute", top: 12, right: 14, padding: "3px 8px", borderRadius: 100, background: "var(--red)", color: "#fff", fontSize: 10, fontWeight: 800, letterSpacing: ".05em" }}>ATRASADA</div>}
+      
+      {over && <div className="nover">ATRASADA</div>}
     </div>
   );
 }
@@ -1405,7 +1430,7 @@ export default function AoVivoGlass({
 
   return (
     <div className="glass-root" data-theme={theme}>
-      <style>{theme === 'stark-light' ? CSS_STARK : CSS_GLASS}</style>
+      <style>{theme === 'red-light' ? CSS_RED_LIGHT : theme === 'stark-light' ? CSS_STARK : CSS_GLASS}</style>
       <div id="glass-screen">
         <div className="mesh">
           <div className="blob b1" /><div className="blob b2" />

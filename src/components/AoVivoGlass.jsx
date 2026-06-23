@@ -132,20 +132,21 @@ const CSS_GLASS = `
 .glass::after { content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
   background:linear-gradient(150deg,rgba(255,255,255,.14),transparent 26%); }
 
-.wrap { position:relative; z-index:3; height:100%; display:flex; flex-direction:column; padding:22px 28px 16px; gap:16px; }
+.wrap { position:relative; z-index:3; height:100%; display:flex; flex-direction:column;
+  padding:clamp(10px, 1.4vw, 22px) clamp(12px, 1.6vw, 28px) clamp(8px, 1vw, 16px); gap:clamp(8px, 1vw, 16px); }
 
 /* chrome */
-.chrome { display:flex; align-items:center; gap:16px; }
+.chrome { display:flex; align-items:center; gap:clamp(8px, 1vw, 16px); }
 .wm { display:flex; align-items:center; gap:12px; }
 /* Ícone: logo do mascote — fundo transparente (multiply remove o branco em dark) */
-.wm .ic { width:44px; height:44px; flex:none; position:relative;
+.wm .ic { width:clamp(32px, 2.4vw, 44px); height:clamp(32px, 2.4vw, 44px); flex:none; position:relative;
   border-radius:12px; overflow:hidden;
   background:linear-gradient(160deg,rgba(255,107,107,0.18),rgba(255,69,58,0.12));
   border:1px solid rgba(255,107,107,0.32);
   box-shadow:0 6px 16px -4px var(--red), inset 0 1px 0 rgba(255,255,255,.18); }
 .wm .ic img { width:100%; height:100%; object-fit:contain; object-position:center;
   mix-blend-mode:multiply; filter:brightness(1.45) contrast(1.15) drop-shadow(0 0 4px rgba(255,69,58,0.4)); }
-.wm .tt { font-family:'Orbitron'; font-weight:800; letter-spacing:.14em; font-size:22px; line-height:1; }
+.wm .tt { font-family:'Orbitron'; font-weight:800; letter-spacing:.14em; font-size:clamp(14px, 1.4vw, 22px); line-height:1; }
 .wm .tt2 { font-family:'Orbitron'; font-weight:600; letter-spacing:.22em; font-size:11px;
   color:var(--txt2); margin-left:2px; padding-left:10px;
   border-left:1px solid var(--stroke); align-self:center; }
@@ -157,16 +158,20 @@ const CSS_GLASS = `
 .live.paused-pill .d { background:var(--orange); box-shadow:0 0 9px var(--orange); }
 @keyframes gpulse { 50% { opacity:.4; } }
 .chrome .right { margin-left:auto; display:flex; align-items:center; gap:13px; }
-.clock { font-family:'Orbitron'; font-weight:700; font-size:22px; letter-spacing:.04em; padding:6px 15px; border-radius:15px; }
+.clock { font-family:'Orbitron'; font-weight:700; font-size:clamp(14px, 1.4vw, 22px); letter-spacing:.04em;
+  padding:clamp(4px, 0.5vw, 6px) clamp(8px, 1vw, 15px); border-radius:clamp(8px, 1vw, 15px); }
 .clock small { font-family:'Inter'; font-weight:600; font-size:11px; color:var(--txt2); margin-left:8px; letter-spacing:.1em; }
 .themebtn { background:rgba(255,255,255,.06); border:1px solid var(--stroke); border-radius:12px;
   width:34px; height:34px; color:var(--txt); cursor:pointer; font-size:16px; display:grid; place-items:center; }
 
 /* KPIs */
-.kpis { display:grid; grid-template-columns:repeat(11,1fr); gap:9px; }
-.kpi { padding:11px 8px; text-align:center; border-radius:18px; position:relative; overflow:hidden; }
-.kpi .v { font-family:'Orbitron'; font-weight:800; font-size:23px; line-height:1; font-variant-numeric:tabular-nums; }
-.kpi .k { font-size:9px; font-weight:600; letter-spacing:.1em; color:var(--txt2); margin-top:5px; }
+.kpis { display:grid; grid-template-columns:repeat(11,1fr); gap:clamp(4px, 0.5vw, 9px); }
+.kpi { padding:clamp(6px, 0.7vw, 11px) clamp(4px, 0.5vw, 8px); text-align:center;
+  border-radius:clamp(10px, 1vw, 18px); position:relative; overflow:hidden; }
+.kpi .v { font-family:'Orbitron'; font-weight:800; font-size:clamp(14px, 1.4vw, 23px);
+  line-height:1; font-variant-numeric:tabular-nums; }
+.kpi .k { font-size:clamp(7px, 0.6vw, 9px); font-weight:600; letter-spacing:.1em;
+  color:var(--txt2); margin-top:clamp(2px, 0.3vw, 5px); }
 .kpi.act { box-shadow:inset 0 0 0 1.5px var(--ac,var(--blue)),0 16px 46px -18px rgba(0,0,0,.6), inset 0 1px 0 var(--spec); }
 .kpi.act .k { color:var(--txt); }
 .c-grn .v { color:var(--green); } .c-amb .v { color:var(--orange); } .c-red .v { color:var(--red); }
@@ -187,8 +192,11 @@ const CSS_GLASS = `
   padding:4px 11px; border-radius:100px; background:rgba(255,255,255,.06); border:1px solid var(--stroke); }
 
 /* andamento — anéis + cartões */
-.andamento { flex:1; min-height:0; display:grid; grid-template-columns:430px 1fr; gap:16px; }
-.ringspanel { padding:24px 26px; display:flex; flex-direction:column; gap:16px; }
+/* Painel "Hoje na oficina" usa proporção do viewport — em ecrãs pequenos
+   (Chromecast 1280×720) não come metade da tela. */
+.andamento { flex:1; min-height:0; display:grid;
+  grid-template-columns:clamp(260px, 22vw, 430px) 1fr; gap:clamp(8px, 1vw, 16px); }
+.ringspanel { padding:clamp(12px, 1.4vw, 24px) clamp(14px, 1.5vw, 26px); display:flex; flex-direction:column; gap:clamp(8px, 1vw, 16px); }
 /* Cabeçalho com logo mascote */
 .rhead { display:flex; align-items:center; gap:14px; padding-bottom:14px; border-bottom:1px solid var(--stroke); }
 .rlogo { width:60px; height:60px; flex:none; border-radius:14px; overflow:hidden; position:relative;
@@ -200,7 +208,7 @@ const CSS_GLASS = `
 .ringspanel .rt { font-family:'Orbitron'; font-size:17px; font-weight:800; letter-spacing:.06em; line-height:1.1; }
 .ringspanel .rts { font-size:11px; font-weight:600; color:var(--txt3); letter-spacing:.14em; margin-top:3px; }
 .ringspanel .rmid { flex:1; display:flex; align-items:center; justify-content:center; gap:24px; }
-.ringwrap { width:200px; height:200px; position:relative; flex:none; }
+.ringwrap { width:clamp(120px, 12vw, 200px); height:clamp(120px, 12vw, 200px); position:relative; flex:none; }
 .ringwrap svg { transform:rotate(-90deg); }
 .rleg { display:flex; flex-direction:column; gap:16px; }
 .lg { display:flex; align-items:center; gap:11px; }
@@ -218,8 +226,9 @@ const CSS_GLASS = `
 .rkpis span { font-size:9.5px; font-weight:600; color:var(--txt3); letter-spacing:.08em; text-transform:uppercase; }
 /* Colunas adaptativas: cada card nunca fica mais estreito que 330px; com poucos
    cards alargam, com muitos quebram em mais colunas. Garante espaço p/ o NS. */
-.cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(330px, 1fr));
-  grid-auto-rows:minmax(0, 1fr); gap:14px; min-height:0; align-content:stretch; }
+/* Cards: minimo reduzido para caber 3 colunas mesmo em viewports menores */
+.cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(clamp(220px, 18vw, 330px), 1fr));
+  grid-auto-rows:minmax(0, 1fr); gap:clamp(8px, 1vw, 14px); min-height:0; align-content:stretch; }
 
 /* CARDS — denso, sem espaço morto, com timer regressivo destacado */
 /* Card: blocos distribuídos (space-between) para preencher a altura sem
@@ -303,7 +312,7 @@ const CSS_GLASS = `
   border-top:1px solid var(--stroke); }
 
 /* grupos (standby) */
-.groups { flex:1; min-height:0; display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+.groups { flex:1; min-height:0; display:grid; grid-template-columns:repeat(4,1fr); gap:clamp(8px, 1vw, 14px); }
 .grp { display:flex; flex-direction:column; padding:0; overflow:hidden; }
 .gh { display:flex; align-items:center; gap:8px; padding:14px 18px; font-size:12.5px; font-weight:700;
   letter-spacing:.04em; border-bottom:1px solid var(--stroke); }
@@ -319,7 +328,7 @@ const CSS_GLASS = `
 .gempty { padding:16px; font-size:11px; color:var(--txt3); text-align:center; }
 
 /* gantt */
-.gantt { flex:1; min-height:0; padding:22px 26px; display:flex; flex-direction:column; }
+.gantt { flex:1; min-height:0; padding:clamp(12px, 1.4vw, 22px) clamp(14px, 1.5vw, 26px); display:flex; flex-direction:column; }
 .gsc { display:grid; grid-template-columns:200px repeat(15,1fr); border-bottom:1px solid var(--stroke); padding-bottom:6px; }
 .gsc .d { text-align:center; font-size:10px; color:var(--txt2); }
 .gsc .d b { display:block; font-size:13px; font-weight:700; }
@@ -335,7 +344,7 @@ const CSS_GLASS = `
 .gb2.fila { background:rgba(255,255,255,.12); color:var(--txt2); }
 
 /* próximas */
-.week { flex:1; min-height:0; display:grid; grid-template-columns:repeat(5,1fr); gap:12px; }
+.week { flex:1; min-height:0; display:grid; grid-template-columns:repeat(5,1fr); gap:clamp(6px, 0.8vw, 12px); }
 .day { display:flex; flex-direction:column; overflow:hidden; }
 .dh { display:flex; justify-content:space-between; padding:12px 15px; font-size:12px; font-weight:700;
   letter-spacing:.04em; border-bottom:1px solid var(--stroke); }
@@ -349,7 +358,7 @@ const CSS_GLASS = `
 .mini .mh { font-size:11px; color:var(--orange); font-weight:600; }
 
 /* nts (simplificado — só campos que existem) */
-.ntsgrid { flex:1; min-height:0; display:grid; grid-template-columns:1fr 1fr; gap:16px; overflow:hidden; }
+.ntsgrid { flex:1; min-height:0; display:grid; grid-template-columns:1fr 1fr; gap:clamp(8px, 1vw, 16px); overflow:hidden; }
 .ntc { padding:22px 24px; display:flex; flex-direction:column; gap:14px; border:1px solid rgba(255,69,58,.3); overflow:hidden; min-height:0; }
 .ntc::before { content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
   background:radial-gradient(110% 70% at 85% 0%,rgba(255,69,58,.12),transparent 55%); }
@@ -373,7 +382,9 @@ const CSS_GLASS = `
 .gi .v.amb { color:var(--orange); } .gi .v.red { color:var(--red); } .gi .v.grn { color:var(--green); }
 
 /* recon — secções que preenchem todo o espaço vertical */
-.recon { flex:1; min-height:0; display:flex; flex-direction:column; gap:14px; overflow:hidden; padding:20px 24px; }
+.recon { flex:1; min-height:0; display:flex; flex-direction:column;
+  gap:clamp(8px, 1vw, 14px); overflow:hidden;
+  padding:clamp(10px, 1.2vw, 20px) clamp(12px, 1.4vw, 24px); }
 .rsec { display:flex; flex-direction:column; gap:9px; min-height:0; }
 .rsec-grow { flex:1; }                 /* PRÓXIMAS cresce e ocupa o resto */
 .rs { font-size:13px; font-weight:700; letter-spacing:.08em; color:var(--txt2); display:flex; align-items:center; gap:10px; flex-shrink:0; }
@@ -400,8 +411,9 @@ const CSS_GLASS = `
 .rchip b { color:#cfd3dc; font-weight:600; margin-left:5px; }
 
 /* concluídas */
-.donec { flex:1; min-height:0; display:grid; grid-template-columns:repeat(auto-fit, minmax(360px, 1fr));
-  grid-auto-rows:minmax(0, 1fr); gap:14px; overflow:hidden; }
+.donec { flex:1; min-height:0; display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(clamp(240px, 20vw, 360px), 1fr));
+  grid-auto-rows:minmax(0, 1fr); gap:clamp(8px, 1vw, 14px); overflow:hidden; }
 /* Card concluída — tema azul claro, NS protagonista, tipo + tarefas feitas */
 .dc { padding:16px 20px; display:flex; flex-direction:column; gap:10px; overflow:hidden;
   border:1px solid rgba(125,211,252,.28); position:relative; }

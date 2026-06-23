@@ -195,8 +195,8 @@ const CSS_GLASS = `
 /* Painel "Hoje na oficina" usa proporção do viewport — em ecrãs pequenos
    (Chromecast 1280×720) não come metade da tela. */
 .andamento { flex:1; min-height:0; display:grid;
-  grid-template-columns:clamp(220px, 18vw, 340px) 1fr; gap:clamp(6px, 0.8vw, 14px); }
-.ringspanel { padding:clamp(10px, 1.1vw, 18px) clamp(12px, 1.2vw, 20px); display:flex; flex-direction:column; gap:clamp(6px, 0.7vw, 12px); }
+  grid-template-columns:clamp(220px, 18vw, 340px) 1fr; gap:clamp(6px, 0.8vw, 14px); overflow:hidden; min-height:0; }
+.ringspanel { padding:clamp(10px, 1.1vw, 18px) clamp(12px, 1.2vw, 20px); display:flex; flex-direction:column; gap:clamp(6px, 0.7vw, 12px); overflow:hidden; min-width:0; }
 /* Cabeçalho com logo mascote */
 .rhead { display:flex; align-items:center; gap:10px; padding-bottom:clamp(8px,0.8vh,14px); border-bottom:1px solid var(--stroke); }
 .rlogo { width:clamp(42px,4.5vw,60px); height:clamp(42px,4.5vw,60px); flex:none; border-radius:14px; overflow:hidden; position:relative;
@@ -207,21 +207,22 @@ const CSS_GLASS = `
   mix-blend-mode:multiply; filter:brightness(1.45) contrast(1.15) drop-shadow(0 0 6px rgba(255,69,58,0.4)); }
 .ringspanel .rt { font-family:'Orbitron'; font-size:clamp(13px,1.3vw,17px); font-weight:800; letter-spacing:.06em; line-height:1.1; }
 .ringspanel .rts { font-size:11px; font-weight:600; color:var(--txt3); letter-spacing:.14em; margin-top:3px; }
-.ringspanel .rmid { flex:1; display:flex; align-items:center; justify-content:center; gap:clamp(12px,1.5vw,24px); }
-.ringwrap { width:clamp(90px, 9vw, 160px); height:clamp(90px, 9vw, 160px); position:relative; flex:none; }
+.ringspanel .rmid { flex:1; display:flex; align-items:center; justify-content:center; gap:clamp(8px,1.2vw,20px); overflow:hidden; min-width:0; min-height:0; }
+.ringwrap { width:clamp(90px, 9vw, 160px); height:clamp(90px, 9vw, 160px); position:relative; flex:none; overflow:hidden; }
+.ringwrap svg { width:100%; height:100%; }
 .ringwrap svg { transform:rotate(-90deg); }
-.rleg { display:flex; flex-direction:column; gap:clamp(8px,1vh,16px); }
-.lg { display:flex; align-items:center; gap:11px; }
+.rleg { display:flex; flex-direction:column; gap:clamp(6px,0.8vh,14px); min-width:0; overflow:hidden; }
+.lg { display:flex; align-items:center; gap:8px; min-width:0; overflow:hidden; }
 .lg .dot { width:13px; height:13px; border-radius:50%; box-shadow:0 0 10px currentColor; flex:none; }
-.lg b { display:block; font-size:clamp(16px,1.6vw,22px); font-weight:800; line-height:1; font-variant-numeric:tabular-nums; }
-.lg span { font-size:clamp(10px,0.9vw,12px); color:var(--txt2); font-weight:500; }
+.lg b { display:block; font-size:clamp(14px,1.5vw,20px); font-weight:800; line-height:1; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.lg span { font-size:clamp(9px,0.85vw,11px); color:var(--txt2); font-weight:500; white-space:nowrap; }
 /* Bloco KPIs extra — 4 colunas */
-.rkpis { display:grid; grid-template-columns:repeat(4,1fr); gap:clamp(5px,0.6vw,10px); padding-top:clamp(8px,0.8vh,14px);
-  border-top:1px solid var(--stroke); }
-.rkpis > div { display:flex; flex-direction:column; gap:3px; padding:10px 8px; border-radius:12px;
-  background:rgba(255,255,255,.04); text-align:center; }
-.rkpis b { font-family:'Orbitron'; font-size:clamp(14px,1.4vw,20px); font-weight:800; line-height:1; color:var(--txt);
-  font-variant-numeric:tabular-nums; }
+.rkpis { display:grid; grid-template-columns:repeat(4,1fr); gap:clamp(4px,0.5vw,8px); padding-top:clamp(6px,0.7vh,12px);
+  border-top:1px solid var(--stroke); min-width:0; overflow:hidden; }
+.rkpis > div { display:flex; flex-direction:column; gap:3px; padding:clamp(6px,0.7vw,10px) clamp(4px,0.5vw,8px); border-radius:12px;
+  background:rgba(255,255,255,.04); text-align:center; overflow:hidden; min-width:0; }
+.rkpis b { font-family:'Orbitron'; font-size:clamp(12px,1.2vw,18px); font-weight:800; line-height:1; color:var(--txt);
+  font-variant-numeric:tabular-nums; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .rkpis b i { font-style:normal; font-size:13px; color:var(--txt2); margin-left:1px; }
 .rkpis span { font-size:9.5px; font-weight:600; color:var(--txt3); letter-spacing:.08em; text-transform:uppercase; }
 /* Colunas adaptativas: cada card nunca fica mais estreito que 330px; com poucos
@@ -592,7 +593,7 @@ function SlideAndamento({ andamento, conHoje, totalCon, avgH, machines, standby,
         </div>
         <div className="rmid">
           <div className="ringwrap">
-            <svg width="200" height="200" viewBox="0 0 200 200">
+            <svg width="100%" height="100%" viewBox="0 0 200 200" style={{overflow:"visible"}}>
               {rings.map(({ r, c, p }, i) => {
                 const C = 2 * Math.PI * r;
                 return (

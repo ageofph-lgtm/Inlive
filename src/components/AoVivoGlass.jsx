@@ -1430,7 +1430,7 @@ export default function AoVivoGlass({
 
   return (
     <div className="glass-root" data-theme={theme}>
-      <style>{theme === 'red-light' ? CSS_RED_LIGHT : theme === 'stark-light' ? CSS_STARK : CSS_GLASS}</style>
+      <style>{theme === 'stark-light' ? CSS_STARK : CSS_GLASS}</style>
       <div id="glass-screen">
         <div className="mesh">
           <div className="blob b1" /><div className="blob b2" />

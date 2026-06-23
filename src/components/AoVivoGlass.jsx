@@ -116,10 +116,10 @@ const CSS_GLASS = `
 
 .mesh { position:absolute; inset:-15%; z-index:0; filter:blur(8px); }
 .blob { position:absolute; border-radius:50%; mix-blend-mode:screen; opacity:.5; animation:gdrift 28s ease-in-out infinite; }
-.b1 { width:760px; height:760px; left:-5%; top:-12%; background:radial-gradient(circle,#5B3FD6,transparent 62%); }
-.b2 { width:720px; height:720px; right:-7%; top:4%; background:radial-gradient(circle,#0A84FF,transparent 62%); animation-delay:-7s; }
-.b3 { width:680px; height:680px; left:26%; bottom:-18%; background:radial-gradient(circle,#26B6A0,transparent 62%); animation-delay:-13s; }
-.b4 { width:520px; height:520px; right:16%; bottom:-12%; background:radial-gradient(circle,#FF6482,transparent 64%); animation-delay:-19s; opacity:.36; }
+.b1 { width:clamp(400px,40vw,700px); height:clamp(400px,40vw,700px); left:-5%; top:-12%; background:radial-gradient(circle,#5B3FD6,transparent 62%); }
+.b2 { width:clamp(380px,38vw,660px); height:clamp(380px,38vw,660px); right:-7%; top:4%; background:radial-gradient(circle,#0A84FF,transparent 62%); animation-delay:-7s; }
+.b3 { width:clamp(360px,36vw,620px); height:clamp(360px,36vw,620px); left:26%; bottom:-18%; background:radial-gradient(circle,#26B6A0,transparent 62%); animation-delay:-13s; }
+.b4 { width:clamp(280px,28vw,480px); height:clamp(280px,28vw,480px); right:16%; bottom:-12%; background:radial-gradient(circle,#FF6482,transparent 64%); animation-delay:-19s; opacity:.28; }
 @keyframes gdrift { 0%,100% { transform:translate(0,0) scale(1); } 33% { transform:translate(60px,40px) scale(1.08); } 66% { transform:translate(-40px,30px) scale(.96); } }
 
 .scan { position:absolute; inset:0; z-index:1; pointer-events:none; opacity:.5;
@@ -133,7 +133,7 @@ const CSS_GLASS = `
   background:linear-gradient(150deg,rgba(255,255,255,.14),transparent 26%); }
 
 .wrap { position:relative; z-index:3; height:100%; display:flex; flex-direction:column;
-  padding:clamp(10px, 1.4vw, 22px) clamp(12px, 1.6vw, 28px) clamp(8px, 1vw, 16px); gap:clamp(8px, 1vw, 16px); }
+  padding:clamp(8px, 1vw, 18px) clamp(10px, 1.2vw, 22px) clamp(6px, 0.8vw, 14px); gap:clamp(6px, 0.7vw, 14px); }
 
 /* chrome */
 .chrome { display:flex; align-items:center; gap:clamp(8px, 1vw, 16px); }
@@ -166,9 +166,9 @@ const CSS_GLASS = `
 
 /* KPIs */
 .kpis { display:grid; grid-template-columns:repeat(11,1fr); gap:clamp(4px, 0.5vw, 9px); }
-.kpi { padding:clamp(6px, 0.7vw, 11px) clamp(4px, 0.5vw, 8px); text-align:center;
-  border-radius:clamp(10px, 1vw, 18px); position:relative; overflow:hidden; }
-.kpi .v { font-family:'Orbitron'; font-weight:800; font-size:clamp(14px, 1.4vw, 23px);
+.kpi { padding:clamp(5px, 0.6vw, 10px) clamp(3px, 0.4vw, 7px); text-align:center;
+  border-radius:clamp(8px, 0.9vw, 16px); position:relative; overflow:hidden; }
+.kpi .v { font-family:'Orbitron'; font-weight:800; font-size:clamp(12px, 1.2vw, 20px);
   line-height:1; font-variant-numeric:tabular-nums; }
 .kpi .k { font-size:clamp(7px, 0.6vw, 9px); font-weight:600; letter-spacing:.1em;
   color:var(--txt2); margin-top:clamp(2px, 0.3vw, 5px); }
@@ -184,10 +184,10 @@ const CSS_GLASS = `
 .slide { position:absolute; inset:0; opacity:0; visibility:hidden; transform:scale(.99);
   transition:opacity .45s ease,transform .45s ease; display:flex; flex-direction:column; }
 .slide.on { opacity:1; visibility:visible; transform:none; }
-.stitle { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+.stitle { display:flex; align-items:center; gap:12px; margin-bottom:clamp(6px,0.7vh,12px); }
 .stitle .g { width:12px; height:12px; background:var(--ac,var(--green));
   clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%); box-shadow:0 0 10px var(--ac,var(--green)); }
-.stitle h2 { font-family:'Orbitron'; font-weight:800; letter-spacing:.1em; font-size:22px; }
+.stitle h2 { font-family:'Orbitron'; font-weight:800; letter-spacing:.1em; font-size:clamp(15px,1.6vw,22px); }
 .stitle .ct { margin-left:auto; font-family:'Orbitron'; font-weight:700; font-size:13px; color:var(--ac,var(--green));
   padding:4px 11px; border-radius:100px; background:rgba(255,255,255,.06); border:1px solid var(--stroke); }
 
@@ -195,52 +195,61 @@ const CSS_GLASS = `
 /* Painel "Hoje na oficina" usa proporção do viewport — em ecrãs pequenos
    (Chromecast 1280×720) não come metade da tela. */
 .andamento { flex:1; min-height:0; display:grid;
-  grid-template-columns:clamp(260px, 22vw, 430px) 1fr; gap:clamp(8px, 1vw, 16px); }
-.ringspanel { padding:clamp(12px, 1.4vw, 24px) clamp(14px, 1.5vw, 26px); display:flex; flex-direction:column; gap:clamp(8px, 1vw, 16px); }
+  grid-template-columns:clamp(200px, 17vw, 320px) 1fr; gap:clamp(6px, 0.8vw, 14px); isolation:isolate; }
+.ringspanel { padding:clamp(10px, 1.1vw, 18px) clamp(12px, 1.2vw, 20px); display:flex; flex-direction:column; gap:clamp(6px, 0.7vw, 12px); min-width:0; }
 /* Cabeçalho com logo mascote */
-.rhead { display:flex; align-items:center; gap:14px; padding-bottom:14px; border-bottom:1px solid var(--stroke); }
-.rlogo { width:60px; height:60px; flex:none; border-radius:14px; overflow:hidden; position:relative;
+.rhead { display:flex; align-items:center; gap:10px; padding-bottom:clamp(8px,0.8vh,14px); border-bottom:1px solid var(--stroke); }
+.rlogo { width:clamp(42px,4.5vw,60px); height:clamp(42px,4.5vw,60px); flex:none; border-radius:14px; overflow:hidden; position:relative;
   background:linear-gradient(160deg,rgba(255,107,107,0.20),rgba(255,69,58,0.10));
   border:1px solid rgba(255,107,107,0.35);
   box-shadow:0 8px 22px -8px var(--red), inset 0 1px 0 rgba(255,255,255,.2); }
 .rlogo img { width:100%; height:100%; object-fit:contain;
   mix-blend-mode:multiply; filter:brightness(1.45) contrast(1.15) drop-shadow(0 0 6px rgba(255,69,58,0.4)); }
-.ringspanel .rt { font-family:'Orbitron'; font-size:17px; font-weight:800; letter-spacing:.06em; line-height:1.1; }
+.ringspanel .rt { font-family:'Orbitron'; font-size:clamp(13px,1.3vw,17px); font-weight:800; letter-spacing:.06em; line-height:1.1; }
 .ringspanel .rts { font-size:11px; font-weight:600; color:var(--txt3); letter-spacing:.14em; margin-top:3px; }
-.ringspanel .rmid { flex:1; display:flex; align-items:center; justify-content:center; gap:24px; }
-.ringwrap { width:clamp(120px, 12vw, 200px); height:clamp(120px, 12vw, 200px); position:relative; flex:none; }
+.ringspanel .rmid { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:clamp(8px,1vw,16px); overflow:visible; min-width:0; min-height:0; }
+.ringwrap { width:clamp(100px, 10vw, 170px); height:clamp(100px, 10vw, 170px); position:relative; flex:none; padding:8px; box-sizing:content-box; }
+.ringwrap svg { width:100%; height:100%; overflow:visible; }
 .ringwrap svg { transform:rotate(-90deg); }
-.rleg { display:flex; flex-direction:column; gap:16px; }
-.lg { display:flex; align-items:center; gap:11px; }
-.lg .dot { width:13px; height:13px; border-radius:50%; box-shadow:0 0 10px currentColor; flex:none; }
-.lg b { display:block; font-size:22px; font-weight:800; line-height:1; font-variant-numeric:tabular-nums; }
-.lg span { font-size:12px; color:var(--txt2); font-weight:500; }
+.rleg { display:flex; flex-direction:row; flex-wrap:wrap; justify-content:center; gap:clamp(8px,1.2vw,18px); min-width:0; }
+.lg { display:flex; flex-direction:column; align-items:center; gap:3px; min-width:0; }
+.lg .dot { width:8px; height:8px; border-radius:50%; box-shadow:0 0 8px currentColor; flex:none; margin-bottom:2px; }
+.lg b { display:block; font-size:clamp(16px,1.6vw,22px); font-weight:800; line-height:1; font-variant-numeric:tabular-nums; white-space:nowrap; text-align:center; }
+.lg span { font-size:clamp(9px,0.8vw,10px); color:var(--txt2); font-weight:600; text-align:center; letter-spacing:.04em; text-transform:uppercase; }
 /* Bloco KPIs extra — 4 colunas */
-.rkpis { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; padding-top:14px;
-  border-top:1px solid var(--stroke); }
-.rkpis > div { display:flex; flex-direction:column; gap:3px; padding:10px 8px; border-radius:12px;
-  background:rgba(255,255,255,.04); text-align:center; }
-.rkpis b { font-family:'Orbitron'; font-size:20px; font-weight:800; line-height:1; color:var(--txt);
-  font-variant-numeric:tabular-nums; }
-.rkpis b i { font-style:normal; font-size:13px; color:var(--txt2); margin-left:1px; }
-.rkpis span { font-size:9.5px; font-weight:600; color:var(--txt3); letter-spacing:.08em; text-transform:uppercase; }
+.rkpis { display:grid; grid-template-columns:repeat(2,1fr); gap:clamp(4px,0.5vw,8px); padding-top:clamp(6px,0.7vh,12px);
+  border-top:1px solid var(--stroke); min-width:0; }
+.rkpis > div { display:flex; flex-direction:column; gap:2px; padding:clamp(5px,0.6vw,9px) clamp(4px,0.5vw,8px); border-radius:10px;
+  background:rgba(255,255,255,.04); text-align:center; min-width:0; }
+.rkpis b { font-family:'Orbitron'; font-size:clamp(13px,1.3vw,19px); font-weight:800; line-height:1;
+  font-variant-numeric:tabular-nums; white-space:nowrap; }
+.rkpis b i { font-style:normal; font-size:clamp(10px,1vw,13px); color:var(--txt2); margin-left:1px; }
+.rkpis span { font-size:clamp(8px,0.7vw,9.5px); font-weight:600; color:var(--txt3); letter-spacing:.06em; text-transform:uppercase; line-height:1.2; word-break:break-word; }
 /* Colunas adaptativas: cada card nunca fica mais estreito que 330px; com poucos
    cards alargam, com muitos quebram em mais colunas. Garante espaço p/ o NS. */
 /* Cards: minimo reduzido para caber 3 colunas mesmo em viewports menores */
-.cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(clamp(220px, 18vw, 330px), 1fr));
-  grid-auto-rows:minmax(0, 1fr); gap:clamp(8px, 1vw, 14px); min-height:0; align-content:stretch; }
+.cards { display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(clamp(280px, 24vw, 420px), 1fr));
+  grid-auto-rows:auto;
+  gap:clamp(6px, 0.8vw, 12px);
+  align-content:start;
+  overflow-y:auto; overflow-x:hidden;
+  min-height:0; height:100%; }
 
 /* CARDS — denso, sem espaço morto, com timer regressivo destacado */
 /* Card: blocos distribuídos (space-between) para preencher a altura sem
    void. NS/modelo/timer ficam agrupados em .mid e nunca encolhem/cortam. */
-.card { padding:18px 20px; display:flex; flex-direction:column; min-height:0;
-  position:relative; overflow:hidden; border-radius:24px; --st:var(--green);
-  gap:12px; justify-content:space-between; }
+.card { padding:clamp(10px,1.2vh,18px) clamp(12px,1.2vw,20px);
+  display:flex; flex-direction:column;
+  min-height:clamp(160px,22vh,280px);
+  position:relative; overflow:hidden;
+  border-radius:clamp(14px,1.4vw,24px); --st:var(--green);
+  gap:clamp(6px,0.8vh,12px); justify-content:space-between; }
 /* Faixa de tipo (NTS/RECON/ACP) no topo do card */
 .card .typestrip { position:absolute; top:0; left:0; right:0; height:4px;
   background:var(--type,var(--teal)); box-shadow:0 0 12px var(--type,var(--teal)); }
-.card .mid { flex:none; display:flex; flex-direction:column; gap:12px; }
-.card .top { display:flex; align-items:flex-start; gap:8px; flex:none; }
+.card .mid { flex:none; display:flex; flex-direction:column; gap:clamp(5px,0.6vh,12px); }
+.card .top { display:flex; align-items:flex-start; gap:8px; flex:none; flex-wrap:wrap; }
 .badges { display:flex; gap:6px; flex-wrap:wrap; }
 .bdg { font-size:9.5px; font-weight:700; padding:3px 8px; border-radius:100px; letter-spacing:.04em; }
 .bdg.type { font-size:11px; font-weight:800; padding:4px 11px; letter-spacing:.1em;
@@ -256,7 +265,7 @@ const CSS_GLASS = `
   animation:bdgPulse 1.4s ease-in-out infinite; }
 @keyframes bdgPulse { 50% { opacity:.5; } }
 /* Anel de progresso (continua a usar conic-gradient) */
-.cring { margin-left:auto; width:84px; height:84px; border-radius:50%; flex:none; position:relative;
+.cring { margin-left:auto; width:clamp(52px,5.5vw,84px); height:clamp(52px,5.5vw,84px); border-radius:50%; flex:none; position:relative;
   background:conic-gradient(var(--st) calc(var(--p,0)*1%),rgba(255,255,255,.08) 0); }
 .cring::before { content:''; position:absolute; inset:5px; border-radius:50%;
   background:rgba(8,9,14,.78); backdrop-filter:blur(6px); }
@@ -268,20 +277,20 @@ const CSS_GLASS = `
 .card .central { display:flex; flex-direction:column; gap:4px; }
 /* NS nunca corta: fonte vem inline (adaptativa) e o texto pode quebrar */
 .card .ns { font-family:'Orbitron'; font-weight:800; letter-spacing:.02em; line-height:1.04;
-  word-break:break-word; overflow-wrap:anywhere; }
+  word-break:break-word; overflow-wrap:anywhere; flex-shrink:0; }
 .card .ns small { font-size:.55em; color:var(--txt2); font-weight:700; }
-.card .mo { font-size:14px; color:var(--txt2); font-weight:500;
+.card .mo { font-size:clamp(11px,1.1vw,14px); color:var(--txt2); font-weight:500;
   word-break:break-word; overflow-wrap:anywhere; line-height:1.2; }
 .card .tech { font-size:11px; color:var(--txt3); font-weight:600; letter-spacing:.05em;
   display:flex; align-items:center; gap:6px; }
 .card .tech b { color:var(--teal); font-weight:700; }
 /* Timer regressivo — protagonista */
-.card .timer { display:flex; align-items:baseline; justify-content:space-between; gap:10px;
-  padding:10px 12px; border-radius:14px; background:rgba(255,255,255,.04);
+.card .timer { display:flex; align-items:baseline; justify-content:space-between; gap:8px;
+  padding:clamp(6px,0.7vh,10px) clamp(8px,0.9vw,12px); border-radius:12px; background:rgba(255,255,255,.04);
   border:1px solid var(--stroke); }
 .card .timer .lbl { font-size:10px; font-weight:700; color:var(--txt3); letter-spacing:.16em; }
 /* Timer secundário ao NS — fica menor para o NS ser sempre o protagonista */
-.card .timer .val { font-family:'Orbitron'; font-weight:800; font-size:22px; letter-spacing:.04em;
+.card .timer .val { font-family:'Orbitron'; font-weight:800; font-size:clamp(16px,1.8vw,22px); letter-spacing:.04em;
   font-variant-numeric:tabular-nums; color:var(--st);
   text-shadow:0 0 10px var(--st); }
 .card .timer .meta { font-size:11px; color:var(--txt2); font-weight:600; letter-spacing:.06em;
@@ -290,21 +299,22 @@ const CSS_GLASS = `
 /* Lista de tarefas — ELEMENTO FLEXÍVEL: cresce para encher o espaço livre.
    É o único que pode desaparecer (overflow:hidden) quando falta espaço;
    NS/modelo/timer/datas ficam sempre intactos. */
-.card .tasks { flex:0 1 auto; min-height:0; display:flex; flex-direction:column; gap:7px;
+.card .tasks { flex:1; min-height:0; display:flex; flex-direction:column;
+  gap:clamp(3px,0.4vh,6px);
   overflow:hidden; align-content:flex-start; }
 .card .tasklbl { font-size:10px; font-weight:700; letter-spacing:.14em; color:var(--txt3);
   text-transform:uppercase; flex:none; }
-.card .tk { display:flex; align-items:center; gap:8px; flex:none;
-  font-size:13px; font-weight:500; color:#dfe2ea;
-  background:rgba(255,255,255,.05); padding:5px 11px; border-radius:8px;
+.card .tk { display:flex; align-items:center; gap:6px; flex:none;
+  font-size:clamp(11px,1vw,13px); font-weight:500; color:#dfe2ea;
+  background:rgba(255,255,255,.05); padding:clamp(3px,0.4vh,5px) clamp(8px,0.9vw,11px); border-radius:8px;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .card .tk .icon { flex:none; font-size:11px; color:var(--st); }
 .card .tk.done { color:var(--txt2); }
 .card .tk.done .txt { text-decoration:line-through; text-decoration-color:rgba(255,255,255,.3); }
 .card .tk.done .icon { color:var(--green); }
 .card .tk .txt { overflow:hidden; text-overflow:ellipsis; }
-.card .dates { display:flex; gap:14px; font-size:12px; font-weight:600; color:var(--txt2);
-  font-variant-numeric:tabular-nums; padding-top:8px; flex:none;
+.card .dates { display:flex; gap:10px; font-size:clamp(10px,0.9vw,12px); font-weight:600; color:var(--txt2);
+  font-variant-numeric:tabular-nums; padding-top:clamp(5px,0.6vh,8px); flex:none;
   border-top:1px solid var(--stroke); }
 .card .dates b { color:var(--teal); }
 .card .dates .e b { color:var(--green); }
@@ -375,6 +385,15 @@ const CSS_GLASS = `
 .ntc .ntags { display:flex; flex-wrap:wrap; gap:6px; }
 .ntc .ntags .t { font-size:11px; font-weight:500; padding:4px 10px; border-radius:8px; background:rgba(255,255,255,.06); color:#dfe2ea; }
 .ntc .ntags .t.done { background:rgba(52,199,89,.14); color:var(--green); text-decoration:line-through; }
+.ntc .nhead { display:flex; flex-direction:column; gap:4px; }
+.ntc .nhead .nn { font-family:'Orbitron'; font-weight:800; line-height:1.04; word-break:break-word; overflow-wrap:anywhere; }
+.ntc .nhead .nm { font-size:13px; font-weight:500; color:var(--txt2); }
+.ntc .ntm { display:flex; align-items:center; gap:12px; padding:14px; background:rgba(255,69,58,.08); border-radius:12px; border:1px solid rgba(255,69,58,.15); }
+.ntc .ntm svg { flex-shrink:0; }
+.ntc .ntmdata { display:flex; flex-direction:column; gap:2px; }
+.ntc .ntmdata .tl { font-family:'Orbitron'; font-weight:800; font-size:20px; color:var(--red); }
+.ntc .ntmdata .meta { font-size:10px; color:var(--txt2); }
+.ntc .nover { position:absolute; top:12px; right:14px; padding:"3px 8px"; border-radius:100px; background:var(--red); color:#fff; font-size:9px; font-weight:800; letter-spacing:.05em; }
 .ntc .ng { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:auto; }
 .ntc .gi { background:rgba(255,255,255,.05); border-radius:13px; padding:11px 12px; }
 .ntc .gi .k { font-size:10px; color:var(--txt2); font-weight:600; letter-spacing:.04em; }
@@ -383,31 +402,31 @@ const CSS_GLASS = `
 
 /* recon — secções que preenchem todo o espaço vertical */
 .recon { flex:1; min-height:0; display:flex; flex-direction:column;
-  gap:clamp(8px, 1vw, 14px); overflow:hidden;
-  padding:clamp(10px, 1.2vw, 20px) clamp(12px, 1.4vw, 24px); }
-.rsec { display:flex; flex-direction:column; gap:9px; min-height:0; }
-.rsec-grow { flex:1; }                 /* PRÓXIMAS cresce e ocupa o resto */
-.rs { font-size:13px; font-weight:700; letter-spacing:.08em; color:var(--txt2); display:flex; align-items:center; gap:10px; flex-shrink:0; }
-.rs b { color:var(--purple); font-family:'Orbitron'; font-size:15px; }
+  gap:clamp(5px, 0.6vw, 10px); overflow:hidden;
+  padding:clamp(8px, 1vw, 14px) clamp(10px, 1.2vw, 18px); }
+.rsec { display:flex; flex-direction:column; gap:clamp(4px,0.5vh,8px); min-height:0; overflow:hidden; flex-shrink:0; }
+.rsec-grow { flex:1; height:0; overflow:hidden; display:flex; flex-direction:column; gap:clamp(4px,0.5vh,8px); } /* PRÓXIMAS cresce: height:0+flex:1 força containment correcto */
+.rs { font-size:clamp(9px,0.85vw,12px); font-weight:700; letter-spacing:.08em; color:var(--txt2); display:flex; align-items:center; gap:8px; flex-shrink:0; line-height:1; }
+.rs b { color:var(--purple); font-family:'Orbitron'; font-size:clamp(12px,1.1vw,15px); }
 .rs::after { content:''; flex:1; height:1px; background:var(--stroke); }
-.rg { display:grid; gap:11px; }
-.rg-active { grid-auto-rows:minmax(0,1fr); height:clamp(96px, 13vh, 150px); }
-.rg-next { flex:1; grid-auto-rows:minmax(64px, 1fr); min-height:0; }
-.rt2 { padding:12px 16px; border-radius:16px; border-top:3px solid var(--purple); background:rgba(255,255,255,.05);
-  display:flex; flex-direction:column; justify-content:center; gap:6px; min-height:0; }
+.rg { display:grid; gap:clamp(5px,0.6vw,11px); }
+.rg-active { grid-auto-rows:minmax(0,1fr); height:clamp(84px, 11vh, 130px); overflow:hidden; flex-shrink:0; }
+.rg-next { flex:1; height:0; min-height:0; grid-auto-rows:minmax(clamp(52px,7vh,76px), auto); overflow-y:auto; overflow-x:hidden; align-content:start; }
+.rt2 { padding:clamp(8px,0.9vh,12px) clamp(10px,1vw,16px); border-radius:14px; border-top:3px solid var(--purple); background:rgba(255,255,255,.05);
+  display:flex; flex-direction:column; justify-content:center; gap:clamp(3px,0.4vh,6px); min-height:0; overflow:hidden; }
 .rt2.run { border-top-color:var(--green); }
 .rt2.paus { border-top-color:var(--orange); }
 .rt2 .t { font-size:11px; font-weight:800; color:var(--purple); letter-spacing:.1em; flex:none; }
 .rt2.run .t { color:var(--green); } .rt2.paus .t { color:var(--orange); }
 /* NS — protagonista, numa só linha; fonte adaptativa vem inline */
 .rt2 .n { font-family:'Orbitron'; font-weight:800; line-height:1; color:#fff;
-  white-space:nowrap; flex:none; }
-.rt2 .m { font-size:13px; color:var(--txt2); display:flex; justify-content:space-between; gap:8px; align-items:baseline; flex:none; }
+  white-space:nowrap; flex:none; overflow:hidden; text-overflow:ellipsis; }
+.rt2 .m { font-size:clamp(10px,0.9vw,13px); color:var(--txt2); display:flex; justify-content:space-between; gap:6px; align-items:baseline; flex:none; }
 .rt2 .m span:first-child { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .rt2 .m .h { color:var(--orange); font-variant-numeric:tabular-nums; font-weight:700; flex:none; }
-.rdone { display:flex; gap:9px; flex-wrap:wrap; }
-.rchip { padding:8px 13px; border-radius:13px; background:rgba(52,199,89,.1); border:1px solid rgba(52,199,89,.26);
-  font-size:11.5px; font-weight:600; color:var(--green); }
+.rdone { display:flex; gap:5px; flex-wrap:wrap; max-height:clamp(58px,8vh,96px); overflow:hidden; align-content:flex-start; flex-shrink:0; }
+.rchip { padding:5px 10px; border-radius:10px; background:rgba(52,199,89,.1); border:1px solid rgba(52,199,89,.26);
+  font-size:clamp(10px,0.9vw,11.5px); font-weight:600; color:var(--green); white-space:nowrap; }
 .rchip b { color:#cfd3dc; font-weight:600; margin-left:5px; }
 
 /* concluídas */
@@ -453,6 +472,8 @@ const CSS_GLASS = `
 
 @media (prefers-reduced-motion:reduce) { .glass-root *, .glass-root *::before, .glass-root *::after { animation:none!important; transition:none!important; } }
 `;
+
+// ── CSS tema Stark Light (Iron Apple — claro, dourado, arc reactor) ──────────
 
 // ── Card de máquina (usado em ANDAMENTO e PRIORITÁRIAS) ─────────────────────
 // Layout denso: tipo (NTS/RECON/ACP) em destaque, NS gigante, timer REGRESSIVO,
@@ -514,7 +535,7 @@ function MachineCard({ m }) {
       {/* GRUPO CENTRAL: NS + modelo + timer (mantêm-se juntos e intactos) */}
       <div className="mid">
         <div className="central">
-          <div className="ns" style={{ fontSize: nsFontSize(ns.main, 40, 24) + "px" }}>{ns.main}{ns.sub && <small> · {ns.sub}</small>}</div>
+          <div className="ns" style={{ fontSize: nsFontSize(ns.main, 36, 22) + "px" }}>{ns.main}{ns.sub && <small> · {ns.sub}</small>}</div>
           <div className="mo">{m.modelo || "—"}</div>
         </div>
         {meta > 0 && (
@@ -562,18 +583,19 @@ function MachineCard({ m }) {
 }
 
 // ── Slide: EM ANDAMENTO ─────────────────────────────────────────────────────
-function SlideAndamento({ andamento, conHoje, totalCon, avgH, machines, standby, prioritarias }) {
+function SlideAndamento({ andamento, conHoje, conSemana, totalCon, avgH, machines, standby, prioritarias }) {
   // Stats reais (sem inventar campos)
   const emCurso      = andamento.length;
   const concHoje     = conHoje.length;
+  const concSemana   = (conSemana || []).length;
   const emPausa      = standby.length;
   const emPrio       = prioritarias.length;
   const emAndOverdue = andamento.filter(isOverdue).length;
   const noPrazoPct   = emCurso > 0 ? Math.round((1 - emAndOverdue / emCurso) * 100) : 100;
   // Anéis: 3 métricas reais
-  const ringMax = Math.max(emCurso + concHoje, 1);
+  const ringMax = Math.max(emCurso + concSemana, 1);
   const rings = [
-    { r: 86, c: "var(--sky)",    p: concHoje / ringMax },
+    { r: 86, c: "var(--sky)",    p: concSemana / Math.max(concSemana + emCurso, 1) },
     { r: 64, c: "var(--dgreen)", p: noPrazoPct / 100 },
     { r: 42, c: "var(--orange)", p: Math.min(1, emCurso / 8) },
   ];
@@ -592,15 +614,15 @@ function SlideAndamento({ andamento, conHoje, totalCon, avgH, machines, standby,
         </div>
         <div className="rmid">
           <div className="ringwrap">
-            <svg width="200" height="200" viewBox="0 0 200 200">
+            <svg width="100%" height="100%" viewBox="0 0 200 200" style={{overflow:"visible"}}>
               {rings.map(({ r, c, p }, i) => {
                 const C = 2 * Math.PI * r;
                 return (
                   <g key={i}>
-                    <circle cx="100" cy="100" r={r} fill="none" stroke="rgba(255,255,255,.09)" strokeWidth="16" />
-                    <circle cx="100" cy="100" r={r} fill="none" stroke={c} strokeWidth="16" strokeLinecap="round"
+                    <circle cx="100" cy="100" r={r} fill="none" stroke="rgba(255,255,255,.07)" strokeWidth="14" />
+                    <circle cx="100" cy="100" r={r} fill="none" stroke={c} strokeWidth="14" strokeLinecap="round"
                       strokeDasharray={C} strokeDashoffset={C * (1 - p)}
-                      style={{ filter: `drop-shadow(0 0 6px ${c})` }} />
+                      style={{ filter: `drop-shadow(0 0 8px ${c}) drop-shadow(0 0 16px ${c})` }} />
                   </g>
                 );
               })}
@@ -608,7 +630,7 @@ function SlideAndamento({ andamento, conHoje, totalCon, avgH, machines, standby,
           </div>
           <div className="rleg">
             <div className="lg" style={{ color: "var(--sky)" }}>
-              <span className="dot" /><div><b>{concHoje}</b><span>Concluídas hoje</span></div>
+              <span className="dot" /><div><b>{concSemana}</b><span>Esta semana</span></div>
             </div>
             <div className="lg" style={{ color: "var(--dgreen)" }}>
               <span className="dot" /><div><b>{noPrazoPct}%</b><span>No prazo</span></div>
@@ -821,17 +843,30 @@ function NTSCard({ m }) {
 
   return (
     <div className="ntc glass">
-      <div>
+      {/* Topo — Série + Modelo */}
+      <div className="nhead">
         <div className="nn" style={{ fontSize: nsFontSize(ns.main, 48, 30) + "px" }}>{ns.main}{ns.sub && <small> · {ns.sub}</small>}</div>
         <div className="nm">{m.modelo || "—"}</div>
       </div>
+      
+      {/* Observações — se existem */}
       {m.observacoes && <div className="nwhy">{m.observacoes}</div>}
+      
+      {/* Timer + Meta */}
       <div className="ntm">
-        <div className="tl">{fmtHMS(elapsed)}</div>
-        <div className="meta">
-          {meta > 0 ? `de ${Math.round(meta/3600)}h estimadas` : "sem estimativa"}
+        <svg width="48" height="48" viewBox="0 0 48 48" style={{flexShrink:0}}>
+          <circle cx="24" cy="24" r="22" fill="none" stroke="rgba(255,69,58,.1)" strokeWidth="2"/>
+          <circle cx="24" cy="24" r="22" fill="none" stroke="var(--red)" strokeWidth="2" 
+            strokeDasharray={`${(elapsed/meta)*138.2} 138.2`} strokeLinecap="round" style={{transform:"rotate(-90deg)", transformOrigin:"24px 24px"}}/>
+          <text x="24" y="26" textAnchor="middle" fill="var(--red)" fontSize="10" fontWeight="800" fontFamily="Orbitron">⚛</text>
+        </svg>
+        <div className="ntmdata">
+          <div className="tl">{fmtHMS(elapsed)}</div>
+          <div className="meta">{meta > 0 ? `de ${Math.round(meta/3600)}h` : "—"}</div>
         </div>
       </div>
+      
+      {/* Tarefas */}
       {tasks.length > 0 && (
         <div className="ntags">
           {tasks.slice(0, 8).map((t, i) => (
@@ -839,6 +874,8 @@ function NTSCard({ m }) {
           ))}
         </div>
       )}
+      
+      {/* Grid KPIs */}
       <div className="ng">
         <div className="gi">
           <div className="k">EM OFICINA</div>
@@ -857,7 +894,8 @@ function NTSCard({ m }) {
           <div className={`v ${tasks.length > 0 && done === tasks.length ? "grn" : ""}`}>{done}/{tasks.length || 0}</div>
         </div>
       </div>
-      {over && <div style={{ position: "absolute", top: 12, right: 14, padding: "3px 8px", borderRadius: 100, background: "var(--red)", color: "#fff", fontSize: 10, fontWeight: 800, letterSpacing: ".05em" }}>ATRASADA</div>}
+      
+      {over && <div className="nover">ATRASADA</div>}
     </div>
   );
 }
@@ -1039,7 +1077,7 @@ export default function AoVivoGlass({
   };
 
   return (
-    <div className="glass-root">
+    <div className="glass-root" data-theme={theme}>
       <style>{CSS_GLASS}</style>
       <div id="glass-screen">
         <div className="mesh">
@@ -1084,7 +1122,7 @@ export default function AoVivoGlass({
           <div className="stage">
             <section className={`slide${slideId === "andamento" ? " on" : ""}`} style={{ "--ac": "var(--green)" }}><div className="watermark" />
               <div className="stitle"><span className="g" /><h2>EM ANDAMENTO</h2><span className="ct">×{pad2(andamento.length)}</span></div>
-              <SlideAndamento andamento={andamento} conHoje={conHoje} totalCon={totalCon} avgH={avgH} machines={machines} standby={standby} prioritarias={prioritarias} />
+              <SlideAndamento andamento={andamento} conHoje={conHoje} conSemana={conSemana} totalCon={totalCon} avgH={avgH} machines={machines} standby={standby} prioritarias={prioritarias} />
             </section>
 
             <section className={`slide${slideId === "standby" ? " on" : ""}`} style={{ "--ac": "var(--orange)" }}><div className="watermark" />

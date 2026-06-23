@@ -1789,7 +1789,7 @@ export default function AoVivo(){
   const dark = theme === "dark";
   const cycleTheme = () => {
     const order = ["dark","light","glass","stark-light"];
-    const next = order[(order.indexOf(theme)+1)%3];
+    const next = order[(order.indexOf(theme)+1)%order.length];
     sTheme(next);
     try{localStorage.setItem("theme",next);}catch{ /* ignore */ }
   };

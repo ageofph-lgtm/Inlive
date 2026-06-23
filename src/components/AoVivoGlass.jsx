@@ -227,20 +227,20 @@ const CSS_GLASS = `
 /* Colunas adaptativas: cada card nunca fica mais estreito que 330px; com poucos
    cards alargam, com muitos quebram em mais colunas. Garante espaço p/ o NS. */
 /* Cards: minimo reduzido para caber 3 colunas mesmo em viewports menores */
-.cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(clamp(220px, 18vw, 330px), 1fr));
-  grid-auto-rows:minmax(0, 1fr); gap:clamp(8px, 1vw, 14px); min-height:0; align-content:stretch; }
+.cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(clamp(260px, 22vw, 380px), 1fr));
+  grid-auto-rows:minmax(0, 1fr); gap:clamp(6px, 0.8vw, 12px); min-height:0; align-content:stretch; }
 
 /* CARDS — denso, sem espaço morto, com timer regressivo destacado */
 /* Card: blocos distribuídos (space-between) para preencher a altura sem
    void. NS/modelo/timer ficam agrupados em .mid e nunca encolhem/cortam. */
-.card { padding:18px 20px; display:flex; flex-direction:column; min-height:0;
-  position:relative; overflow:hidden; border-radius:24px; --st:var(--green);
-  gap:12px; justify-content:space-between; }
+.card { padding:clamp(10px,1.1vh,18px) clamp(12px,1.2vw,20px); display:flex; flex-direction:column; min-height:0;
+  position:relative; overflow:hidden; border-radius:clamp(14px,1.4vw,24px); --st:var(--green);
+  gap:clamp(6px,0.7vh,12px); justify-content:space-between; }
 /* Faixa de tipo (NTS/RECON/ACP) no topo do card */
 .card .typestrip { position:absolute; top:0; left:0; right:0; height:4px;
   background:var(--type,var(--teal)); box-shadow:0 0 12px var(--type,var(--teal)); }
-.card .mid { flex:none; display:flex; flex-direction:column; gap:12px; }
-.card .top { display:flex; align-items:flex-start; gap:8px; flex:none; }
+.card .mid { flex:none; display:flex; flex-direction:column; gap:clamp(5px,0.6vh,12px); }
+.card .top { display:flex; align-items:flex-start; gap:8px; flex:none; flex-wrap:wrap; }
 .badges { display:flex; gap:6px; flex-wrap:wrap; }
 .bdg { font-size:9.5px; font-weight:700; padding:3px 8px; border-radius:100px; letter-spacing:.04em; }
 .bdg.type { font-size:11px; font-weight:800; padding:4px 11px; letter-spacing:.1em;
@@ -256,7 +256,7 @@ const CSS_GLASS = `
   animation:bdgPulse 1.4s ease-in-out infinite; }
 @keyframes bdgPulse { 50% { opacity:.5; } }
 /* Anel de progresso (continua a usar conic-gradient) */
-.cring { margin-left:auto; width:84px; height:84px; border-radius:50%; flex:none; position:relative;
+.cring { margin-left:auto; width:clamp(52px,5.5vw,84px); height:clamp(52px,5.5vw,84px); border-radius:50%; flex:none; position:relative;
   background:conic-gradient(var(--st) calc(var(--p,0)*1%),rgba(255,255,255,.08) 0); }
 .cring::before { content:''; position:absolute; inset:5px; border-radius:50%;
   background:rgba(8,9,14,.78); backdrop-filter:blur(6px); }
@@ -268,9 +268,9 @@ const CSS_GLASS = `
 .card .central { display:flex; flex-direction:column; gap:4px; }
 /* NS nunca corta: fonte vem inline (adaptativa) e o texto pode quebrar */
 .card .ns { font-family:'Orbitron'; font-weight:800; letter-spacing:.02em; line-height:1.04;
-  word-break:break-word; overflow-wrap:anywhere; }
+  word-break:break-word; overflow-wrap:anywhere; flex-shrink:0; }
 .card .ns small { font-size:.55em; color:var(--txt2); font-weight:700; }
-.card .mo { font-size:14px; color:var(--txt2); font-weight:500;
+.card .mo { font-size:clamp(11px,1.1vw,14px); color:var(--txt2); font-weight:500;
   word-break:break-word; overflow-wrap:anywhere; line-height:1.2; }
 .card .tech { font-size:11px; color:var(--txt3); font-weight:600; letter-spacing:.05em;
   display:flex; align-items:center; gap:6px; }
@@ -281,7 +281,7 @@ const CSS_GLASS = `
   border:1px solid var(--stroke); }
 .card .timer .lbl { font-size:10px; font-weight:700; color:var(--txt3); letter-spacing:.16em; }
 /* Timer secundário ao NS — fica menor para o NS ser sempre o protagonista */
-.card .timer .val { font-family:'Orbitron'; font-weight:800; font-size:22px; letter-spacing:.04em;
+.card .timer .val { font-family:'Orbitron'; font-weight:800; font-size:clamp(16px,1.8vw,22px); letter-spacing:.04em;
   font-variant-numeric:tabular-nums; color:var(--st);
   text-shadow:0 0 10px var(--st); }
 .card .timer .meta { font-size:11px; color:var(--txt2); font-weight:600; letter-spacing:.06em;
@@ -290,8 +290,8 @@ const CSS_GLASS = `
 /* Lista de tarefas — ELEMENTO FLEXÍVEL: cresce para encher o espaço livre.
    É o único que pode desaparecer (overflow:hidden) quando falta espaço;
    NS/modelo/timer/datas ficam sempre intactos. */
-.card .tasks { flex:0 1 auto; min-height:0; display:flex; flex-direction:column; gap:7px;
-  overflow:hidden; align-content:flex-start; }
+.card .tasks { flex:0 1 auto; min-height:0; display:flex; flex-direction:column; gap:clamp(3px,0.4vh,7px);
+  overflow:hidden; align-content:flex-start; max-height:clamp(55px,12vh,180px); }
 .card .tasklbl { font-size:10px; font-weight:700; letter-spacing:.14em; color:var(--txt3);
   text-transform:uppercase; flex:none; }
 .card .tk { display:flex; align-items:center; gap:8px; flex:none;
@@ -514,7 +514,7 @@ function MachineCard({ m }) {
       {/* GRUPO CENTRAL: NS + modelo + timer (mantêm-se juntos e intactos) */}
       <div className="mid">
         <div className="central">
-          <div className="ns" style={{ fontSize: nsFontSize(ns.main, 40, 24) + "px" }}>{ns.main}{ns.sub && <small> · {ns.sub}</small>}</div>
+          <div className="ns" style={{ fontSize: nsFontSize(ns.main, 36, 22) + "px" }}>{ns.main}{ns.sub && <small> · {ns.sub}</small>}</div>
           <div className="mo">{m.modelo || "—"}</div>
         </div>
         {meta > 0 && (

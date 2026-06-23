@@ -1076,9 +1076,9 @@ export default function AoVivoGlassLight({
   };
 
   return (
-    <div className="glass-root" data-theme={theme}>
+    <div className="glasslight-root" data-theme={theme}>
       <style>{CSS_GLASSLIGHT}</style>
-      <div id="glass-screen">
+      <div id="glasslight-screen">
         <div className="mesh">
           <div className="blob b1" /><div className="blob b2" />
           <div className="blob b3" /><div className="blob b4" />

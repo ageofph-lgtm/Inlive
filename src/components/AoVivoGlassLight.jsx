@@ -607,8 +607,7 @@ function SlideAndamento({ andamento, conHoje, conSemana, totalCon, avgH, machine
             <img src={JORDAN_URL} alt="" />
           </div>
           <div>
-            <div className="rt">Hoje na oficina</div>
-            <div className="rts">Tempo real · {new Date().toLocaleDateString("pt-PT",{weekday:"long"}).toUpperCase()}</div>
+            <div className="rt">Hoje em oficina</div>
           </div>
         </div>
         <div className="rmid">
@@ -837,7 +836,7 @@ function NTSCard({ m }) {
     ? Math.max(0, Math.floor((Date.now() - new Date(m.dataAtribuicao).getTime()) / 86400000))
     : null;
   const deltaSec = meta > 0 ? elapsed - meta : 0;
-  const deltaLbl = meta > 0 ? (deltaSec > 0 ? `+${fmtHMS(deltaSec)}` : `${fmtHMS(-deltaSec)} folga`) : "—";
+  const deltaLbl = meta > 0 ? (deltaSec > 0 ? `+${fmtHMS(deltaSec)}` : `${fmtHMS(-deltaSec)}`) : "—";
   const deltaCls = meta > 0 ? (deltaSec > 0 ? "red" : "grn") : "";
 
   return (

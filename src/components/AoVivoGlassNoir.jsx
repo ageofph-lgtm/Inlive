@@ -95,7 +95,7 @@ const CSS_GLASSNOIR = `
   --sky:#7DD3FC;
   --dgreen:#15803D;
   --shock:#FF2D78;
-  --glass:rgba(255,255,255,.055); --glass2:rgba(255,255,255,.028);
+  --glass:rgba(255,255,255,.10); --glass2:rgba(255,255,255,.018);
   --stroke:rgba(255,51,68,.22); --spec:rgba(255,255,255,.38);
   font-family:'Inter',-apple-system,system-ui,sans-serif;
   background:var(--base); color:var(--txt);
@@ -118,12 +118,12 @@ const CSS_GLASSNOIR = `
 
 /* Noir: blobs tingidos de vermelho a baixa opacidade — halo subtil nos cantos
    (não os multi-cores do glass). Brilho diagonal branco do .glass continua protagonista. */
-.mesh { position:absolute; inset:-15%; z-index:0; filter:blur(8px); }
-.blob { position:absolute; border-radius:50%; mix-blend-mode:screen; opacity:.18; animation:gdrift 28s ease-in-out infinite; }
+.mesh { position:absolute; inset:-15%; z-index:0; filter:blur(14px); }
+.blob { position:absolute; border-radius:50%; mix-blend-mode:screen; opacity:.10; animation:gdrift 28s ease-in-out infinite; }
 .b1 { width:clamp(400px,40vw,700px); height:clamp(400px,40vw,700px); left:-5%; top:-12%; background:radial-gradient(circle,#FF3344,transparent 65%); }
-.b2 { width:clamp(380px,38vw,660px); height:clamp(380px,38vw,660px); right:-7%; top:4%; background:radial-gradient(circle,#FF3344,transparent 68%); animation-delay:-7s; opacity:.12; }
-.b3 { width:clamp(360px,36vw,620px); height:clamp(360px,36vw,620px); left:26%; bottom:-18%; background:radial-gradient(circle,#FF3344,transparent 68%); animation-delay:-13s; opacity:.10; }
-.b4 { width:clamp(280px,28vw,480px); height:clamp(280px,28vw,480px); right:16%; bottom:-12%; background:radial-gradient(circle,#FF3344,transparent 65%); animation-delay:-19s; opacity:.16; }
+.b2 { width:clamp(380px,38vw,660px); height:clamp(380px,38vw,660px); right:-7%; top:4%; background:radial-gradient(circle,#FF3344,transparent 68%); animation-delay:-7s; opacity:.07; }
+.b3 { width:clamp(360px,36vw,620px); height:clamp(360px,36vw,620px); left:26%; bottom:-18%; background:radial-gradient(circle,#FF3344,transparent 68%); animation-delay:-13s; opacity:.05; }
+.b4 { width:clamp(280px,28vw,480px); height:clamp(280px,28vw,480px); right:16%; bottom:-12%; background:radial-gradient(circle,#FF3344,transparent 65%); animation-delay:-19s; opacity:.09; }
 @keyframes gdrift { 0%,100% { transform:translate(0,0) scale(1); } 33% { transform:translate(60px,40px) scale(1.08); } 66% { transform:translate(-40px,30px) scale(.96); } }
 
 .scan { position:absolute; inset:0; z-index:1; pointer-events:none; opacity:.5;
@@ -134,7 +134,7 @@ const CSS_GLASSNOIR = `
   border:1px solid var(--stroke); border-radius:26px;
   box-shadow:0 16px 46px -18px rgba(0,0,0,.6), inset 0 1px 0 var(--spec); }
 .glass::after { content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
-  background:linear-gradient(150deg,rgba(255,255,255,.14),transparent 26%); }
+  background:linear-gradient(150deg,rgba(255,255,255,.22),transparent 42%); }
 
 .wrap { position:relative; z-index:3; height:100%; display:flex; flex-direction:column;
   padding:clamp(8px, 1vw, 18px) clamp(10px, 1.2vw, 22px) clamp(6px, 0.8vw, 14px); gap:clamp(6px, 0.7vw, 14px); }
@@ -151,7 +151,7 @@ const CSS_GLASSNOIR = `
 .wm .ic img { width:100%; height:100%; object-fit:contain; object-position:center;
   mix-blend-mode:multiply; filter:brightness(1.45) contrast(1.15) drop-shadow(0 0 4px rgba(255,69,58,0.4)); }
 .wm .tt { font-family:'Orbitron'; font-weight:800; letter-spacing:.14em; font-size:clamp(14px, 1.4vw, 22px); line-height:1;
-  color:var(--red); text-shadow:0 0 12px rgba(255,51,68,.35); }
+  color:var(--red); text-shadow:0 0 16px rgba(255,51,68,.5); }
 .wm .tt2 { font-family:'Orbitron'; font-weight:600; letter-spacing:.22em; font-size:11px;
   color:var(--txt2); margin-left:2px; padding-left:10px;
   border-left:1px solid var(--stroke); align-self:center; }
@@ -468,10 +468,10 @@ const CSS_GLASSNOIR = `
 .foot { display:flex; align-items:center; gap:18px; font-size:10.5px; color:var(--txt3); font-weight:500; letter-spacing:.06em; }
 .foot .lab { color:var(--txt2); font-family:'Orbitron'; font-weight:700; letter-spacing:.1em; }
 .foot .prog { position:relative; flex:none; width:120px; height:3px; background:rgba(255,255,255,.08); border-radius:2px; overflow:hidden; }
-.foot .prog > div { height:100%; background:var(--red); transition:width .1s linear; }
+.foot .prog > div { height:100%; background:var(--red); box-shadow:0 0 10px rgba(255,51,68,.6); transition:width .1s linear; }
 .pips { display:flex; gap:6px; margin-left:auto; }
 .pip { width:20px; height:5px; border-radius:3px; background:rgba(255,255,255,.18); transition:.3s; }
-.pip.on { background:var(--red); width:30px; box-shadow:0 0 8px rgba(255,51,68,.5); }
+.pip.on { background:var(--red); width:30px; box-shadow:0 0 12px rgba(255,51,68,.7); }
 .org { font-family:'Orbitron'; font-weight:700; letter-spacing:.06em; color:var(--txt2); }
 .org em { color:var(--red); font-style:normal; }
 
@@ -613,8 +613,7 @@ function SlideAndamento({ andamento, conHoje, conSemana, totalCon, avgH, machine
             <img src={JORDAN_URL} alt="" />
           </div>
           <div>
-            <div className="rt">Hoje na oficina</div>
-            <div className="rts">Tempo real · {new Date().toLocaleDateString("pt-PT",{weekday:"long"}).toUpperCase()}</div>
+            <div className="rt">Hoje em oficina</div>
           </div>
         </div>
         <div className="rmid">
@@ -843,7 +842,7 @@ function NTSCard({ m }) {
     ? Math.max(0, Math.floor((Date.now() - new Date(m.dataAtribuicao).getTime()) / 86400000))
     : null;
   const deltaSec = meta > 0 ? elapsed - meta : 0;
-  const deltaLbl = meta > 0 ? (deltaSec > 0 ? `+${fmtHMS(deltaSec)}` : `${fmtHMS(-deltaSec)} folga`) : "—";
+  const deltaLbl = meta > 0 ? (deltaSec > 0 ? `+${fmtHMS(deltaSec)}` : `${fmtHMS(-deltaSec)}`) : "—";
   const deltaCls = meta > 0 ? (deltaSec > 0 ? "red" : "grn") : "";
 
   return (

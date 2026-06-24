@@ -116,13 +116,14 @@ const CSS_GLASSNOIR = `
 /* Garante que o conteúdo do slide fica por cima da marca d'água */
 .slide > *:not(.watermark) { position:relative; z-index:1; }
 
-/* Noir: blobs coloridos desligados — fundo preto puro, deixa o brilho do glass ser o protagonista */
-.mesh { display:none; }
-.blob { position:absolute; border-radius:50%; mix-blend-mode:screen; opacity:.5; animation:gdrift 28s ease-in-out infinite; }
-.b1 { width:clamp(400px,40vw,700px); height:clamp(400px,40vw,700px); left:-5%; top:-12%; background:radial-gradient(circle,#5B3FD6,transparent 62%); }
-.b2 { width:clamp(380px,38vw,660px); height:clamp(380px,38vw,660px); right:-7%; top:4%; background:radial-gradient(circle,#0A84FF,transparent 62%); animation-delay:-7s; }
-.b3 { width:clamp(360px,36vw,620px); height:clamp(360px,36vw,620px); left:26%; bottom:-18%; background:radial-gradient(circle,#26B6A0,transparent 62%); animation-delay:-13s; }
-.b4 { width:clamp(280px,28vw,480px); height:clamp(280px,28vw,480px); right:16%; bottom:-12%; background:radial-gradient(circle,#FF6482,transparent 64%); animation-delay:-19s; opacity:.28; }
+/* Noir: blobs tingidos de vermelho a baixa opacidade — halo subtil nos cantos
+   (não os multi-cores do glass). Brilho diagonal branco do .glass continua protagonista. */
+.mesh { position:absolute; inset:-15%; z-index:0; filter:blur(8px); }
+.blob { position:absolute; border-radius:50%; mix-blend-mode:screen; opacity:.18; animation:gdrift 28s ease-in-out infinite; }
+.b1 { width:clamp(400px,40vw,700px); height:clamp(400px,40vw,700px); left:-5%; top:-12%; background:radial-gradient(circle,#FF3344,transparent 65%); }
+.b2 { width:clamp(380px,38vw,660px); height:clamp(380px,38vw,660px); right:-7%; top:4%; background:radial-gradient(circle,#FF3344,transparent 68%); animation-delay:-7s; opacity:.12; }
+.b3 { width:clamp(360px,36vw,620px); height:clamp(360px,36vw,620px); left:26%; bottom:-18%; background:radial-gradient(circle,#FF3344,transparent 68%); animation-delay:-13s; opacity:.10; }
+.b4 { width:clamp(280px,28vw,480px); height:clamp(280px,28vw,480px); right:16%; bottom:-12%; background:radial-gradient(circle,#FF3344,transparent 65%); animation-delay:-19s; opacity:.16; }
 @keyframes gdrift { 0%,100% { transform:translate(0,0) scale(1); } 33% { transform:translate(60px,40px) scale(1.08); } 66% { transform:translate(-40px,30px) scale(.96); } }
 
 .scan { position:absolute; inset:0; z-index:1; pointer-events:none; opacity:.5;

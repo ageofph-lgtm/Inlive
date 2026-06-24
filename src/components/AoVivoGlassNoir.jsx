@@ -530,8 +530,8 @@ function MachineCard({ m }) {
         {meta > 0 && (
           <div className="cring">
             <div className="cc">
-              <b>{Math.round(ratio * 100)}%</b>
-              <span>concluído</span>
+              <b>{isLate ? "⚠︎" : `${Math.round(Math.min(ratio, 1) * 100)}%`}</b>
+              <span>{isLate ? "ATRASO" : "concluído"}</span>
             </div>
           </div>
         )}

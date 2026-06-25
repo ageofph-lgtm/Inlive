@@ -417,9 +417,7 @@ const CSS_GLASS = `
 
 /* ── Concluídas ──────────────────────────────────────────────────────────── */
 .donec { flex:1; min-height:0; display:grid;
-  grid-template-columns:repeat(auto-fill, minmax(clamp(200px, 18vw, 320px), 1fr));
-  grid-auto-rows:auto; gap:clamp(6px, 0.8vw, 12px);
-  overflow-y:auto; overflow-x:hidden; align-content:start; }
+  gap:clamp(4px, 0.5vw, 8px); overflow:hidden; align-content:start; }
 .dc { padding:16px 20px; display:flex; flex-direction:column; gap:10px; overflow:hidden;
   border:1px solid rgba(125,211,252,.25); position:relative; }
 .dc .dctop { display:flex; align-items:center; gap:10px; }
@@ -963,8 +961,17 @@ function SlideRecon({ reconAnd, reconAF, reconCon }) {
 
 // ── Slide: CONCLUÍDAS ───────────────────────────────────────────────────────
 function SlideConcluidas({ conSemana }) {
+  const n = conSemana.length;
+  // Colunas: até 4 para poucos cards, mais colunas conforme cresce
+  const cols = n <= 4 ? n || 1 : n <= 8 ? 4 : n <= 12 ? 4 : n <= 16 ? 4 : n <= 20 ? 5 : 6;
+  // Escala do card: reduz padding/fonte conforme mais cards
+  const compact = n > 12;
+  const veryCompact = n > 20;
   return (
-    <div className="donec">
+    <div className="donec" style={{
+      gridTemplateColumns: `repeat(${cols}, 1fr)`,
+      gridAutoRows: "1fr",
+    }}>
       {conSemana.length === 0
         ? <div style={{ gridColumn: "1 / -1", display: "grid", placeItems: "center", color: "var(--txt3)", fontSize: 14 }}>Nada concluído esta semana</div>
         : conSemana.map(m => {
@@ -979,33 +986,36 @@ function SlideConcluidas({ conSemana }) {
           const ns = nsSplit(m.serie);
           const tipo = tipoIntervencao(m);
           const tier = tierRecon(m);
-          // Tarefas feitas (concluídas), ignorando marcadores reservados
           const RESERVED = new Set(["EXPRESS", "VPS", "IMPREVISTOS"]);
-          // Máquina concluída → todo o trabalho está feito; mostra todas as
-          // tarefas reais (a flag tk.concluida nem sempre é marcada na DB).
           const feitas = (m.tarefas || []).filter(tk => (tk.texto || "").trim() && !RESERVED.has((tk.texto || "").trim()));
-          const showTasks = feitas.slice(0, 4);
+          // Em modo muito compacto, esconde tarefas para ganhar espaço
+          const showTasks = veryCompact ? [] : compact ? feitas.slice(0, 2) : feitas.slice(0, 4);
           const moreTasks = feitas.length - showTasks.length;
+          const nsFz = veryCompact ? nsFontSize(ns.main, 18, 12) : compact ? nsFontSize(ns.main, 22, 14) : nsFontSize(ns.main, 30, 18);
+          const pad = veryCompact ? "8px 10px" : compact ? "10px 14px" : "16px 20px";
+          const gap = veryCompact ? "4px" : compact ? "6px" : "10px";
           return (
-            <div key={m.id} className="dc glass" style={{ "--type": tipo.color }}>
-              <div className="dctop">
-                <div className="ck">✓</div>
+            <div key={m.id} className="dc glass" style={{ "--type": tipo.color, padding: pad, gap }}>
+              <div className="dctop" style={{ gap: compact ? "6px" : "10px" }}>
+                <div className="ck" style={compact ? { width: 28, height: 28, fontSize: 14 } : {}}>✓</div>
                 <div className="badges">
-                  <span className="bdg type">{tipo.label}</span>
-                  {tier && <span className="bdg tier">{tier}</span>}
+                  <span className="bdg type" style={compact ? { fontSize: 9, padding: "2px 7px" } : {}}>{tipo.label}</span>
+                  {tier && !veryCompact && <span className="bdg tier" style={compact ? { fontSize: 9 } : {}}>{tier}</span>}
                 </div>
-                <div className="dt">
-                  <b>{t}</b>
-                  <span>{ts}</span>
-                </div>
+                {!veryCompact && (
+                  <div className="dt">
+                    <b style={compact ? { fontSize: 13 } : {}}>{t}</b>
+                    <span>{ts}</span>
+                  </div>
+                )}
               </div>
               <div className="dcmid">
-                <div className="dn" style={{ fontSize: nsFontSize(ns.main, 30, 18) + "px" }}>{ns.main}{ns.sub && <small style={{ fontSize: "0.6em", color: "var(--txt2)" }}> · {ns.sub}</small>}</div>
-                <div className="dm">{m.modelo || "—"}</div>
+                <div className="dn" style={{ fontSize: nsFz + "px" }}>{ns.main}{ns.sub && <small style={{ fontSize: "0.6em", color: "var(--txt2)" }}> · {ns.sub}</small>}</div>
+                {!veryCompact && <div className="dm" style={compact ? { fontSize: 12 } : {}}>{m.modelo || "—"}</div>}
               </div>
               {showTasks.length > 0 && (
                 <div className="dtasks">
-                  {showTasks.map((tk, i) => <span key={i} className="tk">{tk.texto}</span>)}
+                  {showTasks.map((tk, i) => <span key={i} className="tk" style={{ fontSize: 10, padding: "2px 7px" }}>{tk.texto}</span>)}
                   {moreTasks > 0 && <span className="more">+{moreTasks}</span>}
                 </div>
               )}

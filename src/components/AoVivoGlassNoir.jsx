@@ -436,8 +436,9 @@ const CSS_GLASSNOIR = `
 
 /* concluídas */
 .donec { flex:1; min-height:0; display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(clamp(240px, 20vw, 360px), 1fr));
-  grid-auto-rows:minmax(0, 1fr); gap:clamp(8px, 1vw, 14px); overflow:hidden; }
+  grid-template-columns:repeat(auto-fill, minmax(clamp(200px, 18vw, 320px), 1fr));
+  grid-auto-rows:auto; gap:clamp(6px, 0.8vw, 12px);
+  overflow-y:auto; overflow-x:hidden; align-content:start; }
 /* Card concluída — tema azul claro, NS protagonista, tipo + tarefas feitas */
 .dc { padding:16px 20px; display:flex; flex-direction:column; gap:10px; overflow:hidden;
   border:1px solid rgba(125,211,252,.28); position:relative; }
@@ -990,7 +991,7 @@ function SlideConcluidas({ conSemana }) {
     <div className="donec">
       {conSemana.length === 0
         ? <div style={{ gridColumn: "1 / -1", display: "grid", placeItems: "center", color: "var(--txt3)", fontSize: 14 }}>Nada concluído esta semana</div>
-        : conSemana.slice(0, 8).map(m => {
+        : conSemana.map(m => {
           const t = m.timer_accumulated_seconds ? fmtHMS(m.timer_accumulated_seconds) : "—";
           let ts = "—";
           if (m.dataConclusao) {

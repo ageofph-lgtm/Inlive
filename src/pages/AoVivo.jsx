@@ -1787,10 +1787,10 @@ function AlmocoClock(){
 
 export default function AoVivo(){
   // Tema: dark | light | glass | glass-light. `dark` derivado para preservar toda a lógica existente.
-  const [theme,sTheme] = useState(()=>{ try{const t=localStorage.getItem("theme");return ["dark","light","glass","glass-light","glass-noir"].includes(t)?t:"dark";}catch{return "dark";} });
+  const [theme,sTheme] = useState(()=>{ try{const t=localStorage.getItem("theme");return ["glass","glass-light","glass-noir"].includes(t)?t:"glass";}catch{return "glass";} }); // temas dark/light removidos — apenas glass
   const dark = theme === "dark";
   const cycleTheme = () => {
-    const order = ["dark","light","glass","glass-light","glass-noir"];
+    const order = ["glass","glass-light","glass-noir"]; // dark/light comentados — apenas glass activos
     const next = order[(order.indexOf(theme)+1)%order.length];
     sTheme(next);
     try{localStorage.setItem("theme",next);}catch{ /* ignore */ }

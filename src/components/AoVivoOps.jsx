@@ -183,32 +183,24 @@ function TypeDonut({ machines }) {
 
 // ── Desempenho do dia — rota entre reator "no prazo" e donut de tipos ─────────
 function Desempenho({ noPrazoPct, gstats, gmax, machines }) {
-  const [view, setView] = useState(0);
-  useEffect(() => {
-    const id = setInterval(() => setView((v) => (v + 1) % 2), 8000);
-    return () => clearInterval(id);
-  }, []);
   return (
-    <div className="cb">
-      <div className="gauwrap gaufade" key={view}>
-        {view === 0 ?
-        <>
-            <TriReactor pct={noPrazoPct} />
-            <div className="gstats">
-              {gstats.map((g, i) =>
-            <div key={i} className="gstat">
-                  <div className="gl"><span className="lg"><i style={{ background: g[2] }} />{g[0]}</span><b>{g[1]}</b></div>
-                  <div className="gb"><i style={{ width: g[1] / gmax * 100 + "%", background: g[2] }} /></div>
-                </div>
-            )}
-            </div>
-          </> :
-
+    <div className="cb desemp-cb">
+      <div className="desemp-top">
+        <TriReactor pct={noPrazoPct} />
         <TypeDonut machines={machines} />
-        }
+      </div>
+      <div className="desemp-stats">
+        {gstats.map((g, i) =>
+          <div key={i} className="gstat">
+            <div className="gl">
+              <span className="lg"><i style={{ background: g[2] }} />{g[0]}</span>
+              <b>{g[1]}</b>
+            </div>
+            <div className="gb"><i style={{ width: g[1] / gmax * 100 + "%", background: g[2] }} /></div>
+          </div>
+        )}
       </div>
     </div>);
-
 }
 
 // ── EM ANDAMENTO (destaque · fundo claro) ────────────────────────────────────
@@ -265,14 +257,20 @@ function EmAndamento({ andamento }) {
 
 }
 
-// ── Quadros pequenos: linha compacta em 2 níveis (NS nunca truncado) ─────────
+// ── Quadros pequenos: NS + Modelo sempre visíveis ───────────────────────────
 function MiniRow({ m, v, vc }) {
+  const ns = nsSplit(m.serie);
   return (
     <div className="mrow">
-      <div className="mtop"><TypeDot m={m} /><span className="mn">{nsSplit(m.serie).main}</span></div>
-      <div className="mbot"><span className="mm">{m.modelo || "—"}</span><span className="mv" style={{ color: vc }}>{v}</span></div>
+      <div className="mtop">
+        <TypeDot m={m} />
+        <span className="mn">{ns.main}</span>
+        <span className="mv" style={{ color: vc, marginLeft:"auto", flexShrink:0 }}>{v}</span>
+      </div>
+      <div className="mbot">
+        <span className="mm">{m.modelo || "—"}</span>
+      </div>
     </div>);
-
 }
 function Prioritarias({ prioritarias }) {
   const win = useRotatingWindow(prioritarias, 4, 9000);
@@ -751,6 +749,10 @@ const CSS_OPS = `
 
 /* ===== GAUGE / DONUT ===== */
 .ops-root .gauwrap{display:flex; align-items:center; gap:14px; height:100%}
+/* ===== DESEMPENHO layout fixo ===== */
+.ops-root .desemp-cb{display:flex; flex-direction:column; gap:8px}
+.ops-root .desemp-top{display:flex; align-items:center; justify-content:space-around; gap:8px; flex:1; min-height:0}
+.ops-root .desemp-stats{display:flex; flex-direction:column; gap:clamp(5px,.55vw,9px); flex-shrink:0; padding-top:4px; border-top:1px solid var(--line)}
 .ops-root .gaufade{animation:opsFade .5s ease}
 .ops-root .trir{position:relative; width:clamp(80px,8vw,130px); flex:none; aspect-ratio:200/190}
 .ops-root .trir svg{width:100%; height:100%; display:block}
@@ -772,13 +774,13 @@ const CSS_OPS = `
 .ops-root .gstat .gb i{display:block; height:100%; border-radius:100px}
 
 /* ===== quadros pequenos: 2 níveis (NS nunca truncado) ===== */
-.ops-root .mlist{display:flex; flex-direction:column; gap:3px; height:100%; overflow:hidden; animation:opsFade .5s ease}
-.ops-root .mrow{display:flex; flex-direction:column; gap:3px; background:var(--panel2); border:1px solid var(--line); border-radius:7px; padding:4px 8px}
-.ops-root .mrow .mtop{display:flex; align-items:center; gap:7px; min-width:0}
-.ops-root .mrow .mn{font-family:var(--mono); font-weight:600; font-size:10.5px; color:var(--txt); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.ops-root .mrow .mbot{display:flex; align-items:center; justify-content:space-between; gap:8px; padding-left:14px}
-.ops-root .mrow .mm{font-size:9.5px; color:var(--mut); font-family:var(--mono); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0}
-.ops-root .mrow .mv{font-family:var(--mono); font-weight:700; font-size:11px; white-space:nowrap; flex:none}
+.ops-root .mlist{display:flex; flex-direction:column; gap:3px; height:100%; overflow:hidden; justify-content:flex-start; animation:opsFade .5s ease}
+.ops-root .mrow{display:flex; flex-direction:column; gap:1px; background:var(--panel2); border:1px solid var(--line); border-radius:7px; padding:4px 8px; flex-shrink:0}
+.ops-root .mrow .mtop{display:flex; align-items:center; gap:6px; min-width:0; flex-shrink:0}
+.ops-root .mrow .mn{font-family:var(--mono); font-weight:600; font-size:10.5px; color:var(--txt); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1; min-width:0}
+.ops-root .mrow .mbot{display:flex; align-items:center; gap:6px; padding-left:14px; flex-shrink:0}
+.ops-root .mrow .mm{font-size:9px; color:var(--mut); font-family:var(--mono); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; flex:1}
+.ops-root .mrow .mv{font-family:var(--mono); font-weight:700; font-size:10.5px; white-space:nowrap; flex:none}
 
 /* ===== TIMELINE ===== */
 .ops-root .tlhead{display:grid; grid-template-columns:160px 1fr; align-items:center; padding:0 2px 7px; border-bottom:1px solid var(--line); margin-bottom:8px; flex:none}

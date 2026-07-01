@@ -4,6 +4,7 @@ import { Activity, Flag, CheckCircle2, ListOrdered, Sun, Moon, Layers,
 import AoVivoGlass from "@/components/AoVivoGlass";
 import AoVivoGlassLight from "@/components/AoVivoGlassLight";
 import AoVivoGlassNoir from "@/components/AoVivoGlassNoir";
+import AoVivoOps from "@/components/AoVivoOps";
 import ArcReactorGauge from "@/components/ArcReactorGauge";
 // ── Config ────────────────────────────────────────────────────────────────────
 // Chama directamente a saganBridge do Watcher com segredo read-only.
@@ -1787,10 +1788,10 @@ function AlmocoClock(){
 
 export default function AoVivo(){
   // Tema: dark | light | glass | glass-light. `dark` derivado para preservar toda a lógica existente.
-  const [theme,sTheme] = useState(()=>{ try{const t=localStorage.getItem("theme");return ["glass","glass-light","glass-noir"].includes(t)?t:"glass";}catch{return "glass";} }); // temas dark/light removidos — apenas glass
+  const [theme,sTheme] = useState(()=>{ try{const t=localStorage.getItem("theme");return ["glass","glass-light","glass-noir","ops"].includes(t)?t:"glass";}catch{return "glass";} }); // temas dark/light removidos — apenas glass + ops
   const dark = theme === "dark";
   const cycleTheme = () => {
-    const order = ["glass","glass-light","glass-noir"]; // dark/light comentados — apenas glass activos
+    const order = ["glass","glass-light","glass-noir","ops"]; // dark/light comentados — apenas glass + ops activos
     const next = order[(order.indexOf(theme)+1)%order.length];
     sTheme(next);
     try{localStorage.setItem("theme",next);}catch{ /* ignore */ }
@@ -2405,6 +2406,21 @@ export default function AoVivo(){
   // Componente standalone que recebe dados já calculados. Quando theme!=="glass"
   // esta linha é ignorada. Durante o almoço cai para o return principal, que
   // sobrepõe o overlay de almoço (zIndex 9999) — funciona nos 3 modos.
+  if(theme==="ops" && !isAlmoco) return(
+    <AoVivoOps
+      key="aovivo-ops"
+      loading={loading}
+      slide={slide} prog={prog} paused={paused}
+      SLIDES={SLIDES} next={next} prev={prev} sPaused={sPaused}
+      cycleTheme={cycleTheme} theme={theme}
+      data={{
+        machines, andamento, standby, prioritarias, proximas,
+        ntsAnd, ntsAF, reconAnd, reconAF, reconCon,
+        conSemana, totalCon, conHoje, avgH,
+      }}
+    />
+  );
+
   if(theme==="glass" && !isAlmoco) return(
     <AoVivoGlass
       key="aovivo-glass"

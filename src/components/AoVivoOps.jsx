@@ -119,7 +119,7 @@ function Clock() {
 // ── Gauge: triângulo invertido (reator ark) — vermelho com glow ──────────────
 function TriReactor({ pct }) {
   const p = Math.max(0, Math.min(100, Math.round(pct)));
-  const col = RED;
+  const col = BLUE_LIGHT;
   const tri = "M34,42 L166,42 L100,168 Z";
   return (
     <div className="trir">
@@ -128,11 +128,11 @@ function TriReactor({ pct }) {
         <path d={tri} pathLength="100" fill="none" stroke={col} strokeWidth="10"
           strokeLinecap="round" strokeLinejoin="round"
           strokeDasharray="100" strokeDashoffset={100 - p}
-          style={{ filter: `drop-shadow(0 0 5px ${col}) drop-shadow(0 0 11px ${col}88)` }} />
-        <circle cx="100" cy="134" r="4" fill={col} style={{ filter: `drop-shadow(0 0 6px ${col})` }} />
+          style={{ filter: `drop-shadow(0 0 4px #fff) drop-shadow(0 0 10px ${col}99)` }} />
+        <circle cx="100" cy="134" r="4" fill="#fff" style={{ filter: `drop-shadow(0 0 6px #fff)` }} />
       </svg>
       <div className="tric">
-        <b style={{ color: col, textShadow: `0 0 12px ${col}66, 0 2px 8px rgba(0,0,0,.6)` }}>{p}<i>%</i></b>
+        <b style={{ color: "#fff", textShadow: `0 0 10px rgba(255,255,255,.7), 0 2px 8px rgba(0,0,0,.6)` }}>{p}<i>%</i></b>
         <span>No prazo</span>
       </div>
     </div>
@@ -744,7 +744,7 @@ const CSS_OPS = `
 .ops-root .trir .tric{position:absolute; left:0; right:0; top:39%; transform:translateY(-50%); text-align:center; pointer-events:none}
 .ops-root .trir .tric b{display:block; font-family:var(--mono); font-weight:700; font-size:clamp(24px,2.4vw,36px); line-height:1}
 .ops-root .trir .tric b i{font-style:normal; font-size:.5em; margin-left:1px; opacity:.85; vertical-align:.35em}
-.ops-root .trir .tric span{display:block; font-size:9.5px; color:var(--txt); opacity:.8; font-weight:600; letter-spacing:.08em; text-transform:uppercase; margin-top:3px; text-shadow:0 1px 8px rgba(0,0,0,.7)}
+.ops-root .trir .tric span{display:block; font-size:7px; color:var(--txt); opacity:.8; font-weight:600; letter-spacing:.03em; text-transform:uppercase; margin-top:2px; text-shadow:0 1px 8px rgba(0,0,0,.7)}
 .ops-root .donut{position:relative; width:clamp(120px,10vw,164px); flex:none; aspect-ratio:1/1}
 .ops-root .donut svg{width:100%; height:100%; display:block}
 .ops-root .donutc{position:absolute; inset:0; display:grid; place-content:center; text-align:center}

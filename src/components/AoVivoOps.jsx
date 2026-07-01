@@ -10,28 +10,28 @@
 import React, { useState, useEffect, useRef } from "react";
 
 // ── Paleta ───────────────────────────────────────────────────────────────────
-const RED = "#FB5E5E", BLUE = "#5B8CFF", PINK = "#FF2D95", GREEN = "#2FD3A5";
-const ORANGE_DARK = "#E8730C", YELLOW_LIGHT = "#FFDD57", BLUE_LIGHT = "#5AB8FF";
+const RED = "#FB5E5E",BLUE = "#5B8CFF",PINK = "#FF2D95",GREEN = "#2FD3A5";
+const ORANGE_DARK = "#E8730C",YELLOW_LIGHT = "#FFDD57",BLUE_LIGHT = "#5AB8FF";
 const BRAND_RED = "#F5484D";
 const TYPE = {
-  nts:   { key: "nts",   color: RED,  label: "NTS"   },
+  nts: { key: "nts", color: RED, label: "NTS" },
   recon: { key: "recon", color: PINK, label: "RECON" },
-  acp:   { key: "acp",   color: BLUE, label: "ACP"   },
+  acp: { key: "acp", color: BLUE, label: "ACP" }
 };
 
 // ── Helpers locais (duplicados p/ isolamento; pequenos e estáveis) ──────────
-const pad2 = n => String(n).padStart(2, "0");
+const pad2 = (n) => String(n).padStart(2, "0");
 function fmtHMS(s) {
   if (!s && s !== 0) return "00:00:00";
-  const abs = Math.abs(Math.round(s)); const sign = s < 0 ? "-" : "";
-  return `${sign}${pad2(Math.floor(abs/3600))}:${pad2(Math.floor((abs%3600)/60))}:${pad2(abs%60)}`;
+  const abs = Math.abs(Math.round(s));const sign = s < 0 ? "-" : "";
+  return `${sign}${pad2(Math.floor(abs / 3600))}:${pad2(Math.floor(abs % 3600 / 60))}:${pad2(abs % 60)}`;
 }
 function useLiveTimer(m) {
   const ref = useRef(m);
-  useEffect(() => { ref.current = m; });
+  useEffect(() => {ref.current = m;});
   function calcNow(mm) {
     const acc = Number(mm?.timer_accumulated_seconds) || 0;
-    const at  = mm?.timer_started_at ? new Date(mm.timer_started_at).getTime() : null;
+    const at = mm?.timer_started_at ? new Date(mm.timer_started_at).getTime() : null;
     if (mm?.timer_status === "running" && at) return acc + Math.floor((Date.now() - at) / 1000);
     return acc;
   }
@@ -49,18 +49,18 @@ function getPausaMotivo(m) {
   return m.timer_status.split(":")[1] || "outros";
 }
 function getMondayUTC() {
-  const n = new Date(), d = n.getUTCDay(), b = d === 0 ? 6 : d - 1, mn = new Date(n);
-  mn.setUTCDate(n.getUTCDate() - b); mn.setUTCHours(0, 0, 0, 0); return mn;
+  const n = new Date(),d = n.getUTCDay(),b = d === 0 ? 6 : d - 1,mn = new Date(n);
+  mn.setUTCDate(n.getUTCDate() - b);mn.setUTCHours(0, 0, 0, 0);return mn;
 }
 function nsSplit(ns) {
   if (!ns) return { main: "—", sub: null };
-  if (ns.includes("|")) { const [main, sub] = ns.split("|"); return { main, sub }; }
+  if (ns.includes("|")) {const [main, sub] = ns.split("|");return { main, sub };}
   return { main: ns, sub: null };
 }
 function fmtDateShort(v) {
   if (!v) return null;
-  try { return new Date(String(v).length === 10 ? v + "T12:00:00" : v).toLocaleDateString("pt-PT", { day: "2-digit", month: "2-digit" }); }
-  catch { return null; }
+  try {return new Date(String(v).length === 10 ? v + "T12:00:00" : v).toLocaleDateString("pt-PT", { day: "2-digit", month: "2-digit" });}
+  catch {return null;}
 }
 function tierRecon(m) {
   const r = m.recondicao || {};
@@ -70,14 +70,14 @@ function isOverdue(m) {
   if (!m.previsao_fim) return false;
   const conc = m.estado?.startsWith("concluida") || m.estado === "concluida";
   if (conc) return false;
-  try { return new Date(m.previsao_fim + (String(m.previsao_fim).length === 10 ? "T23:59:59" : "")) < new Date(); }
-  catch { return false; }
+  try {return new Date(m.previsao_fim + (String(m.previsao_fim).length === 10 ? "T23:59:59" : "")) < new Date();}
+  catch {return false;}
 }
-function hasPrevisao(m) { return !!(m.previsao_inicio && m.previsao_fim); }
+function hasPrevisao(m) {return !!(m.previsao_inicio && m.previsao_fim);}
 // Tipo de máquina (para o indicador discreto em qualquer quadro)
 function machineType(m) {
   if (m.tipo === "nova") return TYPE.nts;
-  if (tierRecon(m))      return TYPE.recon;
+  if (tierRecon(m)) return TYPE.recon;
   return TYPE.acp;
 }
 const JORDAN_URL = "https://media.base44.com/images/public/6a045759b56878764b71db11/b4686dedd_Gemini_Generated_Image_6i6wgc6i6wgc6i6w1.png";
@@ -87,8 +87,8 @@ function useRotatingWindow(items, size, intervalMs) {
   const n = items.length;
   const [off, setOff] = useState(0);
   useEffect(() => {
-    if (n <= size) { setOff(0); return; }
-    const id = setInterval(() => setOff(o => (o + size) % n), intervalMs);
+    if (n <= size) {setOff(0);return;}
+    const id = setInterval(() => setOff((o) => (o + size) % n), intervalMs);
     return () => clearInterval(id);
   }, [n, size, intervalMs]);
   if (n <= size) return { slice: items, off: 0, rotating: false };
@@ -101,19 +101,19 @@ function useRotatingWindow(items, size, intervalMs) {
 function TypeDot({ m, size = 7 }) {
   const t = machineType(m);
   return <span className="tdot" title={t.label}
-    style={{ width: size, height: size, background: t.color, boxShadow: `0 0 5px ${t.color}` }} />;
+  style={{ width: size, height: size, background: t.color, boxShadow: `0 0 5px ${t.color}` }} />;
 }
 
 // ── Relógio ──────────────────────────────────────────────────────────────────
 function Clock() {
   const [n, sN] = useState(new Date());
-  useEffect(() => { const id = setInterval(() => sN(new Date()), 1000); return () => clearInterval(id); }, []);
+  useEffect(() => {const id = setInterval(() => sN(new Date()), 1000);return () => clearInterval(id);}, []);
   return (
     <div className="clock">
       {pad2(n.getHours())}:{pad2(n.getMinutes())}
       <small>{n.toLocaleDateString("pt-PT", { weekday: "short", day: "2-digit", month: "short" })}</small>
-    </div>
-  );
+    </div>);
+
 }
 
 // ── Gauge: triângulo invertido (reator ark) — vermelho com glow ──────────────
@@ -126,30 +126,30 @@ function TriReactor({ pct }) {
       <svg viewBox="0 0 200 190" preserveAspectRatio="xMidYMid meet">
         <path d={tri} fill="none" stroke="rgba(255,255,255,.08)" strokeWidth="10" strokeLinejoin="round" />
         <path d={tri} pathLength="100" fill="none" stroke={col} strokeWidth="10"
-          strokeLinecap="round" strokeLinejoin="round"
-          strokeDasharray="100" strokeDashoffset={100 - p}
-          style={{ filter: `drop-shadow(0 0 4px #fff) drop-shadow(0 0 10px ${col}99)` }} />
+        strokeLinecap="round" strokeLinejoin="round"
+        strokeDasharray="100" strokeDashoffset={100 - p}
+        style={{ filter: `drop-shadow(0 0 4px #fff) drop-shadow(0 0 10px ${col}99)` }} />
         <circle cx="100" cy="134" r="4" fill="#fff" style={{ filter: `drop-shadow(0 0 6px #fff)` }} />
       </svg>
       <div className="tric">
         <b style={{ color: "#fff", textShadow: `0 0 10px rgba(255,255,255,.7), 0 2px 8px rgba(0,0,0,.6)` }}>{p}<i>%</i></b>
         <span>No prazo</span>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 // ── Donut: distribuição das máquinas por tipo (NTS/ACP/RECON) ────────────────
 function TypeDonut({ machines }) {
   const counts = { nts: 0, acp: 0, recon: 0 };
-  machines.forEach(m => { counts[machineType(m).key]++; });
+  machines.forEach((m) => {counts[machineType(m).key]++;});
   const total = machines.length || 1;
   const segs = [
-    { ...TYPE.acp,   n: counts.acp },
-    { ...TYPE.nts,   n: counts.nts },
-    { ...TYPE.recon, n: counts.recon },
-  ];
-  const r = 58, C = 2 * Math.PI * r;
+  { ...TYPE.acp, n: counts.acp },
+  { ...TYPE.nts, n: counts.nts },
+  { ...TYPE.recon, n: counts.recon }];
+
+  const r = 58,C = 2 * Math.PI * r;
   let acc = 0;
   return (
     <div className="gauwrap">
@@ -158,74 +158,74 @@ function TypeDonut({ machines }) {
           <circle cx="80" cy="80" r={r} fill="none" stroke="rgba(255,255,255,.07)" strokeWidth="16" />
           {segs.map((s, i) => {
             const frac = s.n / total;
-            const dash = C * frac, off = -acc * C;
+            const dash = C * frac,off = -acc * C;
             acc += frac;
             if (s.n === 0) return null;
             return <circle key={i} cx="80" cy="80" r={r} fill="none" stroke={s.color} strokeWidth="16"
-              strokeDasharray={`${dash} ${C - dash}`} strokeDashoffset={off}
-              transform="rotate(-90 80 80)" strokeLinecap="butt"
-              style={{ filter: `drop-shadow(0 0 4px ${s.color})` }} />;
+            strokeDasharray={`${dash} ${C - dash}`} strokeDashoffset={off}
+            transform="rotate(-90 80 80)" strokeLinecap="butt"
+            style={{ filter: `drop-shadow(0 0 4px ${s.color})` }} />;
           })}
         </svg>
         <div className="donutc"><b>{machines.length}</b><span>máquinas</span></div>
       </div>
       <div className="gstats">
-        {segs.map((s, i) => (
-          <div key={i} className="gstat">
+        {segs.map((s, i) =>
+        <div key={i} className="gstat">
             <div className="gl"><span className="lg"><i style={{ background: s.color }} />{s.label}</span><b>{s.n}</b></div>
-            <div className="gb"><i style={{ width: (s.n / total * 100) + "%", background: s.color }} /></div>
+            <div className="gb"><i style={{ width: s.n / total * 100 + "%", background: s.color }} /></div>
           </div>
-        ))}
+        )}
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 // ── Desempenho do dia — rota entre reator "no prazo" e donut de tipos ─────────
 function Desempenho({ noPrazoPct, gstats, gmax, machines }) {
   const [view, setView] = useState(0);
   useEffect(() => {
-    const id = setInterval(() => setView(v => (v + 1) % 2), 8000);
+    const id = setInterval(() => setView((v) => (v + 1) % 2), 8000);
     return () => clearInterval(id);
   }, []);
   return (
     <div className="cb">
       <div className="gauwrap gaufade" key={view}>
-        {view === 0 ? (
-          <>
+        {view === 0 ?
+        <>
             <TriReactor pct={noPrazoPct} />
             <div className="gstats">
-              {gstats.map((g, i) => (
-                <div key={i} className="gstat">
+              {gstats.map((g, i) =>
+            <div key={i} className="gstat">
                   <div className="gl"><span className="lg"><i style={{ background: g[2] }} />{g[0]}</span><b>{g[1]}</b></div>
-                  <div className="gb"><i style={{ width: (g[1] / gmax * 100) + "%", background: g[2] }} /></div>
+                  <div className="gb"><i style={{ width: g[1] / gmax * 100 + "%", background: g[2] }} /></div>
                 </div>
-              ))}
+            )}
             </div>
-          </>
-        ) : (
-          <TypeDonut machines={machines} />
-        )}
+          </> :
+
+        <TypeDonut machines={machines} />
+        }
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 // ── EM ANDAMENTO (destaque · fundo claro) ────────────────────────────────────
 function Trow({ m }) {
-  const elapsed  = useLiveTimer(m);
-  const meta     = Number(m.tempo_estimado_segundos) || 0;
-  const ratio    = meta > 0 ? elapsed / meta : 0;
+  const elapsed = useLiveTimer(m);
+  const meta = Number(m.tempo_estimado_segundos) || 0;
+  const ratio = meta > 0 ? elapsed / meta : 0;
   const restante = meta > 0 ? meta - elapsed : null;
-  const over     = restante !== null && restante < 0;
-  const run      = m.timer_status === "running";
-  const paused   = m.timer_status?.startsWith("paused");
-  const crit     = m.tipo === "nova" && over;
+  const over = restante !== null && restante < 0;
+  const run = m.timer_status === "running";
+  const paused = m.timer_status?.startsWith("paused");
+  const crit = m.tipo === "nova" && over;
   const st = over ? RED : ratio >= 0.9 ? "#F5B13D" : run ? GREEN : paused ? "#F5B13D" : "#9AA3B2";
   const ns = nsSplit(m.serie);
   const tt = machineType(m);
   const badges = [[tt.key, tt.label]];
-  if (run)          badges.push(["run", "RUN"]);
+  if (run) badges.push(["run", "RUN"]);
   if (m.prioridade) badges.push(["prio", "PRIO"]);
   const ini = (m.serie || "").replace(/[^0-9]/g, "").slice(-2) || "··";
   return (
@@ -247,8 +247,8 @@ function Trow({ m }) {
         <small>{restante === null ? "DECORR." : over ? "ATRASO" : "RESTAM"}</small>
       </div>
       <div className="tech">{ini}</div>
-    </div>
-  );
+    </div>);
+
 }
 function EmAndamento({ andamento }) {
   const win = useRotatingWindow(andamento, 7, 9000);
@@ -260,9 +260,9 @@ function EmAndamento({ andamento }) {
   return (
     <>
       <div className="thead"><div>Máquina</div><div>Estado</div><div>Progresso</div><div className="r">Restante</div><div /></div>
-      <div className="trows" key={win.off}>{rows.map(m => <Trow key={m.id} m={m} />)}</div>
-    </>
-  );
+      <div className="trows" key={win.off}>{rows.map((m) => <Trow key={m.id} m={m} />)}</div>
+    </>);
+
 }
 
 // ── Quadros pequenos: linha compacta em 2 níveis (NS nunca truncado) ─────────
@@ -271,8 +271,8 @@ function MiniRow({ m, v, vc }) {
     <div className="mrow">
       <div className="mtop"><TypeDot m={m} /><span className="mn">{nsSplit(m.serie).main}</span></div>
       <div className="mbot"><span className="mm">{m.modelo || "—"}</span><span className="mv" style={{ color: vc }}>{v}</span></div>
-    </div>
-  );
+    </div>);
+
 }
 function Prioritarias({ prioritarias }) {
   const win = useRotatingWindow(prioritarias, 4, 9000);
@@ -282,14 +282,14 @@ function Prioritarias({ prioritarias }) {
         const fim = fmtDateShort(m.previsao_fim);
         return <MiniRow key={m.id || i} m={m} v={fim ? `⚑ ${fim}` : "⚡"} vc={ORANGE_DARK} />;
       })}
-    </div>
-  );
+    </div>);
+
 }
 function NtsMiniRow({ m }) {
   const elapsed = useLiveTimer(m);
   const meta = Number(m.tempo_estimado_segundos) || 0;
   const d = meta > 0 ? elapsed - meta : 0;
-  const v = meta > 0 ? `Δ ${(d > 0 ? "+" : "")}${fmtHMS(Math.abs(d))}` : "NTS";
+  const v = meta > 0 ? `Δ ${d > 0 ? "+" : ""}${fmtHMS(Math.abs(d))}` : "NTS";
   const vc = meta > 0 && d > 0 ? RED : GREEN;
   return <MiniRow m={m} v={v} vc={vc} />;
 }
@@ -304,96 +304,96 @@ function ASeguir({ proximas }) {
       {win.slice.map((m, i) => {
         const meta = Number(m.tempo_estimado_segundos) || 0;
         const h = meta > 0 ? Math.round(meta / 3600) + "h" : "";
-        const wd = m.previsao_inicio
-          ? new Date(m.previsao_inicio).toLocaleDateString("pt-PT", { weekday: "short" }).toUpperCase().replace(".", "")
-          : "";
+        const wd = m.previsao_inicio ?
+        new Date(m.previsao_inicio).toLocaleDateString("pt-PT", { weekday: "short" }).toUpperCase().replace(".", "") :
+        "";
         const v = [wd, h].filter(Boolean).join(" · ") || "—";
         return <MiniRow key={m.id || i} m={m} v={v} vc={BLUE} />;
       })}
-    </div>
-  );
+    </div>);
+
 }
 function Standby({ standby }) {
   const win = useRotatingWindow(standby, 4, 9000);
   return (
     <div className="mlist" key={win.off}>
       {win.slice.map((m, i) => <MiniRow key={m.id || i} m={m} v={fmtHMS(Number(m.timer_accumulated_seconds) || 0)} vc={YELLOW_LIGHT} />)}
-    </div>
-  );
+    </div>);
+
 }
 
 // ── GANTT / linha do tempo (inferior direito) ────────────────────────────────
 function Timeline({ machines }) {
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  const BACK = 1, AHEAD = 13;
-  const start = new Date(today); start.setDate(today.getDate() - BACK);
-  const end   = new Date(today); end.setDate(today.getDate() + AHEAD + 1);
+  const today = new Date();today.setHours(0, 0, 0, 0);
+  const BACK = 1,AHEAD = 13;
+  const start = new Date(today);start.setDate(today.getDate() - BACK);
+  const end = new Date(today);end.setDate(today.getDate() + AHEAD + 1);
   const totalMs = end - start;
-  const days = Array.from({ length: 15 }, (_, i) => { const d = new Date(start); d.setDate(d.getDate() + i); return d; });
-  const todayPct = ((Date.now() - start.getTime()) / totalMs) * 100;
-  const blocks = machines.map(m => {
+  const days = Array.from({ length: 15 }, (_, i) => {const d = new Date(start);d.setDate(d.getDate() + i);return d;});
+  const todayPct = (Date.now() - start.getTime()) / totalMs * 100;
+  const blocks = machines.map((m) => {
     if (!m.previsao_inicio || !m.previsao_fim) return null;
     const pi = new Date(m.previsao_inicio + (String(m.previsao_inicio).length === 10 ? "T00:00:00" : ""));
-    const pf = new Date(m.previsao_fim    + (String(m.previsao_fim).length    === 10 ? "T23:59:59" : ""));
+    const pf = new Date(m.previsao_fim + (String(m.previsao_fim).length === 10 ? "T23:59:59" : ""));
     if (pf < start || pi > end) return null;
     const isActive = m.estado?.startsWith("em-preparacao");
     const run = m.timer_status === "running";
     const over = isActive && new Date() > pf;
-    const a = ((Math.max(pi, start) - start) / totalMs) * 100;
-    const b = ((Math.min(pf, end)   - start) / totalMs) * 100;
+    const a = (Math.max(pi, start) - start) / totalMs * 100;
+    const b = (Math.min(pf, end) - start) / totalMs * 100;
     return { m, a, b, run, isActive, over };
-  }).filter(Boolean)
-    .sort((x, y) => (x.isActive === y.isActive) ? x.a - y.a : x.isActive ? -1 : 1)
-    .slice(0, 7);
+  }).filter(Boolean).
+  sort((x, y) => x.isActive === y.isActive ? x.a - y.a : x.isActive ? -1 : 1).
+  slice(0, 7);
   return (
     <>
       <div className="tlhead">
         <div />
         <div className="tlscale">
-          {days.map((d, i) => (
-            <b key={i} className={d.toDateString() === today.toDateString() ? "now" : ""}>{pad2(d.getDate())}</b>
-          ))}
+          {days.map((d, i) =>
+          <b key={i} className={d.toDateString() === today.toDateString() ? "now" : ""}>{pad2(d.getDate())}</b>
+          )}
         </div>
       </div>
       <div className="tlrows">
         <div className="tnow" style={{ left: `calc(160px + ((100% - 160px)/100) * ${todayPct})` }} />
-        {blocks.length === 0
-          ? <div className="tlempty">Sem máquinas com previsão na janela</div>
-          : blocks.map((bl, i) => {
-            const cls = bl.over ? "over" : (bl.run || bl.isActive) ? "run" : "fila";
-            const ns = nsSplit(bl.m.serie).main;
-            return (
-              <div key={bl.m.id || i} className="tlrow">
+        {blocks.length === 0 ?
+        <div className="tlempty">Sem máquinas com previsão na janela</div> :
+        blocks.map((bl, i) => {
+          const cls = bl.over ? "over" : bl.run || bl.isActive ? "run" : "fila";
+          const ns = nsSplit(bl.m.serie).main;
+          return (
+            <div key={bl.m.id || i} className="tlrow">
                 <div className="l"><TypeDot m={bl.m} size={6} /><span className="lt">{ns} · {bl.m.modelo || ""}</span></div>
                 <div className="track">
                   <div className={`tbar ${cls}`} style={{ left: bl.a + "%", width: Math.max(bl.b - bl.a, 2) + "%" }}>{ns}</div>
                 </div>
-              </div>
-            );
-          })}
+              </div>);
+
+        })}
       </div>
-    </>
-  );
+    </>);
+
 }
 
 // ── RECONDICIONAMENTO (destaque) — rota entre em curso, fila e concluídas ────
 function Recon({ reconAnd, reconAF, reconCon }) {
-  const active  = reconAnd.filter(m => m.timer_status === "running" || m.timer_status?.startsWith("paused"));
-  const waiting = [...reconAnd.filter(m => !(m.timer_status === "running" || m.timer_status?.startsWith("paused"))), ...reconAF];
-  const nActive = active.length, nWait = waiting.length, nCon = reconCon.length;
+  const active = reconAnd.filter((m) => m.timer_status === "running" || m.timer_status?.startsWith("paused"));
+  const waiting = [...reconAnd.filter((m) => !(m.timer_status === "running" || m.timer_status?.startsWith("paused"))), ...reconAF];
+  const nActive = active.length,nWait = waiting.length,nCon = reconCon.length;
   const total = Math.max(nActive + nWait + nCon, 1);
   const chips = [
-    ...active.map(m => ({ m, cls: "run",  t: "Em curso"  })),
-    ...waiting.map(m => ({ m, cls: "fila", t: tierRecon(m) || "Fila" })),
-    ...reconCon.map(m => ({ m, cls: "done", t: "Concluída" })),
-  ];
+  ...active.map((m) => ({ m, cls: "run", t: "Em curso" })),
+  ...waiting.map((m) => ({ m, cls: "fila", t: tierRecon(m) || "Fila" })),
+  ...reconCon.map((m) => ({ m, cls: "done", t: "Concluída" }))];
+
   const win = useRotatingWindow(chips, 10, 9000);
   return (
     <>
       <div className="funnel">
-        <div className="seg s1" style={{ width: (nActive / total * 100) + "%" }}>{nActive || ""}</div>
-        <div className="seg s2" style={{ width: (nWait / total * 100) + "%" }}>{nWait} em fila</div>
-        <div className="seg s3" style={{ width: (nCon / total * 100) + "%" }}>{nCon || ""}</div>
+        <div className="seg s1" style={{ width: nActive / total * 100 + "%" }}>{nActive || ""}</div>
+        <div className="seg s2" style={{ width: nWait / total * 100 + "%" }}>{nWait} em fila</div>
+        <div className="seg s3" style={{ width: nCon / total * 100 + "%" }}>{nCon || ""}</div>
       </div>
       <div className="recleg">
         <div className="x"><i style={{ background: GREEN }} />Em curso {nActive}</div>
@@ -401,14 +401,14 @@ function Recon({ reconAnd, reconAF, reconCon }) {
         <div className="x"><i style={{ background: BLUE_LIGHT }} />Concl. {nCon}</div>
       </div>
       <div className="recchips" key={win.off}>
-        {chips.length === 0
-          ? <div className="pxempty">Sem máquinas em recondicionamento</div>
-          : win.slice.map((c, i) => (
-            <div key={(c.m.id || i) + "-" + i} className={`rchip ${c.cls}`}>{c.cls === "done" ? "✓ " : ""}{nsSplit(c.m.serie).main} · {c.t}</div>
-          ))}
+        {chips.length === 0 ?
+        <div className="pxempty">Sem máquinas em recondicionamento</div> :
+        win.slice.map((c, i) =>
+        <div key={(c.m.id || i) + "-" + i} className={`rchip ${c.cls}`}>{c.cls === "done" ? "✓ " : ""}{nsSplit(c.m.serie).main} · {c.t}</div>
+        )}
       </div>
-    </>
-  );
+    </>);
+
 }
 
 // ── CONCLUÍDAS DA SEMANA (destaque) — detalhes em azul claro ─────────────────
@@ -421,18 +421,18 @@ function Concluidas({ conSemana }) {
         const ns = nsSplit(m.serie);
         const tier = tierRecon(m);
         return (
-          <div key={(m.id || i)} className="crow">
+          <div key={m.id || i} className="crow">
             <div className="ck">✓</div>
             <div style={{ minWidth: 0, flex: 1 }}>
               <div className="cn"><TypeDot m={m} size={6} />{ns.main}</div>
               <div className="cm">{m.modelo || "—"}{tier ? ` · ${tier}` : ""}</div>
             </div>
             <div className="cti">{t}</div>
-          </div>
-        );
+          </div>);
+
       })}
-    </div>
-  );
+    </div>);
+
 }
 
 // ── Cabeçalho de painel ──────────────────────────────────────────────────────
@@ -442,22 +442,22 @@ function CardHead({ c, title, sub, ct }) {
       <span className="mk" /><h3>{title}</h3>
       {sub && <span className="sub">{sub}</span>}
       {ct != null && <span className="ct">{pad2(ct)}</span>}
-    </div>
-  );
+    </div>);
+
 }
 
 // ── COMPONENTE PRINCIPAL ─────────────────────────────────────────────────────
 export default function AoVivoOps({ data, loading, paused, cycleTheme, theme }) {
   const { machines = [], andamento = [], standby = [], prioritarias = [], proximas = [],
-          ntsAnd = [], ntsAF = [], reconAnd = [], reconAF = [], reconCon = [],
-          conSemana = [], totalCon = [], conHoje = [], avgH = 0 } = data || {};
+    ntsAnd = [], ntsAF = [], reconAnd = [], reconAF = [], reconCon = [],
+    conSemana = [], totalCon = [], conHoje = [], avgH = 0 } = data || {};
 
   const nts = [...ntsAnd, ...ntsAF];
-  const aSeguir = proximas.filter(m => {
+  const aSeguir = proximas.filter((m) => {
     const active = m.timer_status === "running" || m.timer_status?.startsWith("paused");
     if (active || !m.previsao_inicio) return false;
     const d = new Date(m.previsao_inicio + (String(m.previsao_inicio).length === 10 ? "T00:00:00" : ""));
-    const t0 = new Date(); t0.setHours(0, 0, 0, 0);
+    const t0 = new Date();t0.setHours(0, 0, 0, 0);
     return d >= t0;
   });
   const emCurso = andamento.length;
@@ -467,33 +467,33 @@ export default function AoVivoOps({ data, loading, paused, cycleTheme, theme }) 
   const nReconTotal = nRecon + reconCon.length;
 
   const KPI = [
-    { n: emCurso,          l: "Em andamento",      c: GREEN },
-    { n: prioritarias.length, l: "Prioritárias",   c: ORANGE_DARK },
-    { n: nts.length,       l: "NTS",               c: RED, alert: true },
-    { n: nRecon,           l: "Recon",             c: PINK },
-    { n: conSemana.length, l: "Concluídas · sem.", c: BLUE_LIGHT },
-    { n: avgH ? avgH + "h" : "—", l: "Méd. por máq.", c: "#33C7E0" },
-    { n: totalCon.length,  l: "Total 2026",        c: BLUE },
-  ];
+  { n: emCurso, l: "Em andamento", c: GREEN },
+  { n: prioritarias.length, l: "Prioritárias", c: ORANGE_DARK },
+  { n: nts.length, l: "NTS", c: RED, alert: true },
+  { n: nRecon, l: "Recon", c: PINK },
+  { n: conSemana.length, l: "Concluídas · sem.", c: BLUE_LIGHT },
+  { n: avgH ? avgH + "h" : "—", l: "Méd. por máq.", c: "#33C7E0" },
+  { n: totalCon.length, l: "Total 2026", c: BLUE }];
+
 
   // Gauge — estatísticas do dia (cores da paleta reflectidas)
   const gstats = [
-    ["Em andamento", emCurso,             GREEN],
-    ["Prioritárias", prioritarias.length, ORANGE_DARK],
-    ["Standby",      standby.length,      YELLOW_LIGHT],
-    ["Recon",        nRecon,              PINK],
-  ];
-  const gmax = Math.max(...gstats.map(g => g[1]), 1);
+  ["Em andamento", emCurso, GREEN],
+  ["Prioritárias", prioritarias.length, ORANGE_DARK],
+  ["Standby", standby.length, YELLOW_LIGHT],
+  ["Recon", nRecon, PINK]];
+
+  const gmax = Math.max(...gstats.map((g) => g[1]), 1);
 
   // Flags dinâmicas
-  const showAnd  = emCurso > 0;
-  const showRec  = nReconTotal > 0;
-  const showCon  = conSemana.length > 0;
+  const showAnd = emCurso > 0;
+  const showRec = nReconTotal > 0;
+  const showCon = conSemana.length > 0;
   const showPrio = prioritarias.length > 0;
-  const showNts  = nts.length > 0;
+  const showNts = nts.length > 0;
   const showProx = aSeguir.length > 0;
-  const showStb  = standby.length > 0;
-  const hasTL    = machines.some(hasPrevisao);
+  const showStb = standby.length > 0;
+  const hasTL = machines.some(hasPrevisao);
   const showSmall = showPrio || showNts || showProx || showStb;
 
   return (
@@ -504,7 +504,7 @@ export default function AoVivoOps({ data, loading, paused, cycleTheme, theme }) 
         {/* HEADER */}
         <div className="head">
           <div className="logo"><img src={JORDAN_URL} alt="Watcher" /></div>
-          <div className="brand"><b>Watcher</b><span>STILL</span></div>
+          <div className="brand"><b>Watcher</b><span className="text-[hsl(var(--destructive-foreground))]">STILL</span></div>
           <div className="right">
             <div className={`pill live${paused ? " paused" : ""}`}>
               <span className="dot" />{paused ? "Em pausa" : "Ao vivo"}
@@ -516,12 +516,12 @@ export default function AoVivoOps({ data, loading, paused, cycleTheme, theme }) 
 
         {/* KPIs */}
         <div className="kpis">
-          {KPI.map((k, i) => (
-            <div key={i} className={`kpi${k.alert ? " alert" : ""}`} style={{ "--c": k.c }}>
+          {KPI.map((k, i) =>
+          <div key={i} className={`kpi${k.alert ? " alert" : ""}`} style={{ "--c": k.c }}>
               <div className="lab"><i />{k.l}</div>
               <div className="num">{loading ? "—" : k.n}</div>
             </div>
-          ))}
+          )}
         </div>
 
         {/* MAIN — flex dinâmico */}
@@ -529,24 +529,24 @@ export default function AoVivoOps({ data, loading, paused, cycleTheme, theme }) 
 
           {/* TOPO: destaques + gauge */}
           <div className="top">
-            {showAnd && (
-              <div className="card hi and" style={{ "--c": GREEN }}>
+            {showAnd &&
+            <div className="card hi and" style={{ "--c": GREEN }}>
                 <CardHead c={GREEN} title="Em andamento" sub="tempo restante ao vivo" ct={emCurso} />
                 <div className="cb"><EmAndamento andamento={andamento} /></div>
               </div>
-            )}
-            {showRec && (
-              <div className="card hi rec" style={{ "--c": PINK }}>
+            }
+            {showRec &&
+            <div className="card hi rec" style={{ "--c": PINK }}>
                 <CardHead c={PINK} title="Recondicionamento" ct={nReconTotal} />
                 <div className="cb"><Recon reconAnd={reconAnd} reconAF={reconAF} reconCon={reconCon} /></div>
               </div>
-            )}
-            {showCon && (
-              <div className="card hi con" style={{ "--c": BLUE_LIGHT }}>
+            }
+            {showCon &&
+            <div className="card hi con" style={{ "--c": BLUE_LIGHT }}>
                 <CardHead c={BLUE_LIGHT} title="Concluídas" sub="esta semana" ct={conSemana.length} />
                 <div className="cb"><Concluidas conSemana={conSemana} /></div>
               </div>
-            )}
+            }
             {/* Desempenho — sempre visível, rotativo (reator ↔ donut) */}
             <div className="card gau" style={{ "--c": RED }}>
               <CardHead c={RED} title="Desempenho do dia" />
@@ -555,51 +555,51 @@ export default function AoVivoOps({ data, loading, paused, cycleTheme, theme }) 
           </div>
 
           {/* INFERIOR: pequenos (esq.) + gantt (dir.) */}
-          {(showSmall || hasTL) && (
-            <div className="bottom">
-              {showSmall && (
-                <div className="smallzone">
-                  {showPrio && (
-                    <div className="card sm" style={{ "--c": ORANGE_DARK }}>
+          {(showSmall || hasTL) &&
+          <div className="bottom">
+              {showSmall &&
+            <div className="smallzone">
+                  {showPrio &&
+              <div className="card sm" style={{ "--c": ORANGE_DARK }}>
                       <CardHead c={ORANGE_DARK} title="Prioritárias" ct={prioritarias.length} />
                       <div className="cb"><Prioritarias prioritarias={prioritarias} /></div>
                     </div>
-                  )}
-                  {showNts && (
-                    <div className="card sm" style={{ "--c": RED }}>
+              }
+                  {showNts &&
+              <div className="card sm" style={{ "--c": RED }}>
                       <CardHead c={RED} title="NTS" ct={nts.length} />
                       <div className="cb"><Nts nts={nts} /></div>
                     </div>
-                  )}
-                  {showProx && (
-                    <div className="card sm" style={{ "--c": BLUE }}>
+              }
+                  {showProx &&
+              <div className="card sm" style={{ "--c": BLUE }}>
                       <CardHead c={BLUE} title="A seguir" ct={aSeguir.length} />
                       <div className="cb"><ASeguir proximas={aSeguir} /></div>
                     </div>
-                  )}
-                  {showStb && (
-                    <div className="card sm" style={{ "--c": YELLOW_LIGHT }}>
+              }
+                  {showStb &&
+              <div className="card sm" style={{ "--c": YELLOW_LIGHT }}>
                       <CardHead c={YELLOW_LIGHT} title="Standby" ct={standby.length} />
                       <div className="cb"><Standby standby={standby} /></div>
                     </div>
-                  )}
+              }
                 </div>
-              )}
-              {hasTL && (
-                <div className="ganttzone">
+            }
+              {hasTL &&
+            <div className="ganttzone">
                   <div className="card tl" style={{ "--c": BLUE }}>
                     <CardHead c={BLUE} title="Linha do tempo" sub="próximos 14 dias" />
                     <div className="cb"><Timeline machines={machines} /></div>
                   </div>
                 </div>
-              )}
+            }
             </div>
-          )}
+          }
 
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

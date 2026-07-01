@@ -668,11 +668,11 @@ const CSS_OPS = `
 
 /* ===== KPI row ===== */
 .ops-root .kpis{display:grid; grid-template-columns:repeat(7,1fr); gap:clamp(8px,.7vw,14px); flex:none}
-.ops-root .kpi{padding:clamp(11px,.85vw,16px); display:flex; flex-direction:column; gap:8px; overflow:hidden}
-.ops-root .kpi .lab{font-size:clamp(9px,.72vw,11px); font-weight:700; letter-spacing:.06em; color:var(--mut); text-transform:uppercase; display:flex; align-items:center; gap:6px}
+.ops-root .kpi{padding:clamp(11px,.85vw,16px); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; overflow:hidden; text-align:center}
+.ops-root .kpi .lab{font-size:clamp(9px,.72vw,11px); font-weight:700; letter-spacing:.06em; color:var(--mut); text-transform:uppercase; display:flex; align-items:center; justify-content:center; gap:6px}
 .ops-root .kpi .lab i{width:7px; height:7px; border-radius:50%; background:var(--c); flex:none; box-shadow:0 0 6px var(--c)}
-.ops-root .kpi .num{font-size:clamp(24px,2.2vw,36px); font-weight:700; line-height:1; letter-spacing:-.03em; font-family:var(--mono)}
-.ops-root .kpi.alert{border-color:rgba(251,94,94,.4)} .ops-root .kpi.alert .num{color:var(--red)}
+.ops-root .kpi .num{font-size:clamp(24px,2.2vw,36px); font-weight:700; line-height:1; letter-spacing:-.03em; font-family:var(--mono); color:#fff}
+.ops-root .kpi.alert{border-color:rgba(251,94,94,.4)}
 
 /* ===== MAIN — flex dinâmico ===== */
 .ops-root .main{flex:1; min-height:0; display:flex; flex-direction:column; gap:var(--gap)}

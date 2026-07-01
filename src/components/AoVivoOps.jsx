@@ -181,23 +181,89 @@ function TypeDonut({ machines }) {
 
 }
 
-// ── Desempenho do dia — rota entre reator "no prazo" e donut de tipos ─────────
+// ── Donut isolado (só gráfico, sem stats laterais) ───────────────────────────
+function DonutOnly({ machines, counts, total }) {
+  const segs = [
+    { ...TYPE.acp, n: counts.acp },
+    { ...TYPE.nts, n: counts.nts },
+    { ...TYPE.recon, n: counts.recon },
+  ];
+  const r = 58, C = 2 * Math.PI * r;
+  let acc = 0;
+  return (
+    <div className="donut">
+      <svg viewBox="0 0 160 160">
+        <circle cx="80" cy="80" r={r} fill="none" stroke="rgba(255,255,255,.07)" strokeWidth="16" />
+        {segs.map((s, i) => {
+          const frac = s.n / total;
+          const dash = C * frac, off = -acc * C;
+          acc += frac;
+          if (s.n === 0) return null;
+          return <circle key={i} cx="80" cy="80" r={r} fill="none" stroke={s.color} strokeWidth="16"
+            strokeDasharray={`${dash} ${C - dash}`} strokeDashoffset={off}
+            transform="rotate(-90 80 80)" strokeLinecap="butt"
+            style={{ filter: `drop-shadow(0 0 4px ${s.color})` }} />;
+        })}
+      </svg>
+      <div className="donutc"><b>{machines.length}</b><span>máquinas</span></div>
+    </div>);
+}
+
+// ── Desempenho do dia — carrossel vertical (gráfico cima, dados baixo) ────────
 function Desempenho({ noPrazoPct, gstats, gmax, machines }) {
+  const [view, setView] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setView((v) => (v + 1) % 2), 8000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Slide 0: TriReactor + barras de status (gstats)
+  // Slide 1: Donut de tipos + barras ACP/NTS/RECON
+  const counts = { nts: 0, acp: 0, recon: 0 };
+  machines.forEach((m) => { counts[machineType(m).key]++; });
+  const total = machines.length || 1;
+  const typeStats = [
+    [TYPE.acp.label, counts.acp, TYPE.acp.color],
+    [TYPE.nts.label, counts.nts, TYPE.nts.color],
+    [TYPE.recon.label, counts.recon, TYPE.recon.color],
+  ];
+  const typeMax = Math.max(...typeStats.map(g => g[1]), 1);
+
   return (
     <div className="cb desemp-cb">
-      <div className="desemp-top">
-        <TriReactor pct={noPrazoPct} />
-        <TypeDonut machines={machines} />
-      </div>
-      <div className="desemp-stats">
-        {gstats.map((g, i) =>
-          <div key={i} className="gstat">
-            <div className="gl">
-              <span className="lg"><i style={{ background: g[2] }} />{g[0]}</span>
-              <b>{g[1]}</b>
+      <div className="desemp-slide gaufade" key={view}>
+        {view === 0 ? (
+          <>
+            {/* gráfico em cima */}
+            <div className="desemp-fig">
+              <TriReactor pct={noPrazoPct} />
             </div>
-            <div className="gb"><i style={{ width: g[1] / gmax * 100 + "%", background: g[2] }} /></div>
-          </div>
+            {/* dados em baixo */}
+            <div className="desemp-bars">
+              {gstats.map((g, i) =>
+                <div key={i} className="gstat">
+                  <div className="gl"><span className="lg"><i style={{ background: g[2] }} />{g[0]}</span><b>{g[1]}</b></div>
+                  <div className="gb"><i style={{ width: g[1] / gmax * 100 + "%", background: g[2] }} /></div>
+                </div>
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            {/* donut em cima */}
+            <div className="desemp-fig desemp-fig--donut">
+              <DonutOnly machines={machines} counts={counts} total={total} />
+            </div>
+            {/* barras ACP/NTS/RECON em baixo */}
+            <div className="desemp-bars">
+              {typeStats.map((g, i) =>
+                <div key={i} className="gstat">
+                  <div className="gl"><span className="lg"><i style={{ background: g[2] }} />{g[0]}</span><b>{g[1]}</b></div>
+                  <div className="gb"><i style={{ width: g[1] / typeMax * 100 + "%", background: g[2] }} /></div>
+                </div>
+              )}
+            </div>
+          </>
         )}
       </div>
     </div>);
@@ -750,9 +816,11 @@ const CSS_OPS = `
 /* ===== GAUGE / DONUT ===== */
 .ops-root .gauwrap{display:flex; align-items:center; gap:14px; height:100%}
 /* ===== DESEMPENHO layout fixo ===== */
-.ops-root .desemp-cb{display:flex; flex-direction:column; gap:8px}
-.ops-root .desemp-top{display:flex; align-items:center; justify-content:space-around; gap:8px; flex:1; min-height:0}
-.ops-root .desemp-stats{display:flex; flex-direction:column; gap:clamp(5px,.55vw,9px); flex-shrink:0; padding-top:4px; border-top:1px solid var(--line)}
+.ops-root .desemp-cb{overflow:hidden}
+.ops-root .desemp-slide{display:flex; flex-direction:column; gap:8px; height:100%; animation:opsFade .5s ease}
+.ops-root .desemp-fig{display:flex; justify-content:center; align-items:center; flex:1; min-height:0}
+.ops-root .desemp-fig--donut{flex:1.2}
+.ops-root .desemp-bars{display:flex; flex-direction:column; gap:clamp(5px,.55vw,9px); flex-shrink:0; padding-top:6px; border-top:1px solid var(--line)}
 .ops-root .gaufade{animation:opsFade .5s ease}
 .ops-root .trir{position:relative; width:clamp(80px,8vw,130px); flex:none; aspect-ratio:200/190}
 .ops-root .trir svg{width:100%; height:100%; display:block}

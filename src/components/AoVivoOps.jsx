@@ -1,15 +1,16 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// AoVivoOps — 6ª pele de UI: OPERATIONS (tela única, sem rotação de slides).
-// Baseada no mockup inlive_v12_ops.html, com as correcções pedidas:
-//  · Destaque forte (fundo branco / liquid-glass claro): EM ANDAMENTO,
-//    RECONDICIONAMENTO, CONCLUÍDAS DA SEMANA.
-//  · Destaque menor (glass escuro sóbrio): STANDBY, A SEGUIR, NTS.
-//  · Gauge "Desempenho do dia" = triângulo invertido estilo reator ark.
-//  · Logo InLive (mascote) no canto superior esquerdo; sem "atualizado há Xs".
-//  · Efeito Apple "liquid glass" (iOS) sóbrio e leve — pensado para correr
-//    bem tanto no PC como na TV/Chromecast (blur moderado + fallback sólido,
-//    sem animações pesadas).
-//  · Painéis que transbordam rodam subtilmente entre as máquinas.
+// AoVivoOps — pele "OPERATIONS" (tela única, sem rotação de slides).
+// Layout dinâmico: os quadros aparecem/desaparecem consoante existam dados,
+// dando fluidez à informação vigente.
+//  · Destaque (fundo branco / liquid-glass claro): EM ANDAMENTO,
+//    RECONDICIONAMENTO, CONCLUÍDAS DA SEMANA — realocados no topo.
+//  · Quadros pequenos do mesmo tamanho no canto inferior esquerdo:
+//    PRIORITÁRIAS, NTS, A SEGUIR, STANDBY.
+//  · GANTT (linha do tempo) no canto inferior direito.
+//  · Gauge "Desempenho do dia" = triângulo invertido estilo reator ark,
+//    com o número bem legível na zona larga (topo) do triângulo.
+//  · Logo Watcher (mascote) no canto superior esquerdo; sem "atualizado há Xs".
+//  · Liquid-glass sóbrio e leve (multiplataforma PC + TV/Chromecast).
 // Recebe TODOS os dados já calculados via props do AoVivo. Render-only.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -62,11 +63,6 @@ function tierRecon(m) {
   const r = m.recondicao || {};
   return r.ouro ? "OURO" : r.prata ? "PRATA" : r.bronze ? "BRONZE" : r.ferro ? "FERRO" : null;
 }
-function tipoIntervencao(m) {
-  if (m.tipo === "nova") return { label: "NTS",   color: "#FB5E5E" };
-  if (tierRecon(m))      return { label: "RECON", color: "#A98BFA" };
-  return                        { label: "ACP",   color: "#33C7E0" };
-}
 function isOverdue(m) {
   if (!m.previsao_fim) return false;
   const conc = m.estado?.startsWith("concluida") || m.estado === "concluida";
@@ -74,10 +70,10 @@ function isOverdue(m) {
   try { return new Date(m.previsao_fim + (String(m.previsao_fim).length === 10 ? "T23:59:59" : "")) < new Date(); }
   catch { return false; }
 }
+function hasPrevisao(m) { return !!(m.previsao_inicio && m.previsao_fim); }
 const JORDAN_URL = "https://media.base44.com/images/public/6a045759b56878764b71db11/b4686dedd_Gemini_Generated_Image_6i6wgc6i6wgc6i6w1.png";
 
 // Janela rotativa: se items > size, avança uma "página" a cada intervalo.
-// Leve (um setInterval por painel) — sem animações caras, só troca de key.
 function useRotatingWindow(items, size, intervalMs) {
   const n = items.length;
   const [off, setOff] = useState(0);
@@ -86,10 +82,10 @@ function useRotatingWindow(items, size, intervalMs) {
     const id = setInterval(() => setOff(o => (o + size) % n), intervalMs);
     return () => clearInterval(id);
   }, [n, size, intervalMs]);
-  if (n <= size) return { slice: items, off: 0, page: 0, pages: 1, rotating: false };
+  if (n <= size) return { slice: items, off: 0, rotating: false };
   const start = off % n;
   const slice = Array.from({ length: size }, (_, i) => items[(start + i) % n]);
-  return { slice, off, page: Math.floor(start / size), pages: Math.ceil(n / size), rotating: true };
+  return { slice, off, rotating: true };
 }
 
 // ── Relógio ──────────────────────────────────────────────────────────────────
@@ -104,27 +100,25 @@ function Clock() {
   );
 }
 
-// ── Gauge: triângulo invertido estilo reator ark ─────────────────────────────
+// ── Gauge: triângulo invertido estilo reator ark (número na zona larga) ──────
 function TriReactor({ pct }) {
   const p = Math.max(0, Math.min(100, Math.round(pct)));
   const col = p >= 85 ? "#2FD3A5" : p >= 60 ? "#F5B13D" : "#FB5E5E";
-  const tri = "M26,54 L154,54 L90,160 Z";
+  const tri = "M34,42 L166,42 L100,168 Z";
   return (
     <div className="trir">
-      <svg viewBox="0 0 180 180" preserveAspectRatio="xMidYMid meet">
-        {/* triângulos concêntricos (profundidade do reator) */}
-        <path d="M26,54 L154,54 L90,160 Z" fill="none" stroke="rgba(255,255,255,.09)" strokeWidth="11" strokeLinejoin="round" />
-        <path d="M50,68 L130,68 L90,135 Z"  fill="none" stroke="rgba(255,255,255,.06)" strokeWidth="2" strokeLinejoin="round" />
-        <path d="M66,78 L114,78 L90,118 Z"  fill="none" stroke="rgba(255,255,255,.05)" strokeWidth="2" strokeLinejoin="round" />
-        {/* progresso ao longo do triângulo exterior */}
-        <path d={tri} pathLength="100" fill="none" stroke={col} strokeWidth="11"
+      <svg viewBox="0 0 200 190" preserveAspectRatio="xMidYMid meet">
+        <path d={tri} fill="none" stroke="rgba(255,255,255,.08)" strokeWidth="10" strokeLinejoin="round" />
+        <path d={tri} pathLength="100" fill="none" stroke={col} strokeWidth="10"
           strokeLinecap="round" strokeLinejoin="round"
           strokeDasharray="100" strokeDashoffset={100 - p}
           style={{ filter: `drop-shadow(0 0 5px ${col})` }} />
-        {/* núcleo */}
-        <circle cx="90" cy="94" r="4.5" fill={col} style={{ filter: `drop-shadow(0 0 6px ${col})` }} />
+        <circle cx="100" cy="134" r="4" fill={col} style={{ filter: `drop-shadow(0 0 6px ${col})` }} />
       </svg>
-      <div className="tric"><b style={{ color: col }}>{p}%</b><span>No prazo</span></div>
+      <div className="tric">
+        <b style={{ color: col }}>{p}<i>%</i></b>
+        <span>No prazo</span>
+      </div>
     </div>
   );
 }
@@ -170,32 +164,88 @@ function Trow({ m }) {
     </div>
   );
 }
-
-// ── NTS (destaque menor) ─────────────────────────────────────────────────────
-function NtsRow({ m }) {
-  const elapsed  = useLiveTimer(m);
-  const meta     = Number(m.tempo_estimado_segundos) || 0;
-  const deltaSec = meta > 0 ? elapsed - meta : 0;
-  const bad      = deltaSec > 0;
-  const ns       = nsSplit(m.serie);
-  const dias = m.dataAtribuicao
-    ? Math.max(0, Math.floor((Date.now() - new Date(m.dataAtribuicao).getTime()) / 86400000)) : null;
-  const tags = [];
-  if (dias != null) tags.push(`${dias}d`);
-  tags.push(m.aguardaPecas ? "aguarda peças" : "peças OK");
+function EmAndamento({ andamento }) {
+  const win = useRotatingWindow(andamento, 7, 9000);
+  const rows = [...win.slice].sort((a, b) => {
+    const ra = (Number(a.tempo_estimado_segundos) || 0) - (Number(a.timer_accumulated_seconds) || 0);
+    const rb = (Number(b.tempo_estimado_segundos) || 0) - (Number(b.timer_accumulated_seconds) || 0);
+    return ra - rb;
+  });
   return (
-    <div className="ntrow">
-      <div className="t1">
-        <span className="nns">{ns.main}{ns.sub && <small> · {ns.sub}</small>}</span>
-        {meta > 0 && <span className={`delta2 ${bad ? "bad" : "ok"}`}>Δ {(bad ? "+" : "") + fmtHMS(Math.abs(deltaSec))}</span>}
+    <>
+      <div className="thead"><div>Máquina</div><div>Estado</div><div>Progresso</div><div className="r">Restante</div><div /></div>
+      <div className="trows" key={win.off}>{rows.map(m => <Trow key={m.id} m={m} />)}</div>
+    </>
+  );
+}
+
+// ── Quadros pequenos (mesmo tamanho): PRIO, NTS, A SEGUIR, STANDBY ───────────
+function MiniRow({ c, ns, mo, v, vc }) {
+  return (
+    <div className="mrow" style={{ "--c": c }}>
+      <div style={{ minWidth: 0 }}>
+        <div className="mn">{ns}</div>
+        <div className="mm">{mo}</div>
       </div>
-      {m.observacoes && <div className="why">{m.observacoes}</div>}
-      <div className="meta2">{tags.map((t, i) => <span key={i} className="tag">{t}</span>)}</div>
+      <span className="mv" style={{ color: vc || c }}>{v}</span>
+    </div>
+  );
+}
+function Prioritarias({ prioritarias }) {
+  const win = useRotatingWindow(prioritarias, 4, 9000);
+  return (
+    <div className="mlist" key={win.off}>
+      {win.slice.map((m, i) => {
+        const fim = fmtDateShort(m.previsao_fim);
+        return <MiniRow key={m.id || i} c="#F5B13D" ns={nsSplit(m.serie).main} mo={m.modelo || "—"}
+          v={fim ? `⚑ ${fim}` : "⚡"} vc="#F5B13D" />;
+      })}
+    </div>
+  );
+}
+function NtsMiniRow({ m }) {
+  const elapsed = useLiveTimer(m);
+  const meta = Number(m.tempo_estimado_segundos) || 0;
+  const d = meta > 0 ? elapsed - meta : 0;
+  const v = meta > 0 ? `Δ ${(d > 0 ? "+" : "")}${fmtHMS(Math.abs(d))}` : "NTS";
+  const vc = meta > 0 && d > 0 ? "#FB5E5E" : "#2FD3A5";
+  return <MiniRow c="#FB5E5E" ns={nsSplit(m.serie).main} mo={m.modelo || "—"} v={v} vc={vc} />;
+}
+function Nts({ nts }) {
+  const win = useRotatingWindow(nts, 4, 9000);
+  return <div className="mlist" key={win.off}>{win.slice.map((m, i) => <NtsMiniRow key={m.id || i} m={m} />)}</div>;
+}
+function ASeguir({ proximas }) {
+  const win = useRotatingWindow(proximas, 4, 9000);
+  return (
+    <div className="mlist" key={win.off}>
+      {win.slice.map((m, i) => {
+        const meta = Number(m.tempo_estimado_segundos) || 0;
+        const h = meta > 0 ? Math.round(meta / 3600) + "h" : "";
+        const wd = m.previsao_inicio
+          ? new Date(m.previsao_inicio).toLocaleDateString("pt-PT", { weekday: "short" }).toUpperCase().replace(".", "")
+          : "";
+        const v = [wd, h].filter(Boolean).join(" · ") || "—";
+        return <MiniRow key={m.id || i} c="#5B8CFF" ns={nsSplit(m.serie).main} mo={m.modelo || "—"} v={v} vc="#5B8CFF" />;
+      })}
+    </div>
+  );
+}
+function Standby({ standby }) {
+  const win = useRotatingWindow(standby, 4, 9000);
+  return (
+    <div className="mlist" key={win.off}>
+      {win.slice.map((m, i) => {
+        const motivo = getPausaMotivo(m);
+        const c = motivo === "prioritaria" ? "#FB5E5E" : motivo === "aguarda_pecas" ? "#F5B13D" : "#A98BFA";
+        return <MiniRow key={m.id || i} c={c} ns={nsSplit(m.serie).main} mo={m.modelo || "—"}
+          v={fmtHMS(Number(m.timer_accumulated_seconds) || 0)} vc="#F5B13D" />;
+      })}
     </div>
   );
 }
 
-// ── TIMELINE / gantt (mesmo tamanho do mockup) ───────────────────────────────
+// ── GANTT / linha do tempo (canto inferior direito) ──────────────────────────
 function Timeline({ machines }) {
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const BACK = 1, AHEAD = 13;
@@ -217,7 +267,7 @@ function Timeline({ machines }) {
     return { m, a, b, run, isActive, over };
   }).filter(Boolean)
     .sort((x, y) => (x.isActive === y.isActive) ? x.a - y.a : x.isActive ? -1 : 1)
-    .slice(0, 5);
+    .slice(0, 7);
   return (
     <>
       <div className="tlhead">
@@ -246,45 +296,6 @@ function Timeline({ machines }) {
           })}
       </div>
     </>
-  );
-}
-
-// ── A SEGUIR (destaque menor) ────────────────────────────────────────────────
-function Proximas({ proximas }) {
-  const monday = getMondayUTC();
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const days = Array.from({ length: 5 }, (_, i) => { const d = new Date(monday); d.setUTCDate(monday.getUTCDate() + i); return d; });
-  const byDay = {};
-  proximas.forEach(m => {
-    if (!m.previsao_inicio) return;
-    const k = new Date(m.previsao_inicio).toISOString().slice(0, 10);
-    (byDay[k] = byDay[k] || []).push(m);
-  });
-  const groups = days.map(d => ({ d, k: d.toISOString().slice(0, 10) }))
-    .filter(g => (byDay[g.k] || []).length > 0);
-  return (
-    <div className="pxlist">
-      {groups.length === 0
-        ? <div className="pxempty">Sem entradas planeadas</div>
-        : groups.map(({ d, k }) => (
-          <div key={k} className={`pxgroup${k === todayStr ? " now" : ""}`}>
-            <div className="pgh">{d.toLocaleDateString("pt-PT", { weekday: "long" }).toUpperCase()}<span>{(byDay[k] || []).length}</span></div>
-            {(byDay[k] || []).slice(0, 4).map(m => {
-              const meta = Number(m.tempo_estimado_segundos) || 0;
-              const h = meta > 0 ? Math.round(meta / 3600) + "h" : "—";
-              return (
-                <div key={m.id} className="pxrow">
-                  <div style={{ minWidth: 0 }}>
-                    <div className="pn">{nsSplit(m.serie).main}</div>
-                    <div className="pm">{m.modelo || "—"}</div>
-                  </div>
-                  <span className="ph">{h}</span>
-                </div>
-              );
-            })}
-          </div>
-        ))}
-    </div>
   );
 }
 
@@ -322,50 +333,37 @@ function Recon({ reconAnd, reconAF, reconCon }) {
   );
 }
 
-// ── STANDBY (destaque menor) ─────────────────────────────────────────────────
-function Standby({ standby }) {
-  const win = useRotatingWindow(standby, 5, 9000);
-  return (
-    <div className="slist" key={win.off}>
-      {standby.length === 0
-        ? <div className="pxempty">Nenhuma em standby</div>
-        : win.slice.map((m, i) => {
-          const motivo = getPausaMotivo(m);
-          const c = motivo === "prioritaria" ? "#FB5E5E" : motivo === "aguarda_pecas" ? "#F5B13D" : "#A98BFA";
-          return (
-            <div key={(m.id || i)} className="srow" style={{ "--c": c }}>
-              <span className="st2">{fmtHMS(Number(m.timer_accumulated_seconds) || 0)}</span>
-              <div className="sn">{nsSplit(m.serie).main}</div>
-              <div className="sm">{m.modelo || "—"}{m.observacoes ? ` · ${m.observacoes}` : ""}</div>
-            </div>
-          );
-        })}
-    </div>
-  );
-}
-
 // ── CONCLUÍDAS DA SEMANA (destaque · fundo claro) ────────────────────────────
 function Concluidas({ conSemana }) {
   const win = useRotatingWindow(conSemana, 6, 10000);
   return (
     <div className="clist" key={win.off}>
-      {conSemana.length === 0
-        ? <div className="pxempty">Nada concluído esta semana</div>
-        : win.slice.map((m, i) => {
-          const t = m.timer_accumulated_seconds ? fmtHMS(m.timer_accumulated_seconds) : "—";
-          const ns = nsSplit(m.serie);
-          const tier = tierRecon(m);
-          return (
-            <div key={(m.id || i)} className="crow">
-              <div className="ck">✓</div>
-              <div style={{ minWidth: 0 }}>
-                <div className="cn">{ns.main}</div>
-                <div className="cm">{m.modelo || "—"}{tier ? ` · ${tier}` : ""}</div>
-              </div>
-              <div className="cti">{t}</div>
+      {win.slice.map((m, i) => {
+        const t = m.timer_accumulated_seconds ? fmtHMS(m.timer_accumulated_seconds) : "—";
+        const ns = nsSplit(m.serie);
+        const tier = tierRecon(m);
+        return (
+          <div key={(m.id || i)} className="crow">
+            <div className="ck">✓</div>
+            <div style={{ minWidth: 0 }}>
+              <div className="cn">{ns.main}</div>
+              <div className="cm">{m.modelo || "—"}{tier ? ` · ${tier}` : ""}</div>
             </div>
-          );
-        })}
+            <div className="cti">{t}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── Cabeçalho de painel ──────────────────────────────────────────────────────
+function CardHead({ c, title, sub, ct }) {
+  return (
+    <div className="ch" style={{ "--c": c }}>
+      <span className="mk" /><h3>{title}</h3>
+      {sub && <span className="sub">{sub}</span>}
+      {ct != null && <span className="ct">{pad2(ct)}</span>}
     </div>
   );
 }
@@ -377,10 +375,19 @@ export default function AoVivoOps({ data, loading, paused, sPaused, cycleTheme, 
           conSemana = [], totalCon = [], conHoje = [], avgH = 0 } = data || {};
 
   const nts = [...ntsAnd, ...ntsAF];
+  // "A seguir" = só o que ainda não começou (futuro) e não está activo/pausado.
+  const aSeguir = proximas.filter(m => {
+    const active = m.timer_status === "running" || m.timer_status?.startsWith("paused");
+    if (active || !m.previsao_inicio) return false;
+    const d = new Date(m.previsao_inicio + (String(m.previsao_inicio).length === 10 ? "T00:00:00" : ""));
+    const t0 = new Date(); t0.setHours(0, 0, 0, 0);
+    return d >= t0;
+  });
   const emCurso = andamento.length;
   const overdue = andamento.filter(isOverdue).length;
   const noPrazoPct = emCurso > 0 ? Math.round((1 - overdue / emCurso) * 100) : 100;
   const nRecon = reconAnd.length + reconAF.length;
+  const nReconTotal = nRecon + reconCon.length;
 
   const KPI = [
     { n: emCurso,          l: "Em andamento",      c: "#2FD3A5" },
@@ -392,15 +399,25 @@ export default function AoVivoOps({ data, loading, paused, sPaused, cycleTheme, 
     { n: totalCon.length,  l: "Total 2026",        c: "#5B8CFF" },
   ];
 
-  const gmax = Math.max(emCurso, standby.length, prioritarias.length, nts.length, 1);
+  // Gauge — estatísticas do dia (sem "NTS críticas", fora de escopo)
   const gstats = [
-    ["Em andamento", emCurso,           "#2FD3A5"],
-    ["Standby",      standby.length,    "#F5B13D"],
-    ["Prioritárias", prioritarias.length, "#5B8CFF"],
-    ["NTS críticas", nts.length,        "#FB5E5E"],
+    ["Em andamento", emCurso,             "#2FD3A5"],
+    ["Prioritárias", prioritarias.length, "#F5B13D"],
+    ["Standby",      standby.length,      "#5B8CFF"],
+    ["Recon",        nRecon,              "#A98BFA"],
   ];
+  const gmax = Math.max(...gstats.map(g => g[1]), 1);
 
-  const andWin = useRotatingWindow(andamento, 7, 9000);
+  // ── Flags dinâmicas: quadro só existe se houver dados ──────────────────────
+  const showAnd  = emCurso > 0;
+  const showRec  = nReconTotal > 0;
+  const showCon  = conSemana.length > 0;
+  const showPrio = prioritarias.length > 0;
+  const showNts  = nts.length > 0;
+  const showProx = aSeguir.length > 0;
+  const showStb  = standby.length > 0;
+  const hasTL    = machines.some(hasPrevisao);
+  const showSmall = showPrio || showNts || showProx || showStb;
 
   return (
     <div className="ops-root">
@@ -409,8 +426,8 @@ export default function AoVivoOps({ data, loading, paused, sPaused, cycleTheme, 
 
         {/* HEADER */}
         <div className="head">
-          <div className="logo"><img src={JORDAN_URL} alt="InLive" /></div>
-          <div className="brand"><b>InLive · Oficina</b><span>Frota ACP · monitor de serviço</span></div>
+          <div className="logo"><img src={JORDAN_URL} alt="Watcher" /></div>
+          <div className="brand"><b>Watcher · Oficina</b><span>Frota ACP · monitor de serviço</span></div>
           <div className="right">
             <div className={`pill live${paused ? " paused" : ""}`}>
               <span className="dot" />{paused ? "Em pausa" : "Ao vivo"}
@@ -430,81 +447,87 @@ export default function AoVivoOps({ data, loading, paused, sPaused, cycleTheme, 
           ))}
         </div>
 
-        {/* MAIN */}
+        {/* MAIN — flex dinâmico */}
         <div className="main">
 
-          {/* EM ANDAMENTO — destaque */}
-          <div className="card hi and" style={{ "--c": "#2FD3A5" }}>
-            <div className="ch"><span className="mk" /><h3>Em andamento</h3><span className="sub">tempo restante ao vivo</span><span className="ct">{pad2(emCurso)}</span></div>
-            <div className="cb">
-              <div className="thead"><div>Máquina</div><div>Estado</div><div>Progresso</div><div className="r">Restante</div><div /></div>
-              <div className="trows" key={andWin.off}>
-                {andamento.length === 0
-                  ? <div className="pxempty">Sem máquinas em produção</div>
-                  : [...andWin.slice].sort((a, b) => {
-                      const ra = (Number(a.tempo_estimado_segundos) || 0) - (Number(a.timer_accumulated_seconds) || 0);
-                      const rb = (Number(b.tempo_estimado_segundos) || 0) - (Number(b.timer_accumulated_seconds) || 0);
-                      return ra - rb;
-                    }).map(m => <Trow key={m.id} m={m} />)}
+          {/* TOPO: destaques + gauge */}
+          <div className="top">
+            {showAnd && (
+              <div className="card hi and" style={{ "--c": "#2FD3A5" }}>
+                <CardHead c="#2FD3A5" title="Em andamento" sub="tempo restante ao vivo" ct={emCurso} />
+                <div className="cb"><EmAndamento andamento={andamento} /></div>
               </div>
+            )}
+            {showRec && (
+              <div className="card hi rec" style={{ "--c": "#A98BFA" }}>
+                <CardHead c="#A98BFA" title="Recondicionamento" ct={nRecon} />
+                <div className="cb"><Recon reconAnd={reconAnd} reconAF={reconAF} reconCon={reconCon} /></div>
+              </div>
+            )}
+            {showCon && (
+              <div className="card hi con" style={{ "--c": "#2FD3A5" }}>
+                <CardHead c="#2FD3A5" title="Concluídas" sub="esta semana" ct={conSemana.length} />
+                <div className="cb"><Concluidas conSemana={conSemana} /></div>
+              </div>
+            )}
+            {/* Desempenho do dia — sempre visível */}
+            <div className="card gau" style={{ "--c": "#2FD3A5" }}>
+              <CardHead c="#2FD3A5" title="Desempenho do dia" />
+              <div className="cb"><div className="gauwrap">
+                <TriReactor pct={noPrazoPct} />
+                <div className="gstats">
+                  {gstats.map((g, i) => (
+                    <div key={i} className="gstat">
+                      <div className="gl"><span>{g[0]}</span><b>{g[1]}</b></div>
+                      <div className="gb"><i style={{ width: (g[1] / gmax * 100) + "%", background: g[2] }} /></div>
+                    </div>
+                  ))}
+                </div>
+              </div></div>
             </div>
           </div>
 
-          {/* DESEMPENHO — reator triangular */}
-          <div className="card gau" style={{ "--c": "#2FD3A5" }}>
-            <div className="ch"><span className="mk" /><h3>Desempenho do dia</h3></div>
-            <div className="cb"><div className="gauwrap">
-              <TriReactor pct={noPrazoPct} />
-              <div className="gstats">
-                {gstats.map((g, i) => (
-                  <div key={i} className="gstat">
-                    <div className="gl"><span>{g[0]}</span><b>{g[1]}</b></div>
-                    <div className="gb"><i style={{ width: (g[1] / gmax * 100) + "%", background: g[2] }} /></div>
+          {/* INFERIOR: pequenos (esq.) + gantt (dir.) */}
+          {(showSmall || hasTL) && (
+            <div className="bottom">
+              {showSmall && (
+                <div className="smallzone">
+                  {showPrio && (
+                    <div className="card sm" style={{ "--c": "#F5B13D" }}>
+                      <CardHead c="#F5B13D" title="Prioritárias" ct={prioritarias.length} />
+                      <div className="cb"><Prioritarias prioritarias={prioritarias} /></div>
+                    </div>
+                  )}
+                  {showNts && (
+                    <div className="card sm" style={{ "--c": "#FB5E5E" }}>
+                      <CardHead c="#FB5E5E" title="NTS" ct={nts.length} />
+                      <div className="cb"><Nts nts={nts} /></div>
+                    </div>
+                  )}
+                  {showProx && (
+                    <div className="card sm" style={{ "--c": "#5B8CFF" }}>
+                      <CardHead c="#5B8CFF" title="A seguir" ct={aSeguir.length} />
+                      <div className="cb"><ASeguir proximas={aSeguir} /></div>
+                    </div>
+                  )}
+                  {showStb && (
+                    <div className="card sm" style={{ "--c": "#F5B13D" }}>
+                      <CardHead c="#F5B13D" title="Standby" ct={standby.length} />
+                      <div className="cb"><Standby standby={standby} /></div>
+                    </div>
+                  )}
+                </div>
+              )}
+              {hasTL && (
+                <div className="ganttzone">
+                  <div className="card tl" style={{ "--c": "#5B8CFF" }}>
+                    <CardHead c="#5B8CFF" title="Linha do tempo" sub="próximos 14 dias" />
+                    <div className="cb"><Timeline machines={machines} /></div>
                   </div>
-                ))}
-              </div>
-            </div></div>
-          </div>
-
-          {/* NTS — destaque menor */}
-          <div className="card nts" style={{ "--c": "#FB5E5E" }}>
-            <div className="ch"><span className="mk" /><h3>Alertas · NTS</h3><span className="ct">{pad2(nts.length)}</span></div>
-            <div className="cb"><div className="ntlist">
-              {nts.length === 0
-                ? <div className="pxempty">Sem alertas NTS</div>
-                : nts.slice(0, 3).map(m => <NtsRow key={m.id} m={m} />)}
-            </div></div>
-          </div>
-
-          {/* TIMELINE */}
-          <div className="card tl" style={{ "--c": "#5B8CFF" }}>
-            <div className="ch"><span className="mk" /><h3>Linha do tempo</h3><span className="sub">próximos 14 dias</span></div>
-            <div className="cb"><Timeline machines={machines} /></div>
-          </div>
-
-          {/* RECON — destaque */}
-          <div className="card hi rec" style={{ "--c": "#A98BFA" }}>
-            <div className="ch"><span className="mk" /><h3>Recondicionamento</h3><span className="ct">{pad2(nRecon)}</span></div>
-            <div className="cb"><Recon reconAnd={reconAnd} reconAF={reconAF} reconCon={reconCon} /></div>
-          </div>
-
-          {/* CONCLUÍDAS — destaque */}
-          <div className="card hi con" style={{ "--c": "#2FD3A5" }}>
-            <div className="ch"><span className="mk" /><h3>Concluídas</h3><span className="sub">esta semana</span><span className="ct">{pad2(conSemana.length)}</span></div>
-            <div className="cb"><Concluidas conSemana={conSemana} /></div>
-          </div>
-
-          {/* A SEGUIR — destaque menor */}
-          <div className="card prx" style={{ "--c": "#5B8CFF" }}>
-            <div className="ch"><span className="mk" /><h3>A seguir</h3><span className="ct">{pad2(proximas.length)}</span></div>
-            <div className="cb"><Proximas proximas={proximas} /></div>
-          </div>
-
-          {/* STANDBY — destaque menor */}
-          <div className="card stb" style={{ "--c": "#F5B13D" }}>
-            <div className="ch"><span className="mk" /><h3>Standby</h3><span className="ct">{pad2(standby.length)}</span></div>
-            <div className="cb"><Standby standby={standby} /></div>
-          </div>
+                </div>
+              )}
+            </div>
+          )}
 
         </div>
 
@@ -533,10 +556,10 @@ const CSS_OPS = `
   --hi:rgba(248,250,253,.93); --hi-txt:#0C0F14; --hi-mut:#5A6472; --hi-line:rgba(12,15,20,.08);
   --mono:'JetBrains Mono',ui-monospace,monospace;
   --green:#2FD3A5; --amber:#F5B13D; --red:#FB5E5E; --blue:#5B8CFF; --purple:#A98BFA; --teal:#33C7E0;
+  --gap:clamp(9px,.85vw,15px);
   position:absolute; inset:0; height:100%; width:100%;
   font-family:'Inter',-apple-system,system-ui,sans-serif; color:var(--txt);
   letter-spacing:-.01em; -webkit-font-smoothing:antialiased; overflow:hidden;
-  /* fundo preto com halos de cor muito subtis — dão "algo" ao vidro refractar */
   background:
     radial-gradient(60% 45% at 82% 8%, rgba(91,140,255,.10), transparent 60%),
     radial-gradient(55% 45% at 12% 92%, rgba(169,139,250,.09), transparent 60%),
@@ -544,25 +567,20 @@ const CSS_OPS = `
     var(--bg);
 }
 .ops-root *{box-sizing:border-box; margin:0; padding:0}
-.ops-root .app{height:100%; display:flex; flex-direction:column; padding:clamp(12px,1.1vw,20px); gap:clamp(9px,.85vw,15px)}
+.ops-root .app{height:100%; display:flex; flex-direction:column; padding:clamp(12px,1.1vw,20px); gap:var(--gap)}
 
-/* ===== glass base (leve): fill translúcido alto + realce especular; blur é bónus ===== */
+/* ===== glass base (leve): fill translúcido alto + realce especular ===== */
 .ops-root .kpi,.ops-root .card,.ops-root .pill,.ops-root .themebtn{
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:18px;
-  box-shadow:0 8px 30px -12px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.08);
-  position:relative;
+  background:var(--panel); border:1px solid var(--line); border-radius:18px;
+  box-shadow:0 8px 30px -12px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.08); position:relative;
 }
 @supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
   .ops-root .kpi,.ops-root .card,.ops-root .pill,.ops-root .themebtn{
-    -webkit-backdrop-filter:blur(9px) saturate(150%);
-    backdrop-filter:blur(9px) saturate(150%);
+    -webkit-backdrop-filter:blur(9px) saturate(150%); backdrop-filter:blur(9px) saturate(150%);
     background:rgba(20,24,30,.5);
   }
   .ops-root .card.hi{ background:rgba(248,250,253,.82); }
 }
-/* realce especular no topo (fino, barato) */
 .ops-root .card::after,.ops-root .kpi::after{
   content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
   background:linear-gradient(180deg, rgba(255,255,255,.10), transparent 26%);
@@ -595,17 +613,19 @@ const CSS_OPS = `
 .ops-root .kpi .num{font-size:clamp(24px,2.2vw,36px); font-weight:700; line-height:1; letter-spacing:-.03em; font-family:var(--mono)}
 .ops-root .kpi.alert{border-color:rgba(251,94,94,.4)} .ops-root .kpi.alert .num{color:var(--red)}
 
-/* ===== MAIN grid ===== */
-.ops-root .main{flex:1; min-height:0; display:grid; gap:clamp(9px,.85vw,15px);
-  grid-template-columns:repeat(12,1fr); grid-template-rows:1.32fr 1fr 1fr;
-  grid-template-areas:
-    "and and and and and gau gau gau nts nts nts nts"
-    "and and and and and tl  tl  tl  tl  tl  tl  tl"
-    "rec rec rec rec con con con con prx prx stb stb";}
+/* ===== MAIN — flex dinâmico ===== */
+.ops-root .main{flex:1; min-height:0; display:flex; flex-direction:column; gap:var(--gap)}
+.ops-root .top{display:flex; gap:var(--gap); flex:1.55 1 0; min-height:0}
+.ops-root .bottom{display:flex; gap:var(--gap); flex:1 1 0; min-height:0}
+.ops-root .top > .card{min-width:0}
+.ops-root .top > .and{flex:2.4 1 0} .ops-root .top > .rec{flex:1.35 1 0}
+.ops-root .top > .con{flex:1.35 1 0} .ops-root .top > .gau{flex:1.2 1 0}
+.ops-root .smallzone{display:flex; gap:var(--gap); flex:1.75 1 0; min-width:0}
+.ops-root .smallzone > .card{flex:1 1 0; min-width:0}
+.ops-root .ganttzone{display:flex; flex:1.3 1 0; min-width:0}
+.ops-root .ganttzone > .card{flex:1 1 0; min-width:0}
+
 .ops-root .card{display:flex; flex-direction:column; min-height:0; overflow:hidden}
-.ops-root .and{grid-area:and} .ops-root .gau{grid-area:gau} .ops-root .nts{grid-area:nts}
-.ops-root .tl{grid-area:tl} .ops-root .rec{grid-area:rec} .ops-root .con{grid-area:con}
-.ops-root .prx{grid-area:prx} .ops-root .stb{grid-area:stb}
 .ops-root .ch{display:flex; align-items:center; gap:9px; padding:12px 16px 10px; border-bottom:1px solid var(--line); flex:none}
 .ops-root .ch h3{font-size:clamp(12px,1vw,14px); font-weight:700; letter-spacing:.01em}
 .ops-root .ch .mk{width:8px; height:8px; border-radius:3px; background:var(--c); flex:none; box-shadow:0 0 8px var(--c)}
@@ -613,7 +633,12 @@ const CSS_OPS = `
 .ops-root .ch .ct{margin-left:auto; font-family:var(--mono); font-size:12px; font-weight:700; color:var(--mut); background:var(--panel2); border:1px solid var(--line); padding:3px 9px; border-radius:7px}
 .ops-root .cb{flex:1; min-height:0; overflow:hidden; padding:9px 13px 12px; display:flex; flex-direction:column}
 
-/* ---- painéis de destaque (fundo claro) — inversão de cores de texto ---- */
+/* quadros pequenos — cabeçalho mais compacto */
+.ops-root .card.sm .ch{padding:10px 13px 8px}
+.ops-root .card.sm .ch h3{font-size:clamp(11px,.9vw,13px)}
+.ops-root .card.sm .cb{padding:8px 10px 10px}
+
+/* ---- painéis de destaque (fundo claro) ---- */
 .ops-root .card.hi{color:var(--hi-txt); border-color:var(--hi-line)}
 .ops-root .card.hi .ch{border-bottom-color:var(--hi-line)}
 .ops-root .card.hi .ch .sub{color:#8892A0}
@@ -647,28 +672,26 @@ const CSS_OPS = `
 .ops-root .rem small{display:block; font-size:8.5px; color:var(--hi-mut); font-weight:600; letter-spacing:.04em}
 .ops-root .tech{width:22px; height:22px; border-radius:6px; background:rgba(12,15,20,.08); display:grid; place-items:center; font-size:9px; font-weight:700; color:var(--hi-txt); margin-left:auto; font-family:var(--mono)}
 
-/* ===== GAUGE (reator triangular) ===== */
+/* ===== GAUGE (reator triangular) — número na zona larga (topo) ===== */
 .ops-root .gauwrap{display:flex; align-items:center; gap:14px; height:100%}
-.ops-root .trir{position:relative; width:clamp(120px,10vw,170px); flex:none; aspect-ratio:1/1}
+.ops-root .trir{position:relative; width:clamp(128px,11vw,180px); flex:none; aspect-ratio:200/190}
 .ops-root .trir svg{width:100%; height:100%; display:block}
-.ops-root .trir .tric{position:absolute; left:0; right:0; top:44%; transform:translateY(-50%); text-align:center}
-.ops-root .trir .tric b{display:block; font-family:var(--mono); font-weight:700; font-size:clamp(22px,2.1vw,32px); line-height:1}
-.ops-root .trir .tric span{font-size:9.5px; color:var(--mut); font-weight:600; letter-spacing:.05em; text-transform:uppercase}
-.ops-root .gstats{flex:1; display:flex; flex-direction:column; gap:clamp(8px,1vw,13px); min-width:0}
+.ops-root .trir .tric{position:absolute; left:0; right:0; top:39%; transform:translateY(-50%); text-align:center; pointer-events:none}
+.ops-root .trir .tric b{display:block; font-family:var(--mono); font-weight:700; font-size:clamp(24px,2.4vw,36px); line-height:1; text-shadow:0 2px 12px rgba(0,0,0,.7),0 0 2px rgba(0,0,0,.5)}
+.ops-root .trir .tric b i{font-style:normal; font-size:.5em; margin-left:1px; opacity:.85; vertical-align:.35em}
+.ops-root .trir .tric span{display:block; font-size:9.5px; color:var(--txt); opacity:.8; font-weight:600; letter-spacing:.08em; text-transform:uppercase; margin-top:3px; text-shadow:0 1px 8px rgba(0,0,0,.7)}
+.ops-root .gstats{flex:1; display:flex; flex-direction:column; gap:clamp(8px,1.1vw,14px); min-width:0}
 .ops-root .gstat .gl{display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px}
 .ops-root .gstat .gl span{color:var(--mut); font-weight:500} .ops-root .gstat .gl b{font-family:var(--mono); font-weight:700}
 .ops-root .gstat .gb{height:6px; border-radius:100px; background:rgba(255,255,255,.08); overflow:hidden}
 .ops-root .gstat .gb i{display:block; height:100%; border-radius:100px}
 
-/* ===== NTS ===== */
-.ops-root .ntlist{display:flex; flex-direction:column; gap:8px; height:100%; overflow:hidden}
-.ops-root .ntrow{background:rgba(251,94,94,.07); border:1px solid rgba(251,94,94,.22); border-radius:12px; padding:10px 12px; display:flex; flex-direction:column; gap:5px}
-.ops-root .ntrow .t1{display:flex; align-items:center; gap:8px}
-.ops-root .ntrow .nns{font-family:var(--mono); font-weight:700; font-size:14px} .ops-root .ntrow .nns small{color:var(--mut); font-weight:500; font-size:.82em}
-.ops-root .ntrow .delta2{margin-left:auto; font-family:var(--mono); font-weight:700; font-size:13px} .delta2.bad{color:var(--red)} .delta2.ok{color:var(--green)}
-.ops-root .ntrow .why{font-size:11.5px; color:#F3B6B6; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
-.ops-root .ntrow .meta2{display:flex; gap:7px; font-family:var(--mono); font-size:10px; color:var(--mut); flex-wrap:wrap}
-.ops-root .ntrow .tag{background:rgba(255,255,255,.06); border:1px solid var(--line); padding:2px 7px; border-radius:6px}
+/* ===== quadros pequenos: lista compacta uniforme ===== */
+.ops-root .mlist{display:flex; flex-direction:column; gap:6px; height:100%; overflow:hidden; animation:opsFade .5s ease}
+.ops-root .mrow{display:flex; align-items:center; gap:8px; background:var(--panel2); border:1px solid var(--line); border-left:3px solid var(--c); border-radius:9px; padding:7px 10px}
+.ops-root .mrow .mn{font-family:var(--mono); font-weight:600; font-size:12.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.ops-root .mrow .mm{font-size:9.5px; color:var(--mut); font-family:var(--mono); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.ops-root .mrow .mv{margin-left:auto; font-family:var(--mono); font-weight:700; font-size:11px; white-space:nowrap; flex:none}
 
 /* ===== TIMELINE ===== */
 .ops-root .tlhead{display:grid; grid-template-columns:160px 1fr; align-items:center; padding:0 2px 7px; border-bottom:1px solid var(--line); margin-bottom:8px; flex:none}
@@ -693,23 +716,6 @@ const CSS_OPS = `
 .ops-root .rchip{font-family:var(--mono); font-size:11px; color:var(--hi-txt); background:rgba(12,15,20,.05); border:1px solid var(--hi-line); border-radius:8px; padding:6px 10px; border-left:3px solid var(--purple); white-space:nowrap}
 .ops-root .rchip.run{border-left-color:var(--green)} .ops-root .rchip.paus{border-left-color:var(--amber)}
 
-/* ===== A SEGUIR ===== */
-.ops-root .pxlist{display:flex; flex-direction:column; gap:7px; height:100%; overflow:hidden}
-.ops-root .pxgroup .pgh{font-size:10px; font-weight:700; letter-spacing:.05em; color:var(--faint); text-transform:uppercase; margin:2px 0 5px; display:flex; justify-content:space-between}
-.ops-root .pxgroup.now .pgh{color:var(--blue)}
-.ops-root .pxrow{display:flex; align-items:center; gap:10px; background:var(--panel2); border:1px solid var(--line); border-radius:9px; padding:7px 11px; margin-bottom:5px}
-.ops-root .pxrow .pn{font-family:var(--mono); font-weight:600; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.ops-root .pxrow .pm{font-size:10px; color:var(--mut); font-family:var(--mono)}
-.ops-root .pxrow .ph{margin-left:auto; font-family:var(--mono); font-size:11px; font-weight:700; color:var(--amber)}
-.ops-root .pxempty{color:var(--faint); font-size:12px; padding:14px 4px; text-align:center}
-
-/* ===== STANDBY ===== */
-.ops-root .slist{display:flex; flex-direction:column; gap:8px; height:100%; overflow:hidden; animation:opsFade .5s ease}
-.ops-root .srow{background:var(--panel2); border:1px solid var(--line); border-radius:10px; padding:8px 11px; border-left:3px solid var(--c)}
-.ops-root .srow .sn{font-family:var(--mono); font-weight:600; font-size:13px}
-.ops-root .srow .sm{font-size:10px; color:var(--mut); font-family:var(--mono); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.ops-root .srow .st2{float:right; font-family:var(--mono); font-weight:700; font-size:12px; color:var(--amber)}
-
 /* ===== CONCLUÍDAS ===== */
 .ops-root .clist{display:flex; flex-direction:column; gap:7px; height:100%; overflow:hidden; animation:opsFade .5s ease}
 .ops-root .crow{display:flex; align-items:center; gap:10px; background:rgba(12,15,20,.04); border:1px solid var(--hi-line); border-radius:10px; padding:7px 11px}
@@ -717,6 +723,8 @@ const CSS_OPS = `
 .ops-root .crow .cn{font-family:var(--mono); font-weight:600; font-size:13px; color:var(--hi-txt); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .ops-root .crow .cm{font-size:9.5px; color:var(--hi-mut); font-family:var(--mono); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .ops-root .crow .cti{margin-left:auto; font-family:var(--mono); font-weight:700; font-size:12px; color:#0B7A5A}
+
+.ops-root .pxempty{color:var(--faint); font-size:12px; padding:14px 4px; text-align:center}
 
 /* ===== FOOT ===== */
 .ops-root .foot{flex:none; display:flex; align-items:center; gap:16px; font-size:10.5px; color:var(--faint); font-family:var(--mono)}

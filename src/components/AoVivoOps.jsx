@@ -382,12 +382,22 @@ function Recon({ reconAnd, reconAF, reconCon }) {
   const waiting = [...reconAnd.filter((m) => !(m.timer_status === "running" || m.timer_status?.startsWith("paused"))), ...reconAF];
   const nActive = active.length,nWait = waiting.length,nCon = reconCon.length;
   const total = Math.max(nActive + nWait + nCon, 1);
-  const chips = [
-  ...active.map((m) => ({ m, cls: "run", t: "Em curso" })),
-  ...waiting.map((m) => ({ m, cls: "fila", t: tierRecon(m) || "Fila" })),
-  ...reconCon.map((m) => ({ m, cls: "done", t: "Concluída" }))];
 
-  const win = useRotatingWindow(chips, 10, 9000);
+  const groups = [
+  { key: "run", label: "Em curso", cls: "run", items: active },
+  { key: "fila", label: "Fila", cls: "fila", items: waiting },
+  { key: "done", label: "Concluída", cls: "done", items: reconCon }].
+  filter((g) => g.items.length > 0);
+
+  const [view, sView] = useState(0);
+  useEffect(() => {
+    if (groups.length <= 1) { sView(0); return; }
+    const id = setInterval(() => sView((v) => (v + 1) % groups.length), 9000);
+    return () => clearInterval(id);
+  }, [groups.length]);
+
+  const g = groups[view % Math.max(groups.length, 1)];
+
   return (
     <>
       <div className="funnel">
@@ -396,16 +406,17 @@ function Recon({ reconAnd, reconAF, reconCon }) {
         <div className="seg s3" style={{ width: nCon / total * 100 + "%" }}>{nCon || ""}</div>
       </div>
       <div className="recleg">
-        <div className="x"><i style={{ background: GREEN }} />Em curso {nActive}</div>
-        <div className="x"><i style={{ background: PINK }} />Fila {nWait}</div>
-        <div className="x"><i style={{ background: BLUE_LIGHT }} />Concl. {nCon}</div>
+        <div className={`x${g?.key === "run" ? " on" : ""}`}><i style={{ background: GREEN }} />Em curso {nActive}</div>
+        <div className={`x${g?.key === "fila" ? " on" : ""}`}><i style={{ background: PINK }} />Fila {nWait}</div>
+        <div className={`x${g?.key === "done" ? " on" : ""}`}><i style={{ background: BLUE_LIGHT }} />Concl. {nCon}</div>
       </div>
-      <div className="recchips" key={win.off}>
-        {chips.length === 0 ?
+      <div className="recchips" key={g ? g.key : "empty"}>
+        {!g ?
         <div className="pxempty">Sem máquinas em recondicionamento</div> :
-        win.slice.map((c, i) =>
-        <div key={(c.m.id || i) + "-" + i} className={`rchip ${c.cls}`}>{c.cls === "done" ? "✓ " : ""}{nsSplit(c.m.serie).main} · {c.t}</div>
-        )}
+        g.items.map((m, i) => {
+          const t = g.key === "fila" ? tierRecon(m) || "Fila" : g.label;
+          return <div key={m.id || i} className={`rchip ${g.cls}`}>{g.key === "done" ? "✓ " : ""}{nsSplit(m.serie).main} · {t}</div>;
+        })}
       </div>
     </>);
 
@@ -788,7 +799,8 @@ const CSS_OPS = `
 .ops-root .funnel .s2{background:rgba(255,45,149,.20); color:#B01E6B}
 .ops-root .funnel .s3{background:rgba(90,184,255,.24); color:#1E7BC0}
 .ops-root .recleg{display:flex; gap:14px; font-size:11px; margin-bottom:10px; flex:none; flex-wrap:wrap}
-.ops-root .recleg .x{display:flex; align-items:center; gap:6px; color:var(--hi-mut)} .ops-root .recleg .x i{width:9px; height:9px; border-radius:3px}
+.ops-root .recleg .x{display:flex; align-items:center; gap:6px; color:var(--hi-mut); font-weight:500; opacity:.55; transition:opacity .3s} .ops-root .recleg .x i{width:9px; height:9px; border-radius:3px}
+.ops-root .recleg .x.on{color:var(--hi-txt); font-weight:700; opacity:1}
 .ops-root .recchips{display:flex; gap:7px; flex-wrap:wrap; align-content:flex-start; overflow:hidden; flex:1; animation:opsFade .5s ease}
 .ops-root .rchip{font-family:var(--mono); font-size:11px; color:var(--hi-txt); background:rgba(12,15,20,.05); border:1px solid var(--hi-line); border-radius:8px; padding:6px 10px; border-left:3px solid var(--pink); white-space:nowrap}
 .ops-root .rchip.run{border-left-color:var(--green)} .ops-root .rchip.done{border-left-color:var(--bluel)}

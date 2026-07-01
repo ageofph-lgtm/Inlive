@@ -328,13 +328,15 @@ function MiniRow({ m, v, vc }) {
   const ns = nsSplit(m.serie);
   return (
     <div className="mrow">
+      {/* linha 1: NS ocupa tudo — nunca truncado */}
       <div className="mtop">
         <TypeDot m={m} />
         <span className="mn">{ns.main}</span>
-        <span className="mv" style={{ color: vc, marginLeft:"auto", flexShrink:0 }}>{v}</span>
       </div>
+      {/* linha 2: modelo (esq) + valor (dir) — modelo trunca se necessário */}
       <div className="mbot">
         <span className="mm">{m.modelo || "—"}</span>
+        <span className="mv" style={{ color: vc }}>{v}</span>
       </div>
     </div>);
 }
@@ -758,9 +760,9 @@ const CSS_OPS = `
 .ops-root .top > .card{min-width:0}
 .ops-root .top > .and{flex:2.4 1 0} .ops-root .top > .rec{flex:1.35 1 0}
 .ops-root .top > .con{flex:1.35 1 0} .ops-root .top > .gau{flex:1.2 1 0}
-.ops-root .smallzone{display:flex; gap:var(--gap); flex:1.75 1 0; min-width:0}
+.ops-root .smallzone{display:flex; gap:var(--gap); flex:2.1 1 0; min-width:0}
 .ops-root .smallzone > .card{flex:1 1 0; min-width:0}
-.ops-root .ganttzone{display:flex; flex:1.3 1 0; min-width:0}
+.ops-root .ganttzone{display:flex; flex:1.0 1 0; min-width:0}
 .ops-root .ganttzone > .card{flex:1 1 0; min-width:0}
 
 .ops-root .card{display:flex; flex-direction:column; min-height:0; overflow:hidden}
@@ -844,11 +846,11 @@ const CSS_OPS = `
 /* ===== quadros pequenos: 2 níveis (NS nunca truncado) ===== */
 .ops-root .mlist{display:flex; flex-direction:column; gap:3px; height:100%; overflow:hidden; justify-content:flex-start; animation:opsFade .5s ease}
 .ops-root .mrow{display:flex; flex-direction:column; gap:1px; background:var(--panel2); border:1px solid var(--line); border-radius:7px; padding:4px 8px; flex-shrink:0}
-.ops-root .mrow .mtop{display:flex; align-items:center; gap:6px; min-width:0; flex-shrink:0}
-.ops-root .mrow .mn{font-family:var(--mono); font-weight:600; font-size:10.5px; color:var(--txt); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1; min-width:0}
-.ops-root .mrow .mbot{display:flex; align-items:center; gap:6px; padding-left:14px; flex-shrink:0}
-.ops-root .mrow .mm{font-size:9px; color:var(--mut); font-family:var(--mono); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; flex:1}
-.ops-root .mrow .mv{font-family:var(--mono); font-weight:700; font-size:10.5px; white-space:nowrap; flex:none}
+.ops-root .mrow .mtop{display:flex; align-items:center; gap:6px; flex-shrink:0}
+.ops-root .mrow .mn{font-family:var(--mono); font-weight:700; font-size:10.5px; color:var(--txt); white-space:nowrap; overflow:visible}
+.ops-root .mrow .mbot{display:flex; align-items:center; justify-content:space-between; gap:4px; padding-left:13px; flex-shrink:0}
+.ops-root .mrow .mm{font-size:8.5px; color:var(--mut); font-family:var(--mono); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; flex:1}
+.ops-root .mrow .mv{font-family:var(--mono); font-weight:700; font-size:10px; white-space:nowrap; flex:none; margin-left:6px}
 
 /* ===== TIMELINE ===== */
 .ops-root .tlhead{display:grid; grid-template-columns:160px 1fr; align-items:center; padding:0 2px 7px; border-bottom:1px solid var(--line); margin-bottom:8px; flex:none}

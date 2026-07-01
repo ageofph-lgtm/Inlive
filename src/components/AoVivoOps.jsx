@@ -515,7 +515,7 @@ export default function AoVivoOps({ data, loading, paused, cycleTheme, theme }) 
         {/* HEADER */}
         <div className="head">
           <div className="logo"><img src={JORDAN_URL} alt="Watcher" /></div>
-          <div className="brand"><b>Watcher</b><span className="text-[hsl(var(--destructive-foreground))]">STILL</span></div>
+          <div className="brand"><b>Watcher</b><span className="brand-sep"> | </span><span className="brand-still">STILL</span></div>
           <div className="right">
             <div className={`pill live${paused ? " paused" : ""}`}>
               <span className="dot" />{paused ? "Em pausa" : "Ao vivo"}
@@ -626,7 +626,7 @@ const CSS_OPS = `
   --hi:rgba(248,250,253,.93); --hi-txt:#0C0F14; --hi-mut:#5A6472; --hi-line:rgba(12,15,20,.08);
   --mono:'JetBrains Mono',ui-monospace,monospace;
   --red:#FB5E5E; --pink:#FF2D95; --blue:#5B8CFF; --bluel:#5AB8FF; --green:#2FD3A5; --orange:#E8730C; --yellow:#FFDD57;
-  --gap:clamp(9px,.85vw,15px);
+  --gap:clamp(5px,.55vw,10px);
   position:absolute; inset:0; height:100%; width:100%;
   font-family:'Inter',-apple-system,system-ui,sans-serif; color:var(--txt);
   letter-spacing:-.01em; -webkit-font-smoothing:antialiased; overflow:hidden;
@@ -637,7 +637,7 @@ const CSS_OPS = `
     var(--bg);
 }
 .ops-root *{box-sizing:border-box; margin:0; padding:0}
-.ops-root .app{height:100%; display:flex; flex-direction:column; padding:clamp(12px,1.1vw,20px); gap:var(--gap)}
+.ops-root .app{height:100%; display:flex; flex-direction:column; padding:clamp(5px,.6vw,12px); gap:var(--gap)}
 
 /* ===== glass base ===== */
 .ops-root .kpi,.ops-root .card,.ops-root .pill,.ops-root .themebtn{
@@ -663,31 +663,33 @@ const CSS_OPS = `
   background:rgba(255,255,255,.04); border:1px solid var(--line);
   box-shadow:0 6px 18px -6px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.12); display:grid; place-items:center}
 .ops-root .logo img{width:100%; height:100%; object-fit:contain}
-.ops-root .brand b{font-size:clamp(18px,1.45vw,26px); font-weight:800; letter-spacing:-.02em; display:block; line-height:1;
+.ops-root .brand{display:flex; align-items:baseline; gap:0}
+.ops-root .brand b{font-size:clamp(18px,1.45vw,26px); font-weight:800; letter-spacing:-.02em; line-height:1;
   color:${BRAND_RED}; text-shadow:0 0 12px rgba(245,72,77,.45)}
-.ops-root .brand span{font-size:clamp(10px,.82vw,13px); color:var(--mut); font-weight:700; letter-spacing:.28em}
+.ops-root .brand-sep{font-size:clamp(14px,1.1vw,20px); color:rgba(255,255,255,.4); font-weight:300; margin:0 5px; line-height:1}
+.ops-root .brand-still{font-size:clamp(14px,1.1vw,20px); color:#fff; font-weight:700; letter-spacing:.04em; line-height:1}
 .ops-root .head .right{margin-left:auto; display:flex; align-items:center; gap:12px}
 .ops-root .pill{display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:var(--mut); padding:8px 13px; border-radius:11px}
 .ops-root .pill .dot{width:8px; height:8px; border-radius:50%; background:var(--red);
   box-shadow:0 0 7px var(--red), 0 0 0 3px rgba(251,94,94,.18); animation:opsbp 2s infinite}
 .ops-root .pill.paused .dot{background:var(--yellow); box-shadow:0 0 6px var(--yellow),0 0 0 3px rgba(255,221,87,.18); animation:none}
 @keyframes opsbp{50%{opacity:.5}}
-.ops-root .clock{font-family:var(--mono); font-weight:700; font-size:clamp(16px,1.35vw,23px); color:var(--txt); font-variant-numeric:tabular-nums}
+.ops-root .clock{font-family:var(--mono); font-weight:700; font-size:clamp(12px,1.05vw,19px); color:var(--txt); font-variant-numeric:tabular-nums}
 .ops-root .clock small{color:var(--mut); font-weight:600; font-size:12px; margin-left:8px; text-transform:capitalize}
 .ops-root .themebtn{width:36px; height:36px; border-radius:11px; color:var(--mut); font-size:16px; cursor:pointer; display:grid; place-items:center}
 .ops-root .themebtn:hover{color:var(--txt)}
 
 /* ===== KPI row ===== */
 .ops-root .kpis{display:grid; grid-template-columns:repeat(7,1fr); gap:clamp(8px,.7vw,14px); flex:none}
-.ops-root .kpi{padding:clamp(11px,.85vw,16px); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; overflow:hidden; text-align:center}
-.ops-root .kpi .lab{font-size:clamp(9px,.72vw,11px); font-weight:700; letter-spacing:.06em; color:var(--mut); text-transform:uppercase; display:flex; align-items:center; justify-content:center; gap:6px}
+.ops-root .kpi{padding:clamp(6px,.55vw,11px); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; overflow:hidden; text-align:center}
+.ops-root .kpi .lab{font-size:clamp(7px,.6vw,10px); font-weight:700; letter-spacing:.06em; color:var(--mut); text-transform:uppercase; display:flex; align-items:center; justify-content:center; gap:6px}
 .ops-root .kpi .lab i{width:7px; height:7px; border-radius:50%; background:var(--c); flex:none; box-shadow:0 0 6px var(--c)}
-.ops-root .kpi .num{font-size:clamp(24px,2.2vw,36px); font-weight:700; line-height:1; letter-spacing:-.03em; font-family:var(--mono); color:#fff}
+.ops-root .kpi .num{font-size:clamp(17px,1.7vw,28px); font-weight:700; line-height:1; letter-spacing:-.03em; font-family:var(--mono); color:#fff}
 .ops-root .kpi.alert{border-color:rgba(251,94,94,.4)}
 
 /* ===== MAIN — flex dinâmico ===== */
 .ops-root .main{flex:1; min-height:0; display:flex; flex-direction:column; gap:var(--gap)}
-.ops-root .top{display:flex; gap:var(--gap); flex:1.55 1 0; min-height:0}
+.ops-root .top{display:flex; gap:var(--gap); flex:1.5 1 0; min-height:0}
 .ops-root .bottom{display:flex; gap:var(--gap); flex:1 1 0; min-height:0}
 .ops-root .top > .card{min-width:0}
 .ops-root .top > .and{flex:2.4 1 0} .ops-root .top > .rec{flex:1.35 1 0}
@@ -698,16 +700,16 @@ const CSS_OPS = `
 .ops-root .ganttzone > .card{flex:1 1 0; min-width:0}
 
 .ops-root .card{display:flex; flex-direction:column; min-height:0; overflow:hidden}
-.ops-root .ch{display:flex; align-items:center; gap:9px; padding:12px 16px 10px; border-bottom:1px solid var(--line); flex:none}
-.ops-root .ch h3{font-size:clamp(12px,1vw,14px); font-weight:700; letter-spacing:.01em}
+.ops-root .ch{display:flex; align-items:center; gap:9px; padding:7px 12px 6px; border-bottom:1px solid var(--line); flex:none}
+.ops-root .ch h3{font-size:clamp(9px,.82vw,13px); font-weight:700; letter-spacing:.01em}
 .ops-root .ch .mk{width:8px; height:8px; border-radius:3px; background:var(--c); flex:none; box-shadow:0 0 8px var(--c)}
 .ops-root .ch .sub{font-size:11.5px; color:var(--faint); font-weight:500}
 .ops-root .ch .ct{margin-left:auto; font-family:var(--mono); font-size:12px; font-weight:700; color:var(--mut); background:var(--panel2); border:1px solid var(--line); padding:3px 9px; border-radius:7px}
-.ops-root .cb{flex:1; min-height:0; overflow:hidden; padding:9px 13px 12px; display:flex; flex-direction:column}
+.ops-root .cb{flex:1; min-height:0; overflow:hidden; padding:5px 9px 7px; display:flex; flex-direction:column}
 
-.ops-root .card.sm .ch{padding:10px 13px 8px}
-.ops-root .card.sm .ch h3{font-size:clamp(11px,.9vw,13px)}
-.ops-root .card.sm .cb{padding:8px 10px 10px}
+.ops-root .card.sm .ch{padding:6px 10px 5px}
+.ops-root .card.sm .ch h3{font-size:clamp(8px,.75vw,11px)}
+.ops-root .card.sm .cb{padding:4px 7px 6px}
 
 /* indicador de tipo discreto */
 .ops-root .tdot{border-radius:50%; flex:none; display:inline-block}
@@ -723,12 +725,12 @@ const CSS_OPS = `
 .ops-root .thead,.ops-root .trow{display:grid; grid-template-columns:1.7fr 1.05fr 1.4fr .8fr 26px; gap:12px; align-items:center}
 .ops-root .thead{padding:5px 10px; font-size:10px; font-weight:700; letter-spacing:.05em; color:var(--hi-mut); text-transform:uppercase; flex:none}
 .ops-root .thead .r{text-align:right}
-.ops-root .trows{display:flex; flex-direction:column; gap:6px; flex:1; min-height:0; animation:opsFade .5s ease}
-.ops-root .trow{padding:9px 10px; border-radius:11px; background:rgba(12,15,20,.04); border:1px solid rgba(12,15,20,.06); position:relative}
+.ops-root .trows{display:flex; flex-direction:column; gap:3px; flex:1; min-height:0; animation:opsFade .5s ease}
+.ops-root .trow{padding:5px 8px; border-radius:9px; background:rgba(12,15,20,.04); border:1px solid rgba(12,15,20,.06); position:relative}
 .ops-root .trow.crit{background:rgba(251,94,94,.10); border-color:rgba(251,94,94,.32)}
 .ops-root .trow .nsc{display:flex; align-items:center; gap:9px; min-width:0}
 .ops-root .trow .sd{width:9px; height:9px; border-radius:50%; background:var(--st); flex:none; box-shadow:0 0 0 3px color-mix(in srgb,var(--st) 22%,transparent)}
-.ops-root .trow .ns{font-family:var(--mono); font-weight:700; font-size:clamp(13px,1.05vw,16px); color:var(--hi-txt); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.ops-root .trow .ns{font-family:var(--mono); font-weight:700; font-size:clamp(10px,.88vw,14px); color:var(--hi-txt); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .ops-root .trow .ns small{color:var(--hi-mut); font-weight:500; font-size:.8em}
 .ops-root .trow .mo{font-size:11px; color:var(--hi-mut); font-family:var(--mono); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .ops-root .badges{display:flex; gap:5px; flex-wrap:wrap}
@@ -750,16 +752,16 @@ const CSS_OPS = `
 /* ===== GAUGE / DONUT ===== */
 .ops-root .gauwrap{display:flex; align-items:center; gap:14px; height:100%}
 .ops-root .gaufade{animation:opsFade .5s ease}
-.ops-root .trir{position:relative; width:clamp(128px,11vw,180px); flex:none; aspect-ratio:200/190}
+.ops-root .trir{position:relative; width:clamp(80px,8vw,130px); flex:none; aspect-ratio:200/190}
 .ops-root .trir svg{width:100%; height:100%; display:block}
 .ops-root .trir .tric{position:absolute; left:0; right:0; top:39%; transform:translateY(-50%); text-align:center; pointer-events:none}
-.ops-root .trir .tric b{display:block; font-family:var(--mono); font-weight:700; font-size:clamp(24px,2.4vw,36px); line-height:1}
+.ops-root .trir .tric b{display:block; font-family:var(--mono); font-weight:700; font-size:clamp(16px,1.8vw,26px); line-height:1}
 .ops-root .trir .tric b i{font-style:normal; font-size:.5em; margin-left:1px; opacity:.85; vertical-align:.35em}
 .ops-root .trir .tric span{display:block; font-size:7px; color:var(--txt); opacity:.8; font-weight:600; letter-spacing:.03em; text-transform:uppercase; margin-top:2px; text-shadow:0 1px 8px rgba(0,0,0,.7)}
-.ops-root .donut{position:relative; width:clamp(120px,10vw,164px); flex:none; aspect-ratio:1/1}
+.ops-root .donut{position:relative; width:clamp(72px,7vw,110px); flex:none; aspect-ratio:1/1}
 .ops-root .donut svg{width:100%; height:100%; display:block}
 .ops-root .donutc{position:absolute; inset:0; display:grid; place-content:center; text-align:center}
-.ops-root .donutc b{font-family:var(--mono); font-weight:700; font-size:clamp(22px,2vw,32px); line-height:1}
+.ops-root .donutc b{font-family:var(--mono); font-weight:700; font-size:clamp(14px,1.5vw,22px); line-height:1}
 .ops-root .donutc span{font-size:9px; color:var(--mut); font-weight:600; letter-spacing:.06em; text-transform:uppercase; margin-top:2px}
 .ops-root .gstats{flex:1; display:flex; flex-direction:column; gap:clamp(8px,1.1vw,14px); min-width:0}
 .ops-root .gstat .gl{display:flex; justify-content:space-between; align-items:center; font-size:12px; margin-bottom:5px}
@@ -770,10 +772,10 @@ const CSS_OPS = `
 .ops-root .gstat .gb i{display:block; height:100%; border-radius:100px}
 
 /* ===== quadros pequenos: 2 níveis (NS nunca truncado) ===== */
-.ops-root .mlist{display:flex; flex-direction:column; gap:6px; height:100%; overflow:hidden; animation:opsFade .5s ease}
-.ops-root .mrow{display:flex; flex-direction:column; gap:3px; background:var(--panel2); border:1px solid var(--line); border-radius:9px; padding:7px 10px}
+.ops-root .mlist{display:flex; flex-direction:column; gap:3px; height:100%; overflow:hidden; animation:opsFade .5s ease}
+.ops-root .mrow{display:flex; flex-direction:column; gap:3px; background:var(--panel2); border:1px solid var(--line); border-radius:7px; padding:4px 8px}
 .ops-root .mrow .mtop{display:flex; align-items:center; gap:7px; min-width:0}
-.ops-root .mrow .mn{font-family:var(--mono); font-weight:600; font-size:12.5px; color:var(--txt); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.ops-root .mrow .mn{font-family:var(--mono); font-weight:600; font-size:10.5px; color:var(--txt); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .ops-root .mrow .mbot{display:flex; align-items:center; justify-content:space-between; gap:8px; padding-left:14px}
 .ops-root .mrow .mm{font-size:9.5px; color:var(--mut); font-family:var(--mono); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0}
 .ops-root .mrow .mv{font-family:var(--mono); font-weight:700; font-size:11px; white-space:nowrap; flex:none}

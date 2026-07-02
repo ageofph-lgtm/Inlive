@@ -294,7 +294,7 @@ function StatBar({ label, value, display, max, color }) {
 
 // ── Desempenho do dia — carrossel vertical (gráfico cima, dados baixo) ────────
 function Desempenho({ noPrazoPct, gstats, gmax, machines, totalCon }) {
-  const N_SLIDES = 4;
+  const N_SLIDES = 3;
   const [view, setView] = useState(0);
   useEffect(() => {
     const id = setInterval(() => setView((v) => (v + 1) % N_SLIDES), 8000);
@@ -324,12 +324,6 @@ function Desempenho({ noPrazoPct, gstats, gmax, machines, totalCon }) {
   const bestDay = daily[bestIdx];
   const bestLabel = bestDay ? `${pad2(bestDay.date.getDate())}/${pad2(bestDay.date.getMonth() + 1)}` : "—";
   const dailyGmax = Math.max(avgPerDay, last7, bestDay?.count || 0, 1);
-
-  // ── Slide 3: % no prazo histórico ────────────────────────────────────────
-  const weekly = useMemo(() => computeWeeklyOnTime(totalCon, 6), [totalCon?.length]);
-  const withData = weekly.filter((w) => w.pct !== null);
-  const avg6w = withData.length ? Math.round(withData.reduce((a, w) => a + w.pct, 0) / withData.length) : null;
-  const thisWeek = weekly[weekly.length - 1];
 
   return (
     <div className="cb desemp-cb">
@@ -373,17 +367,6 @@ function Desempenho({ noPrazoPct, gstats, gmax, machines, totalCon }) {
               <StatBar label="Média/dia · 14d" value={avgPerDay} max={dailyGmax} color={BLUE_LIGHT} />
               <StatBar label="Últimos 7 dias" value={last7} max={dailyGmax} color={GREEN} />
               <StatBar label={`Melhor dia · ${bestLabel}`} value={bestDay?.count || 0} max={dailyGmax} color={ORANGE_DARK} />
-            </div>
-          </>
-        }
-        {view === 3 &&
-        <>
-            <div className="desemp-fig desemp-fig--bars">
-              <BarChart data={weekly} valueKey="pct" colorFor={(d) => pctColor(d.pct)} highlightLast />
-            </div>
-            <div className="desemp-bars">
-              <StatBar label="Média · 6 sem." value={avg6w || 0} display={avg6w !== null ? avg6w + "%" : "—"} max={100} color={pctColor(avg6w)} />
-              <StatBar label="Esta semana" value={thisWeek?.pct || 0} display={thisWeek?.pct !== null ? thisWeek.pct + "%" : "—"} max={100} color={pctColor(thisWeek?.pct)} />
             </div>
           </>
         }

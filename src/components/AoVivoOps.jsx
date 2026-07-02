@@ -134,7 +134,7 @@ function machineType(m) {
   if (tierRecon(m)) return TYPE.recon;
   return TYPE.acp;
 }
-const JORDAN_URL = "https://media.base44.com/images/public/6a045759b56878764b71db11/b4686dedd_Gemini_Generated_Image_6i6wgc6i6wgc6i6w1.png";
+const JORDAN_URL = "/watcher-logo.png";
 
 // Janela rotativa: se items > size, avança uma "página" a cada intervalo.
 function useRotatingWindow(items, size, intervalMs) {

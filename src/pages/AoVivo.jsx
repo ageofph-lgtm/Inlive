@@ -107,8 +107,7 @@ const CAT = {
 };
 // Resolver categoria de uma máquina
 function getMachineCategory(m){
-  const recon=m.recondicao||{};
-  if(recon.bronze||recon.prata) return "recon";
+  if(m.tipo==="usada") return "recon";
   if(m.tipo==="nova") return "nts";
   if(m.prioridade===true) return "prio";
   if(m.express===true||m.urgente===true) return "express";
@@ -1537,7 +1536,7 @@ function GanttChart({ machines, D }) {
     const isPrio   = m.prioridade === true;
     const run      = m.timer_status === "running";
     const overrun  = pi && pf ? new Date() > new Date(pf.getTime() + 86400000) : false;
-    const isRecon  = !!(m.recondicao?.prata || m.recondicao?.bronze);
+    const isRecon  = m.tipo === "usada";
     allRows.push({ m, pi, pf, isActive, isPrio, run, overrun, isRecon, hasDate: !!(pi && pf) });
   }
   const sorted = [...allRows].sort((a, b) => {
@@ -1848,7 +1847,7 @@ export default function AoVivo(){
 
   // ── Filtros ──────────────────────────────────────────────────────────────
   const monday=getMondayUTC();
-  const isRecon=m=>{const r=m.recondicao||{};return r.bronze===true||r.prata===true;};
+  const isRecon=m=>m.tipo==="usada";
   const r30=new Date(Date.now()-30*24*3600*1000);
 
   // Em Andamento: só timers a CORRER (running)
@@ -1864,7 +1863,7 @@ export default function AoVivo(){
     { key:"outros",          label:"Outros",                 color:"#6B7280", emoji:"💬" },
   ];
   const prioritarias = machines.filter(m=>m.prioridade===true&&!m.estado?.startsWith("concluida")&&m.estado!=="concluida");
-  const filaACP      = machines.filter(m=>m.estado==="a-fazer"&&m.tipo!=="nova");
+  const filaACP      = machines.filter(m=>m.estado==="a-fazer"&&m.tipo==="aluguer");
   // PRÓXIMAS: tudo com previsao_inicio, que não esteja concluído
   const proximas     = machines.filter(m=>{
     if(!m.previsao_inicio) return false;

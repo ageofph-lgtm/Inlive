@@ -67,8 +67,8 @@ function tierRecon(m) {
 }
 // Tipo de intervenção visível (NTS / RECON / ACP) — em ordem de prioridade
 function tipoIntervencao(m) {
-  if (m.tipo === "nova") return { label: "NTS",   color: "var(--red)"    };
-  if (tierRecon(m))      return { label: "RECON", color: "var(--purple)" };
+  if (m.tipo === "nova")  return { label: "NTS",   color: "var(--red)"    };
+  if (m.tipo === "usada") return { label: "RECON", color: "var(--purple)" };
   return                        { label: "ACP",   color: "var(--teal)"   };
 }
 function isOverdue(m) {

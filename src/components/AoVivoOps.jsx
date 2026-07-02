@@ -131,7 +131,7 @@ function pctColor(pct) {
 // Tipo de máquina (para o indicador discreto em qualquer quadro)
 function machineType(m) {
   if (m.tipo === "nova") return TYPE.nts;
-  if (tierRecon(m)) return TYPE.recon;
+  if (m.tipo === "usada") return TYPE.recon;
   return TYPE.acp;
 }
 const JORDAN_URL = "/watcher-logo.png";

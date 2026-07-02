@@ -17,7 +17,7 @@ const BRIDGE_HEADERS = {
 };
 const SLIDE_DURATION = 30000;
 const MIN_TIMER_SECONDS = 300; // < 5 min = timer inválido, ignorado em stats e display
-const JORDAN_URL = "https://media.base44.com/images/public/6a045759b56878764b71db11/b4686dedd_Gemini_Generated_Image_6i6wgc6i6wgc6i6w1.png";
+const JORDAN_URL = "/watcher-logo.png";
 
 async function callBridge(p) {
   const r = await fetch(BRIDGE_URL,{method:"POST",headers:BRIDGE_HEADERS,body:JSON.stringify(p)});
@@ -2575,7 +2575,7 @@ export default function AoVivo(){
 
 
         {/* ESQUERDA: logo + WATCHER maior, puxado pro centro */}
-        <img src="https://media.base44.com/images/public/6a045759b56878764b71db11/b4686dedd_Gemini_Generated_Image_6i6wgc6i6wgc6i6w1.png"
+        <img src="/watcher-logo.png"
           alt="" style={{width:"26px",height:"26px",objectFit:"contain",
           filter:D.dark?`drop-shadow(0 0 6px ${D.pink}aa)`:"none",flexShrink:0}}/>
         <span style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(13px,1.1vw,16px)",

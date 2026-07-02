@@ -80,7 +80,7 @@ function isOverdue(m) {
 }
 
 // Logo do mascote STILL (mesma URL que o AoVivo principal usa)
-const JORDAN_URL = "https://media.base44.com/images/public/6a045759b56878764b71db11/b4686dedd_Gemini_Generated_Image_6i6wgc6i6wgc6i6w1.png";
+const JORDAN_URL = "/watcher-logo.png";
 
 // ── CSS (adaptado do mockup) ────────────────────────────────────────────────
 const CSS_GLASSNOIR = `
@@ -110,7 +110,7 @@ const CSS_GLASSNOIR = `
 /* Marca d'água do mascote em cada slide */
 .watermark { position:absolute; bottom:0; right:0; width:32vw; height:62vh;
   pointer-events:none; z-index:0; opacity:0.10;
-  background-image:url('${"https://media.base44.com/images/public/6a045759b56878764b71db11/b4686dedd_Gemini_Generated_Image_6i6wgc6i6wgc6i6w1.png"}');
+  background-image:url('${"/watcher-logo.png"}');
   background-size:contain; background-repeat:no-repeat; background-position:bottom right;
   mix-blend-mode:luminosity; filter:drop-shadow(0 0 30px rgba(255,69,58,0.3)); }
 /* Garante que o conteúdo do slide fica por cima da marca d'água */

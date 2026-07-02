@@ -1788,7 +1788,7 @@ function AlmocoClock(){
 
 export default function AoVivo(){
   // Tema: dark | light | glass | glass-light. `dark` derivado para preservar toda a lógica existente.
-  const [theme,sTheme] = useState(()=>{ try{const t=localStorage.getItem("theme");return ["glass","glass-light","glass-noir","ops"].includes(t)?t:"glass";}catch{return "glass";} }); // temas dark/light removidos — apenas glass + ops
+  const [theme,sTheme] = useState("ops"); // sempre inicia em "ops" — qualquer acesso ao link abre direto neste tema (independente do que ficou salvo no navegador)
   const dark = theme === "dark";
   const cycleTheme = () => {
     const order = ["glass","glass-light","glass-noir","ops"]; // dark/light comentados — apenas glass + ops activos

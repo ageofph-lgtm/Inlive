@@ -7,7 +7,7 @@
 // Render-only: recebe os dados já calculados via props do AoVivo.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 
 // ── Paleta ───────────────────────────────────────────────────────────────────
 const RED = "#FB5E5E",BLUE = "#5B8CFF",PINK = "#FF2D95",GREEN = "#2FD3A5";
@@ -74,6 +74,60 @@ function isOverdue(m) {
   catch {return false;}
 }
 function hasPrevisao(m) {return !!(m.previsao_inicio && m.previsao_fim);}
+// ── Agregações históricas p/ gráficos de tendência (Desempenho) ──────────────
+function computeDailyProductivity(totalCon, days = 14) {
+  const today = new Date();today.setHours(0, 0, 0, 0);
+  const buckets = [];
+  for (let i = days - 1;i >= 0;i--) {
+    const d = new Date(today);d.setDate(d.getDate() - i);
+    buckets.push({ date: d, key: d.toISOString().slice(0, 10), count: 0 });
+  }
+  const map = new Map(buckets.map((b) => [b.key, b]));
+  (totalCon || []).forEach((m) => {
+    if (!m.dataConclusao) return;
+    let key;
+    try {key = new Date(m.dataConclusao).toISOString().slice(0, 10);}
+    catch {return;}
+    const b = map.get(key);
+    if (b) b.count++;
+  });
+  return buckets;
+}
+function computeWeeklyOnTime(totalCon, weeks = 6) {
+  const today = new Date();today.setHours(0, 0, 0, 0);
+  const dow = today.getDay(),diffMon = dow === 0 ? 6 : dow - 1;
+  const monday = new Date(today);monday.setDate(today.getDate() - diffMon);
+  const buckets = [];
+  for (let i = weeks - 1;i >= 0;i--) {
+    const start = new Date(monday);start.setDate(monday.getDate() - i * 7);
+    const end = new Date(start);end.setDate(start.getDate() + 6);end.setHours(23, 59, 59, 999);
+    buckets.push({ start, end, total: 0, onTime: 0 });
+  }
+  (totalCon || []).forEach((m) => {
+    if (!m.dataConclusao || !m.previsao_fim) return;
+    let dc;
+    try {dc = new Date(m.dataConclusao);}
+    catch {return;}
+    const b = buckets.find((bb) => dc >= bb.start && dc <= bb.end);
+    if (!b) return;
+    b.total++;
+    try {
+      const pf = new Date(m.previsao_fim + "T23:59:59");
+      if (dc <= pf) b.onTime++;
+    } catch {/* ignore */}
+  });
+  return buckets.map((b) => ({
+    label: `${pad2(b.start.getDate())}/${pad2(b.start.getMonth() + 1)}`,
+    pct: b.total > 0 ? Math.round(b.onTime / b.total * 100) : null,
+    total: b.total
+  }));
+}
+function pctColor(pct) {
+  if (pct === null || pct === undefined) return "rgba(255,255,255,.15)";
+  if (pct >= 90) return GREEN;
+  if (pct >= 70) return YELLOW_LIGHT;
+  return RED;
+}
 // Tipo de máquina (para o indicador discreto em qualquer quadro)
 function machineType(m) {
   if (m.tipo === "nova") return TYPE.nts;
@@ -209,64 +263,133 @@ function DonutOnly({ machines, counts, total }) {
     </div>);
 }
 
+// ── Bar chart (sparkline) — usado nos slides de tendência histórica ─────────
+function BarChart({ data, valueKey, colorFor, highlightLast }) {
+  const max = Math.max(...data.map((d) => Number(d[valueKey]) || 0), 1);
+  return (
+    <div className="barchart">
+      {data.map((d, i) => {
+        const v = Number(d[valueKey]) || 0;
+        const h = v > 0 ? Math.max(v / max * 100, 6) : 2;
+        const isLast = highlightLast && i === data.length - 1;
+        return (
+          <div key={i} className={`bx${isLast ? " now" : ""}`}>
+            <i style={{ height: h + "%", background: colorFor ? colorFor(d, i) : BLUE_LIGHT }} />
+          </div>);
+
+      })}
+    </div>);
+
+}
+// ── Linha de estatística com barra proporcional (reaproveita estilo .gstat) ──
+function StatBar({ label, value, display, max, color }) {
+  const pct = max > 0 ? Math.min(100, value / max * 100) : 0;
+  return (
+    <div className="gstat">
+      <div className="gl"><span className="lg"><i style={{ background: color }} />{label}</span><b>{display ?? value}</b></div>
+      <div className="gb"><i style={{ width: pct + "%", background: color }} /></div>
+    </div>);
+
+}
+
 // ── Desempenho do dia — carrossel vertical (gráfico cima, dados baixo) ────────
-function Desempenho({ noPrazoPct, gstats, gmax, machines }) {
+function Desempenho({ noPrazoPct, gstats, gmax, machines, totalCon }) {
+  const N_SLIDES = 4;
   const [view, setView] = useState(0);
   useEffect(() => {
-    const id = setInterval(() => setView((v) => (v + 1) % 2), 8000);
+    const id = setInterval(() => setView((v) => (v + 1) % N_SLIDES), 8000);
     return () => clearInterval(id);
   }, []);
 
   // Slide 0: TriReactor + barras de status (gstats)
   // Slide 1: Donut de tipos + barras ACP/NTS/RECON
+  // Slide 2: Produtividade diária (14 dias) — tendência
+  // Slide 3: % No prazo — histórico semanal (6 sem.)
   const counts = { nts: 0, acp: 0, recon: 0 };
   machines.forEach((m) => { counts[machineType(m).key]++; });
   const total = machines.length || 1;
   const typeStats = [
-    [TYPE.acp.label, counts.acp, TYPE.acp.color],
-    [TYPE.nts.label, counts.nts, TYPE.nts.color],
-    [TYPE.recon.label, counts.recon, TYPE.recon.color],
-  ];
-  const typeMax = Math.max(...typeStats.map(g => g[1]), 1);
+  [TYPE.acp.label, counts.acp, TYPE.acp.color],
+  [TYPE.nts.label, counts.nts, TYPE.nts.color],
+  [TYPE.recon.label, counts.recon, TYPE.recon.color]];
+
+  const typeMax = Math.max(...typeStats.map((g) => g[1]), 1);
+
+  // ── Slide 2: produtividade diária ────────────────────────────────────────
+  const daily = useMemo(() => computeDailyProductivity(totalCon, 14), [totalCon?.length]);
+  const dailyCounts = daily.map((d) => d.count);
+  const avgPerDay = daily.length ? Math.round(dailyCounts.reduce((a, b) => a + b, 0) / daily.length * 10) / 10 : 0;
+  const last7 = dailyCounts.slice(-7).reduce((a, b) => a + b, 0);
+  const bestIdx = dailyCounts.reduce((best, v, i) => v > dailyCounts[best] ? i : best, 0);
+  const bestDay = daily[bestIdx];
+  const bestLabel = bestDay ? `${pad2(bestDay.date.getDate())}/${pad2(bestDay.date.getMonth() + 1)}` : "—";
+  const dailyGmax = Math.max(avgPerDay, last7, bestDay?.count || 0, 1);
+
+  // ── Slide 3: % no prazo histórico ────────────────────────────────────────
+  const weekly = useMemo(() => computeWeeklyOnTime(totalCon, 6), [totalCon?.length]);
+  const withData = weekly.filter((w) => w.pct !== null);
+  const avg6w = withData.length ? Math.round(withData.reduce((a, w) => a + w.pct, 0) / withData.length) : null;
+  const thisWeek = weekly[weekly.length - 1];
 
   return (
     <div className="cb desemp-cb">
       <div className="desemp-slide gaufade" key={view}>
-        {view === 0 ? (
-          <>
-            {/* gráfico em cima */}
+        {view === 0 &&
+        <>
             <div className="desemp-fig">
               <TriReactor pct={noPrazoPct} />
             </div>
-            {/* dados em baixo */}
             <div className="desemp-bars">
               {gstats.map((g, i) =>
-                <div key={i} className="gstat">
+            <div key={i} className="gstat">
                   <div className="gl"><span className="lg"><i style={{ background: g[2] }} />{g[0]}</span><b>{g[1]}</b></div>
                   <div className="gb"><i style={{ width: g[1] / gmax * 100 + "%", background: g[2] }} /></div>
                 </div>
-              )}
+            )}
             </div>
           </>
-        ) : (
-          <>
-            {/* donut em cima */}
+        }
+        {view === 1 &&
+        <>
             <div className="desemp-fig desemp-fig--donut">
               <DonutOnly machines={machines} counts={counts} total={total} />
             </div>
-            {/* barras ACP/NTS/RECON em baixo */}
             <div className="desemp-bars">
               {typeStats.map((g, i) =>
-                <div key={i} className="gstat">
+            <div key={i} className="gstat">
                   <div className="gl"><span className="lg"><i style={{ background: g[2] }} />{g[0]}</span><b>{g[1]}</b></div>
                   <div className="gb"><i style={{ width: g[1] / typeMax * 100 + "%", background: g[2] }} /></div>
                 </div>
-              )}
+            )}
             </div>
           </>
-        )}
+        }
+        {view === 2 &&
+        <>
+            <div className="desemp-fig desemp-fig--bars">
+              <BarChart data={daily} valueKey="count" colorFor={() => BLUE_LIGHT} highlightLast />
+            </div>
+            <div className="desemp-bars">
+              <StatBar label="Média/dia · 14d" value={avgPerDay} max={dailyGmax} color={BLUE_LIGHT} />
+              <StatBar label="Últimos 7 dias" value={last7} max={dailyGmax} color={GREEN} />
+              <StatBar label={`Melhor dia · ${bestLabel}`} value={bestDay?.count || 0} max={dailyGmax} color={ORANGE_DARK} />
+            </div>
+          </>
+        }
+        {view === 3 &&
+        <>
+            <div className="desemp-fig desemp-fig--bars">
+              <BarChart data={weekly} valueKey="pct" colorFor={(d) => pctColor(d.pct)} highlightLast />
+            </div>
+            <div className="desemp-bars">
+              <StatBar label="Média · 6 sem." value={avg6w || 0} display={avg6w !== null ? avg6w + "%" : "—"} max={100} color={pctColor(avg6w)} />
+              <StatBar label="Esta semana" value={thisWeek?.pct || 0} display={thisWeek?.pct !== null ? thisWeek.pct + "%" : "—"} max={100} color={pctColor(thisWeek?.pct)} />
+            </div>
+          </>
+        }
       </div>
     </div>);
+
 }
 
 // ── EM ANDAMENTO (destaque · fundo claro) ────────────────────────────────────
@@ -627,7 +750,7 @@ export default function AoVivoOps({ data, loading, paused, cycleTheme, theme }) 
             {/* Desempenho — sempre visível, rotativo (reator ↔ donut) */}
             <div className="card gau" style={{ "--c": RED }}>
               <CardHead c={RED} title="Desempenho do dia" />
-              <Desempenho noPrazoPct={noPrazoPct} gstats={gstats} gmax={gmax} machines={machines} />
+              <Desempenho noPrazoPct={noPrazoPct} gstats={gstats} gmax={gmax} machines={machines} totalCon={totalCon} />
             </div>
           </div>
 
@@ -822,7 +945,13 @@ const CSS_OPS = `
 .ops-root .desemp-slide{display:flex; flex-direction:column; gap:8px; height:100%; animation:opsFade .5s ease}
 .ops-root .desemp-fig{display:flex; justify-content:center; align-items:center; flex:1; min-height:0}
 .ops-root .desemp-fig--donut{flex:1.2}
+.ops-root .desemp-fig--bars{align-items:stretch; padding:2px 0}
 .ops-root .desemp-bars{display:flex; flex-direction:column; gap:clamp(5px,.55vw,9px); flex-shrink:0; padding-top:6px; border-top:1px solid var(--line)}
+/* ===== BAR CHART (sparkline de tendência) ===== */
+.ops-root .barchart{display:flex; align-items:flex-end; gap:clamp(2px,.3vw,4px); height:100%; width:100%}
+.ops-root .barchart .bx{flex:1; display:flex; align-items:flex-end; justify-content:center; height:100%; min-width:0}
+.ops-root .barchart .bx i{width:100%; border-radius:3px 3px 1px 1px; display:block; transition:height .5s ease; opacity:.72}
+.ops-root .barchart .bx.now i{opacity:1; box-shadow:0 0 8px currentColor, inset 0 0 0 1.5px rgba(255,255,255,.55)}
 .ops-root .gaufade{animation:opsFade .5s ease}
 .ops-root .trir{position:relative; width:clamp(80px,8vw,130px); flex:none; aspect-ratio:200/190}
 .ops-root .trir svg{width:100%; height:100%; display:block}

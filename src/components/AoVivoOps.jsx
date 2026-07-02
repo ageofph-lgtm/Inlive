@@ -391,7 +391,6 @@ function Trow({ m }) {
   const badges = [[tt.key, tt.label]];
   if (run) badges.push(["run", "RUN"]);
   if (m.prioridade) badges.push(["prio", "PRIO"]);
-  const ini = (m.serie || "").replace(/[^0-9]/g, "").slice(-2) || "··";
   return (
     <div className={`trow${crit ? " crit" : ""}`} style={{ "--st": st }}>
       <div className="nsc">
@@ -410,7 +409,6 @@ function Trow({ m }) {
         {restante !== null ? (over ? "+" : "") + fmtHMS(Math.abs(restante)) : fmtHMS(elapsed)}
         <small>{restante === null ? "DECORR." : over ? "ATRASO" : "RESTAM"}</small>
       </div>
-      <div className="tech">{ini}</div>
     </div>);
 
 }
@@ -919,7 +917,6 @@ const CSS_OPS = `
 .ops-root .rem{font-family:var(--mono); font-weight:700; font-size:clamp(12px,1.05vw,15px); text-align:right; color:var(--hi-txt)}
 .ops-root .rem.over{color:var(--red)}
 .ops-root .rem small{display:block; font-size:8.5px; color:var(--hi-mut); font-weight:600; letter-spacing:.04em}
-.ops-root .tech{width:22px; height:22px; border-radius:6px; background:rgba(12,15,20,.08); display:grid; place-items:center; font-size:9px; font-weight:700; color:var(--hi-txt); margin-left:auto; font-family:var(--mono)}
 
 /* ===== GAUGE / DONUT ===== */
 .ops-root .gauwrap{display:flex; align-items:center; gap:14px; height:100%}

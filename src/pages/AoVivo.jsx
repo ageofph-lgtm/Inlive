@@ -2532,8 +2532,8 @@ export default function AoVivo(){
             width:"clamp(220px,28vw,380px)",pointerEvents:"none",zIndex:2}}>
             <img src={JORDAN_URL} alt="Jordan" style={{
               width:"100%",objectFit:"contain",objectPosition:"bottom right",
-              opacity:0.82,display:"block",
-              filter:"drop-shadow(0 0 6px #FF2D7888)",
+              opacity:0.92,display:"block",
+              imageRendering:"auto",
             }}/>
           </div>
           {/* conteúdo centrado */}

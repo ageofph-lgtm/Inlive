@@ -2533,7 +2533,7 @@ export default function AoVivo(){
             <img src={JORDAN_URL} alt="Jordan" style={{
               width:"100%",objectFit:"contain",objectPosition:"bottom right",
               opacity:0.82,display:"block",
-              filter:"drop-shadow(0 0 24px #FF2D78cc) drop-shadow(0 0 8px #FF2D78aa)",
+              filter:"drop-shadow(0 0 6px #FF2D7888)",
             }}/>
           </div>
           {/* conteúdo centrado */}

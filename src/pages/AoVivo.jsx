@@ -96,7 +96,7 @@ const C = {
 };
 // ── PALETA SEMÂNTICA POR CATEGORIA ──────────────────────────────────
 // Accent = cor da borda/tag; estados críticos terão glow, passivos não
-const CAT = {
+const CAT = { servico:{accent:"#94A3B8",rgb:"148,163,184",bg:"rgba(148,163,184,0.08)",label:"SERVIÇO INT."},
   prio:     { accent:"#F59E0B", rgb:"245,158,11",   bg:"rgba(245,158,11,0.08)",  label:"PRIORITÁRIA" },
   recon:    { accent:"#a78bfa", rgb:"167,139,250",  bg:"rgba(167,139,250,0.08)", label:"RECOND." },
   nts:      { accent:"#c8102e", rgb:"200,16,46",    bg:"rgba(200,16,46,0.08)",   label:"NTS" },
@@ -106,7 +106,7 @@ const CAT = {
   andamento:{ accent:"#6b7280", rgb:"107,114,128",  bg:"rgba(107,114,128,0.05)", label:"EM ANDAMENTO" },
 };
 // Resolver categoria de uma máquina
-function getMachineCategory(m){
+function getMachineCategory(m){ if(m.tipo==="servico-interno") return "servico";
   if(m.tipo==="usada") return "recon";
   if(m.tipo==="nova") return "nts";
   if(m.prioridade===true) return "prio";
@@ -312,7 +312,7 @@ function BoardCell({m, D, forceCategory=null, scale=1, compact=false}){
   const TB={
     nova:   {l:"NTS",  c:dark?"#FF3344":"#DC2626", b:"rgba(255,51,68,.08)",   br:"rgba(255,51,68,.28)"},
     usada:  {l:"RECON",c:dark?"#9B7BFF":"#7C3AED", b:"rgba(155,123,255,.08)", br:"rgba(155,123,255,.28)"},
-    aluguer:{l:"ACP",  c:dark?"#4D9FFF":"#0A6EBF", b:"rgba(77,159,255,.08)",  br:"rgba(77,159,255,.28)"},
+    aluguer:{l:"ACP",  c:dark?"#4D9FFF":"#0A6EBF", b:"rgba(77,159,255,.08)",  br:"rgba(77,159,255,.28)"},"servico-interno":{l:"INT.",c:dark?"#94A3B8":"#64748B", b:"rgba(148,163,184,.08)", br:"rgba(148,163,184,.28)"},
   };
   const tb = TB[m.tipo||m.tipo_origem||m.tipoOrigem||""]||null;
   const prio=!!m.prioridade;
@@ -1891,7 +1891,7 @@ export default function AoVivo(){
     const raw=m.dataConclusao;if(!raw)return false;
     try{return new Date(raw)>=monday;}catch{return false;}
   });
-  const totalCon=machines.filter(m=>m.estado?.startsWith("concluida")||m.estado==="concluida");
+  const totalCon=machines.filter(m=>(m.estado?.startsWith("concluida")||m.estado==="concluida")&&m.tipo!=="servico-interno");
 
   // ── Slide renders ─────────────────────────────────────────────────────────
   const slides={
@@ -2383,10 +2383,10 @@ export default function AoVivo(){
     : 0;
   // concluídas hoje
   const todayStr2 = new Date().toISOString().slice(0,10);
-  const conHoje = totalCon.filter(m=>{
+  const conHoje = machines.filter(m=>(m.estado?.startsWith("concluida")||m.estado==="concluida")&&(()=>{
     const raw=m.dataConclusao; if(!raw)return false;
     try{return new Date(raw).toISOString().slice(0,10)===todayStr2;}catch{return false;}
-  });
+  })());
   const kpis=[
     {l:"ANDAMENTO",   v:andamento.length,            c:D.green},
     {l:"STANDBY",     v:standby.length,              c:D.yellow},

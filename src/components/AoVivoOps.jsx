@@ -16,7 +16,8 @@ const BRAND_RED = "#F5484D";
 const TYPE = {
   nts: { key: "nts", color: RED, label: "NTS" },
   recon: { key: "recon", color: PINK, label: "RECON" },
-  acp: { key: "acp", color: BLUE, label: "ACP" }
+  acp: { key: "acp", color: BLUE, label: "ACP" },
+  servico: { key: "servico", color: "#94A3B8", label: "SERV. INT." }
 };
 
 // ── Helpers locais (duplicados p/ isolamento; pequenos e estáveis) ──────────
@@ -130,6 +131,7 @@ function pctColor(pct) {
 }
 // Tipo de máquina (para o indicador discreto em qualquer quadro)
 function machineType(m) {
+  if (m.tipo === "servico-interno") return TYPE.servico;
   if (m.tipo === "nova") return TYPE.nts;
   if (m.tipo === "usada") return TYPE.recon;
   return TYPE.acp;
@@ -195,9 +197,10 @@ function TriReactor({ pct }) {
 
 // ── Donut: distribuição das máquinas por tipo (NTS/ACP/RECON) ────────────────
 function TypeDonut({ machines }) {
+  const real = machines.filter((m) => m.tipo !== "servico-interno");
   const counts = { nts: 0, acp: 0, recon: 0 };
-  machines.forEach((m) => {counts[machineType(m).key]++;});
-  const total = machines.length || 1;
+  real.forEach((m) => {counts[machineType(m).key]++;});
+  const total = real.length || 1;
   const segs = [
   { ...TYPE.acp, n: counts.acp },
   { ...TYPE.nts, n: counts.nts },
@@ -221,7 +224,7 @@ function TypeDonut({ machines }) {
             style={{ filter: `drop-shadow(0 0 4px ${s.color})` }} />;
           })}
         </svg>
-        <div className="donutc"><b>{machines.length}</b><span>máquinas</span></div>
+        <div className="donutc"><b>{real.length}</b><span>máquinas</span></div>
       </div>
       <div className="gstats">
         {segs.map((s, i) =>
@@ -305,9 +308,10 @@ function Desempenho({ noPrazoPct, gstats, gmax, machines, totalCon }) {
   // Slide 1: Donut de tipos + barras ACP/NTS/RECON
   // Slide 2: Produtividade diária (14 dias) — tendência
   // Slide 3: % No prazo — histórico semanal (6 sem.)
+  const realMachines = machines.filter((m) => m.tipo !== "servico-interno");
   const counts = { nts: 0, acp: 0, recon: 0 };
-  machines.forEach((m) => { counts[machineType(m).key]++; });
-  const total = machines.length || 1;
+  realMachines.forEach((m) => { counts[machineType(m).key]++; });
+  const total = realMachines.length || 1;
   const typeStats = [
   [TYPE.acp.label, counts.acp, TYPE.acp.color],
   [TYPE.nts.label, counts.nts, TYPE.nts.color],
@@ -346,7 +350,7 @@ function Desempenho({ noPrazoPct, gstats, gmax, machines, totalCon }) {
         {view === 1 &&
         <>
             <div className="desemp-fig desemp-fig--donut">
-              <DonutOnly machines={machines} counts={counts} total={total} />
+              <DonutOnly machines={realMachines} counts={counts} total={total} />
             </div>
             <div className="desemp-bars">
               {typeStats.map((g, i) =>
@@ -910,6 +914,7 @@ const CSS_OPS = `
 .ops-root .bdg.recon{color:#B01E6B; background:rgba(255,45,149,.18)}
 .ops-root .bdg.acp{color:#2A6BE0; background:rgba(91,140,255,.18)}
 .ops-root .bdg.run{color:#0B7A5A; background:rgba(47,211,165,.20)}
+.ops-root .bdg.servico{color:#56606E; background:rgba(148,163,184,.22)}
 .ops-root .prog{display:flex; align-items:center; gap:9px}
 .ops-root .prog .bar{flex:1; height:7px; border-radius:100px; background:rgba(12,15,20,.10); overflow:hidden}
 .ops-root .prog .bar i{display:block; height:100%; border-radius:100px; transition:width .6s ease}

@@ -79,7 +79,7 @@ function hasPrevisao(m) {return !!(m.previsao_inicio && m.previsao_fim);}
 function computeDailyProductivity(totalCon, days = 14) {
   const today = new Date();today.setHours(0, 0, 0, 0);
   const buckets = [];
-  for (let i = days - 1;i >= 0;i--) {
+  for (let i = days - 1; i >= 0; i--) {
     const d = new Date(today);d.setDate(d.getDate() - i);
     buckets.push({ date: d, key: d.toISOString().slice(0, 10), count: 0 });
   }
@@ -99,7 +99,7 @@ function computeWeeklyOnTime(totalCon, weeks = 6) {
   const dow = today.getDay(),diffMon = dow === 0 ? 6 : dow - 1;
   const monday = new Date(today);monday.setDate(today.getDate() - diffMon);
   const buckets = [];
-  for (let i = weeks - 1;i >= 0;i--) {
+  for (let i = weeks - 1; i >= 0; i--) {
     const start = new Date(monday);start.setDate(monday.getDate() - i * 7);
     const end = new Date(start);end.setDate(start.getDate() + 6);end.setHours(23, 59, 59, 999);
     buckets.push({ start, end, total: 0, onTime: 0 });
@@ -241,11 +241,11 @@ function TypeDonut({ machines }) {
 // ── Donut isolado (só gráfico, sem stats laterais) ───────────────────────────
 function DonutOnly({ machines, counts, total }) {
   const segs = [
-    { ...TYPE.acp, n: counts.acp },
-    { ...TYPE.nts, n: counts.nts },
-    { ...TYPE.recon, n: counts.recon },
-  ];
-  const r = 58, C = 2 * Math.PI * r;
+  { ...TYPE.acp, n: counts.acp },
+  { ...TYPE.nts, n: counts.nts },
+  { ...TYPE.recon, n: counts.recon }];
+
+  const r = 58,C = 2 * Math.PI * r;
   let acc = 0;
   return (
     <div className="donut">
@@ -253,13 +253,13 @@ function DonutOnly({ machines, counts, total }) {
         <circle cx="80" cy="80" r={r} fill="none" stroke="rgba(255,255,255,.07)" strokeWidth="16" />
         {segs.map((s, i) => {
           const frac = s.n / total;
-          const dash = C * frac, off = -acc * C;
+          const dash = C * frac,off = -acc * C;
           acc += frac;
           if (s.n === 0) return null;
           return <circle key={i} cx="80" cy="80" r={r} fill="none" stroke={s.color} strokeWidth="16"
-            strokeDasharray={`${dash} ${C - dash}`} strokeDashoffset={off}
-            transform="rotate(-90 80 80)" strokeLinecap="butt"
-            style={{ filter: `drop-shadow(0 0 4px ${s.color})` }} />;
+          strokeDasharray={`${dash} ${C - dash}`} strokeDashoffset={off}
+          transform="rotate(-90 80 80)" strokeLinecap="butt"
+          style={{ filter: `drop-shadow(0 0 4px ${s.color})` }} />;
         })}
       </svg>
       <div className="donutc"><b>{machines.length}</b><span>máquinas</span></div>
@@ -310,7 +310,7 @@ function Desempenho({ noPrazoPct, gstats, gmax, machines, totalCon }) {
   // Slide 3: % No prazo — histórico semanal (6 sem.)
   const realMachines = machines.filter((m) => m.tipo !== "servico-interno");
   const counts = { nts: 0, acp: 0, recon: 0 };
-  realMachines.forEach((m) => { counts[machineType(m).key]++; });
+  realMachines.forEach((m) => {counts[machineType(m).key]++;});
   const total = realMachines.length || 1;
   const typeStats = [
   [TYPE.acp.label, counts.acp, TYPE.acp.color],
@@ -565,7 +565,7 @@ function Recon({ reconAnd, reconAF, reconCon }) {
 
   const [view, sView] = useState(0);
   useEffect(() => {
-    if (groups.length <= 1) { sView(0); return; }
+    if (groups.length <= 1) {sView(0);return;}
     const id = setInterval(() => sView((v) => (v + 1) % groups.length), 9000);
     return () => clearInterval(id);
   }, [groups.length]);
@@ -689,7 +689,7 @@ export default function AoVivoOps({ data, loading, paused, cycleTheme, theme }) 
         {/* HEADER */}
         <div className="head">
           <div className="logo"><img src={JORDAN_URL} alt="Watcher" /></div>
-          <div className="brand"><b>Watcher</b><span className="brand-sep"> | </span><span className="brand-still">STILL</span></div>
+          <div className="brand"><b>Watcher</b><span className="brand-sep"> | </span><span className="brand-still [font-family:'JetBrains_Mono',_monospace] font-bold">STILL</span></div>
           <div className="right">
             <div className={`pill live${paused ? " paused" : ""}`}>
               <span className="dot" />{paused ? "Em pausa" : "Ao vivo"}

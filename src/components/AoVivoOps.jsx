@@ -689,7 +689,7 @@ export default function AoVivoOps({ data, loading, paused, cycleTheme, theme }) 
         {/* HEADER */}
         <div className="head">
           <div className="logo"><img src={JORDAN_URL} alt="Watcher" /></div>
-          <div className="brand"><b>Watcher</b><span className="brand-sep"> | </span><span className="brand-still font-light [font-family:'Urbanist',_sans-serif] text-lg">STILL</span></div>
+          <div className="brand"><b>Watcher</b><span className="brand-sep"> | </span><span className="brand-still font-light [font-family:'Urbanist',_sans-serif] text-lg text-left">STILL</span></div>
           <div className="right">
             <div className={`pill live${paused ? " paused" : ""}`}>
               <span className="dot" />{paused ? "Em pausa" : "Ao vivo"}

@@ -6,7 +6,7 @@ import AoVivoGlassLight from "@/components/AoVivoGlassLight";
 import AoVivoGlassNoir from "@/components/AoVivoGlassNoir";
 import AoVivoOps from "@/components/AoVivoOps";
 import ArcReactorGauge from "@/components/ArcReactorGauge";
-import AoVivoRosaShock from "@/components/AoVivoRosaShock";
+import AoVivoTidal from "@/components/AoVivoTidal";
 import GanttChart from "@/components/GanttChart";
 import ReconCell from "@/components/ReconCellCard";
 // ── Config ────────────────────────────────────────────────────────────────────
@@ -1297,10 +1297,10 @@ function AlmocoClock(){
 
 export default function AoVivo(){
   // Tema: dark | light | glass | glass-light. `dark` derivado para preservar toda a lógica existente.
-  const [theme,sTheme] = useState("ops"); // sempre inicia em "ops" — qualquer acesso ao link abre direto neste tema (independente do que ficou salvo no navegador)
+  const [theme,sTheme] = useState("tidal"); // sempre inicia em "tidal" — qualquer acesso ao link abre direto neste tema
   const dark = theme === "dark";
   const cycleTheme = () => {
-    const order = ["rosa","glass","glass-light","glass-noir","ops"]; // dark/light comentados — apenas glass + ops activos
+    const order = ["tidal","glass","glass-light","glass-noir","ops"];
     const next = order[(order.indexOf(theme)+1)%order.length];
     sTheme(next);
     try{localStorage.setItem("theme",next);}catch{ /* ignore */ }
@@ -1915,12 +1915,10 @@ export default function AoVivo(){
   // Componente standalone que recebe dados já calculados. Quando theme!=="glass"
   // esta linha é ignorada. Durante o almoço cai para o return principal, que
   // sobrepõe o overlay de almoço (zIndex 9999) — funciona nos 3 modos.
-  if(theme==="rosa" && !isAlmoco) return(
-    <AoVivoRosaShock
-      key="aovivo-rosa"
+  if(theme==="tidal" && !isAlmoco) return(
+    <AoVivoTidal
+      key="aovivo-tidal"
       loading={loading}
-      slide={slide} prog={prog} paused={paused}
-      SLIDES={SLIDES} next={next} prev={prev} sPaused={sPaused}
       cycleTheme={cycleTheme} theme={theme}
       data={{
         machines, andamento, standby, prioritarias, proximas,

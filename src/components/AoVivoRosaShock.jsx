@@ -135,24 +135,32 @@ export default function AoVivoRosaShock({ data, loading, paused, sPaused, cycleT
           </div>
         </aside>
 
-        {/* PALCO CENTRAL */}
+        {/* PALCO — todas as janelas visíveis, a activa cresce */}
         <main className="rs-stagewrap">
-          <div className="rs-panel rs-stage" style={{ "--c": cur.color }}>
-            <div className="rs-stagehead">
-              <i />
-              <h2>{cur.label}</h2>
-              {cur.count !== null && <span className="rs-ct">{pad2(cur.count)}</span>}
-              <div className="rs-progress"><i style={{ width: prog * 100 + "%" }} /></div>
-            </div>
-            <div className="rs-stagebody" key={cur.id}>
-              {loading ? <div className="rs-empty">A carregar…</div>
-                : cur.id === "and" ? <StageAndamento andamento={andamento} paused={paused} />
-                : cur.id === "rec" ? <StageRecon reconAnd={reconAnd} reconAF={reconAF} reconCon={reconCon} paused={paused} />
-                : cur.id === "con" ? <StageConcluidas conSemana={conSemana} paused={paused} />
-                : <StageDesempenho machines={machines} totalCon={totalCon} andamento={andamento}
-                    standby={standby} prioritarias={prioritarias} reconTotal={reconTotal}
-                    conSemana={conSemana} conHoje={conHoje} avgH={avgH} />}
-            </div>
+          <div className="rs-stagegrid" style={{
+            gridTemplateColumns: stage === 0 || stage === 2 ? "2.7fr 1fr" : "1fr 2.7fr",
+            gridTemplateRows: stage === 0 || stage === 1 ? "2.6fr 1fr" : "1fr 2.6fr",
+          }}>
+            {STAGES.map((s, i) => (
+              <div key={s.id} className={`rs-panel rs-stage${i === stage ? " on" : ""}`}
+                style={{ "--c": s.color }} onClick={() => goStage(i)}>
+                <div className="rs-stagehead">
+                  <i />
+                  <h2>{s.label}</h2>
+                  {s.count !== null && <span className="rs-ct">{pad2(s.count)}</span>}
+                  {i === stage && <div className="rs-progress"><i style={{ width: prog * 100 + "%" }} /></div>}
+                </div>
+                <div className="rs-stagebody">
+                  {loading ? <div className="rs-empty">A carregar…</div>
+                    : s.id === "and" ? <StageAndamento andamento={andamento} paused={paused} />
+                    : s.id === "rec" ? <StageRecon reconAnd={reconAnd} reconAF={reconAF} reconCon={reconCon} paused={paused} />
+                    : s.id === "con" ? <StageConcluidas conSemana={conSemana} paused={paused} />
+                    : <StageDesempenho machines={machines} totalCon={totalCon} andamento={andamento}
+                        standby={standby} prioritarias={prioritarias} reconTotal={reconTotal}
+                        conSemana={conSemana} conHoje={conHoje} avgH={avgH} />}
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* ÓRBITA INFERIOR */}
@@ -179,8 +187,8 @@ export default function AoVivoRosaShock({ data, loading, paused, sPaused, cycleT
 const CSS_ROSA = `
 .rs-root{
   --pink:${PINK}; --lav:${LAV}; --green:${GREEN}; --red:${RED}; --amber:${AMBER}; --blue:${BLUE};
-  --txt:#FFFFFF; --mut:rgba(255,255,255,.72); --faint:rgba(255,255,255,.46);
-  --line:rgba(255,255,255,.20); --glass:rgba(255,255,255,.09); --glass2:rgba(255,255,255,.055);
+  --txt:#FFFFFF; --mut:rgba(255,255,255,.70); --faint:rgba(255,255,255,.42);
+  --line:rgba(255,255,255,.10); --glass:rgba(255,255,255,.045); --glass2:rgba(255,255,255,.028);
   --mono:'JetBrains Mono',ui-monospace,monospace;
   --gap:clamp(7px,.7vw,13px);
   position:absolute; inset:0; overflow:hidden; color:var(--txt);
@@ -188,18 +196,26 @@ const CSS_ROSA = `
   -webkit-font-smoothing:antialiased;
   display:flex; flex-direction:column; gap:var(--gap); padding:clamp(8px,.8vw,16px);
   background:
-    radial-gradient(70% 55% at 85% -5%, rgba(255,45,149,.55), transparent 62%),
-    radial-gradient(60% 50% at 8% 100%, rgba(185,140,255,.40), transparent 62%),
-    radial-gradient(45% 40% at 45% 45%, rgba(255,127,191,.18), transparent 70%),
-    linear-gradient(160deg,#4A0625 0%,#2B0518 45%,#14030C 100%);
+    radial-gradient(55% 40% at 88% -8%, rgba(255,45,149,.11), transparent 62%),
+    radial-gradient(50% 40% at 5% 105%, rgba(255,45,149,.07), transparent 62%),
+    #000000;
 }
 .rs-root *{box-sizing:border-box; margin:0; padding:0; font-family:inherit}
 .rs-root button{cursor:pointer; border:none; background:none; color:inherit; font:inherit}
 
 /* glass base */
 .rs-root .rs-panel,.rs-root .rs-kpi,.rs-root .rs-tbtn{
-  background:var(--glass); border:1px solid var(--line); border-radius:20px;
-  box-shadow:0 14px 40px -18px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.18);
+  position:relative; background:var(--glass); border:1px solid var(--line); border-radius:20px;
+  box-shadow:0 18px 50px -22px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.10);
+}
+/* detalhes em degradé branco nas pontas */
+.rs-root .rs-panel::before,.rs-root .rs-kpi::before,.rs-root .rs-tbtn::before{
+  content:""; position:absolute; inset:0; border-radius:inherit; padding:1px; pointer-events:none; z-index:4;
+  background:linear-gradient(135deg,rgba(255,255,255,.75) 0%,rgba(255,255,255,.06) 22%,
+    transparent 46%,transparent 56%,rgba(255,255,255,.06) 80%,rgba(255,255,255,.55) 100%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  mask-composite:exclude;
 }
 @supports ((backdrop-filter:blur(2px)) or (-webkit-backdrop-filter:blur(2px))){
   .rs-root .rs-panel,.rs-root .rs-kpi,.rs-root .rs-tbtn{
@@ -231,7 +247,13 @@ const CSS_ROSA = `
 .rs-root .rs-side{width:clamp(220px,19vw,320px); flex:none; display:flex; flex-direction:column; gap:var(--gap); min-height:0}
 .rs-root .rs-flex{flex:1 1 0; min-height:0}
 .rs-root .rs-stagewrap{flex:1; min-width:0; display:flex; flex-direction:column; gap:var(--gap)}
-.rs-root .rs-stage{flex:1 1 auto; min-height:0}
+.rs-root .rs-stagegrid{flex:1; min-height:0; display:grid; gap:var(--gap);
+  transition:grid-template-columns .7s cubic-bezier(.4,0,.2,1), grid-template-rows .7s cubic-bezier(.4,0,.2,1)}
+.rs-root .rs-stage{min-height:0; min-width:0; cursor:pointer; opacity:.6;
+  transition:opacity .5s ease, box-shadow .5s ease}
+.rs-root .rs-stage.on{opacity:1; border-color:rgba(255,255,255,.20);
+  box-shadow:0 22px 60px -22px rgba(0,0,0,.95), 0 0 0 1px rgba(255,45,149,.28),
+    inset 0 1px 0 rgba(255,255,255,.14)}
 .rs-root .rs-orbit{flex:0 0 clamp(150px,20vh,230px); display:flex; gap:var(--gap); min-height:0}
 .rs-root .rs-orb{flex:1.25 1 0; min-width:0}
 .rs-root .rs-orb.narrow{flex:.8 1 0}

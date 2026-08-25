@@ -6,7 +6,6 @@ import AoVivoGlassLight from "@/components/AoVivoGlassLight";
 import AoVivoGlassNoir from "@/components/AoVivoGlassNoir";
 import AoVivoOps from "@/components/AoVivoOps";
 import ArcReactorGauge from "@/components/ArcReactorGauge";
-import AoVivoTidal from "@/components/AoVivoTidal";
 import GanttChart from "@/components/GanttChart";
 import ReconCell from "@/components/ReconCellCard";
 // ── Config ────────────────────────────────────────────────────────────────────
@@ -1297,10 +1296,10 @@ function AlmocoClock(){
 
 export default function AoVivo(){
   // Tema: dark | light | glass | glass-light. `dark` derivado para preservar toda a lógica existente.
-  const [theme,sTheme] = useState("tidal"); // sempre inicia em "tidal" — qualquer acesso ao link abre direto neste tema
+  const [theme,sTheme] = useState("ops"); // sempre inicia em "ops" — qualquer acesso ao link abre direto neste tema
   const dark = theme === "dark";
   const cycleTheme = () => {
-    const order = ["tidal","glass","glass-light","glass-noir","ops"];
+    const order = ["glass","glass-light","glass-noir","ops"];
     const next = order[(order.indexOf(theme)+1)%order.length];
     sTheme(next);
     try{localStorage.setItem("theme",next);}catch{ /* ignore */ }
@@ -1915,19 +1914,6 @@ export default function AoVivo(){
   // Componente standalone que recebe dados já calculados. Quando theme!=="glass"
   // esta linha é ignorada. Durante o almoço cai para o return principal, que
   // sobrepõe o overlay de almoço (zIndex 9999) — funciona nos 3 modos.
-  if(theme==="tidal" && !isAlmoco) return(
-    <AoVivoTidal
-      key="aovivo-tidal"
-      loading={loading}
-      cycleTheme={cycleTheme} theme={theme}
-      data={{
-        machines, andamento, standby, prioritarias, proximas,
-        ntsAnd, ntsAF, reconAnd, reconAF, reconCon,
-        conSemana, totalCon, conHoje, avgH,
-      }}
-    />
-  );
-
   if(theme==="ops" && !isAlmoco) return(
     <AoVivoOps
       key="aovivo-ops"

@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Activity, Flag, CheckCircle2, ListOrdered, Sun, Moon, Layers,
          ChevronLeft, ChevronRight, Pause, Play, Wrench, CalendarDays } from "lucide-react";
+import AoVivoGlass from "@/components/AoVivoGlass";
+import AoVivoGlassLight from "@/components/AoVivoGlassLight";
+import AoVivoGlassNoir from "@/components/AoVivoGlassNoir";
 import AoVivoOps from "@/components/AoVivoOps";
-import AoVivoQuadro from "@/components/AoVivoQuadro";
 import ArcReactorGauge from "@/components/ArcReactorGauge";
 import GanttChart from "@/components/GanttChart";
 import ReconCell from "@/components/ReconCellCard";
@@ -1294,10 +1296,10 @@ function AlmocoClock(){
 
 export default function AoVivo(){
   // Tema: dark | light | glass | glass-light. `dark` derivado para preservar toda a lógica existente.
-  const [theme,sTheme] = useState("quadro"); // inicia no novo tema "quadro" para análise; alterna apenas com "ops"
+  const [theme,sTheme] = useState("ops"); // sempre inicia em "ops" — qualquer acesso ao link abre direto neste tema
   const dark = theme === "dark";
   const cycleTheme = () => {
-    const order = ["quadro","ops"];
+    const order = ["glass","glass-light","glass-noir","ops"];
     const next = order[(order.indexOf(theme)+1)%order.length];
     sTheme(next);
     try{localStorage.setItem("theme",next);}catch{ /* ignore */ }
@@ -1912,12 +1914,13 @@ export default function AoVivo(){
   // Componente standalone que recebe dados já calculados. Quando theme!=="glass"
   // esta linha é ignorada. Durante o almoço cai para o return principal, que
   // sobrepõe o overlay de almoço (zIndex 9999) — funciona nos 3 modos.
-  if(theme==="quadro") return(
-    <AoVivoQuadro
-      key="aovivo-quadro"
+  if(theme==="ops" && !isAlmoco) return(
+    <AoVivoOps
+      key="aovivo-ops"
       loading={loading}
-      isAlmoco={isAlmoco}
-      cycleTheme={cycleTheme}
+      slide={slide} prog={prog} paused={paused}
+      SLIDES={SLIDES} next={next} prev={prev} sPaused={sPaused}
+      cycleTheme={cycleTheme} theme={theme}
       data={{
         machines, andamento, standby, prioritarias, proximas,
         ntsAnd, ntsAF, reconAnd, reconAF, reconCon,
@@ -1926,9 +1929,39 @@ export default function AoVivo(){
     />
   );
 
-  if(theme==="ops" && !isAlmoco) return(
-    <AoVivoOps
-      key="aovivo-ops"
+  if(theme==="glass" && !isAlmoco) return(
+    <AoVivoGlass
+      key="aovivo-glass"
+      loading={loading}
+      slide={slide} prog={prog} paused={paused}
+      SLIDES={SLIDES} next={next} prev={prev} sPaused={sPaused}
+      cycleTheme={cycleTheme} theme={theme}
+      data={{
+        machines, andamento, standby, prioritarias, proximas,
+        ntsAnd, ntsAF, reconAnd, reconAF, reconCon,
+        conSemana, totalCon, conHoje, avgH,
+      }}
+    />
+  );
+
+  if(theme==="glass-light" && !isAlmoco) return(
+    <AoVivoGlassLight
+      key="aovivo-glasslight"
+      loading={loading}
+      slide={slide} prog={prog} paused={paused}
+      SLIDES={SLIDES} next={next} prev={prev} sPaused={sPaused}
+      cycleTheme={cycleTheme} theme={theme}
+      data={{
+        machines, andamento, standby, prioritarias, proximas,
+        ntsAnd, ntsAF, reconAnd, reconAF, reconCon,
+        conSemana, totalCon, conHoje, avgH,
+      }}
+    />
+  );
+
+  if(theme==="glass-noir" && !isAlmoco) return(
+    <AoVivoGlassNoir
+      key="aovivo-glassnoir"
       loading={loading}
       slide={slide} prog={prog} paused={paused}
       SLIDES={SLIDES} next={next} prev={prev} sPaused={sPaused}

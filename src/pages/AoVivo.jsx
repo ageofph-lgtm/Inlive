@@ -1941,51 +1941,6 @@ export default function AoVivo(){
     />
   );
 
-  if(theme==="glass" && !isAlmoco) return(
-    <AoVivoGlass
-      key="aovivo-glass"
-      loading={loading}
-      slide={slide} prog={prog} paused={paused}
-      SLIDES={SLIDES} next={next} prev={prev} sPaused={sPaused}
-      cycleTheme={cycleTheme} theme={theme}
-      data={{
-        machines, andamento, standby, prioritarias, proximas,
-        ntsAnd, ntsAF, reconAnd, reconAF, reconCon,
-        conSemana, totalCon, conHoje, avgH,
-      }}
-    />
-  );
-
-  if(theme==="glass-light" && !isAlmoco) return(
-    <AoVivoGlassLight
-      key="aovivo-glasslight"
-      loading={loading}
-      slide={slide} prog={prog} paused={paused}
-      SLIDES={SLIDES} next={next} prev={prev} sPaused={sPaused}
-      cycleTheme={cycleTheme} theme={theme}
-      data={{
-        machines, andamento, standby, prioritarias, proximas,
-        ntsAnd, ntsAF, reconAnd, reconAF, reconCon,
-        conSemana, totalCon, conHoje, avgH,
-      }}
-    />
-  );
-
-  if(theme==="glass-noir" && !isAlmoco) return(
-    <AoVivoGlassNoir
-      key="aovivo-glassnoir"
-      loading={loading}
-      slide={slide} prog={prog} paused={paused}
-      SLIDES={SLIDES} next={next} prev={prev} sPaused={sPaused}
-      cycleTheme={cycleTheme} theme={theme}
-      data={{
-        machines, andamento, standby, prioritarias, proximas,
-        ntsAnd, ntsAF, reconAnd, reconAF, reconCon,
-        conSemana, totalCon, conHoje, avgH,
-      }}
-    />
-  );
-
   const SHARED_STYLE = (
     <style>{`
       @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=Orbitron:wght@600;700;800;900&family=Share+Tech+Mono&display=swap');

@@ -11,41 +11,41 @@ const fmtHM = s => {
   return `${s<0?"-":""}${Math.floor(abs/3600)}:${String(Math.floor((abs%3600)/60)).padStart(2,"0")}`;
 };
 
-export default function BayCard({ idx, m }){
-  const [elapsed, setElapsed] = useState(()=>m?calcNow(m):0);
+const MOTIVOS = {
+  aguarda_pecas:   "Aguarda Peças",
+  prioritaria:     "P/ Prioritária",
+  aguarda_decisao: "Aguarda Decisão",
+  outros:          "Em Espera",
+};
+
+export default function IndMachineCard({ m, topLabel }){
+  const [elapsed, setElapsed] = useState(()=>calcNow(m));
   useEffect(()=>{
-    if(!m) return;
     setElapsed(calcNow(m));
     const id = setInterval(()=>setElapsed(calcNow(m)), 1000);
     return ()=>clearInterval(id);
-  },[m?.id, m?.timer_status, m?.timer_started_at, m?.timer_accumulated_seconds]); // eslint-disable-line
-
-  if(!m){
-    return (
-      <div className="ind-bay free">
-        <span className="num">Baía {idx+1}</span>
-        <span className="disp">Disponível</span>
-      </div>
-    );
-  }
+  },[m.id, m.timer_status, m.timer_started_at, m.timer_accumulated_seconds]); // eslint-disable-line
 
   const run    = m.timer_status==="running";
+  const paused = m.timer_status?.startsWith("paused");
+  const motivo = paused ? (m.timer_status.split(":")[1]||"outros") : null;
   const meta   = Number(m.tempo_estimado_segundos)||0;
   const rest   = meta>0 ? meta-elapsed : null;
   const late   = rest!==null && rest<0;
   const state  = late?"late":run?"run":"wait";
-  const badge  = late?"Atrasada":run?"A trabalhar":"Em espera";
+  const badge  = late?"Atrasada":run?"A trabalhar":(MOTIVOS[motivo]||"Em Espera");
   const badgeBg= late?"#C8102E":run?"#1E7A46":"#8A7414";
 
   return (
     <div className={`ind-bay ${state}`}>
-      <span className="num">Baía {idx+1}</span>
+      <span className="num">{topLabel}</span>
       <div className="serie">{m.serie||"—"}</div>
       <div className="modelo">{m.modelo||"—"}</div>
       <div style={{display:"flex",gap:4,flexWrap:"wrap",marginTop:6,overflow:"hidden",maxHeight:22}}>
         {m.prioridade && <span className="ind-chip prio">⚑ Prio</span>}
         {m.tipo==="nova" && <span className="ind-chip">NTS</span>}
         {m.tipo==="usada" && <span className="ind-chip">Recon</span>}
+        {m.tipo==="servico-interno" && <span className="ind-chip">Serviço Int.</span>}
         {meta>0 && <span className="ind-chip">meta {fmtHM(meta)}h</span>}
       </div>
       <div className="foot">

@@ -334,9 +334,6 @@ function Desempenho({ noPrazoPct, gstats, gmax, machines, totalCon }) {
       <div className="desemp-slide gaufade" key={view}>
         {view === 0 &&
         <>
-            <div className="desemp-fig">
-              <TriReactor pct={noPrazoPct} />
-            </div>
             <div className="desemp-bars">
               {gstats.map((g, i) =>
             <div key={i} className="gstat">

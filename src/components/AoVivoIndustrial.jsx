@@ -717,15 +717,15 @@ const CSS_INDUSTRIAL = `
   --bg:#FFFFFF; --txt:#141414; --mut:#6B6862; --faint:#9A968C;
   --line:rgba(20,20,20,.14); --line2:rgba(20,20,20,.22);
   /* painéis = vidro preto · KPIs = vidro prateado */
-  --panel:rgba(18,18,20,.82); --panel2:rgba(255,255,255,.06);
-  --kpi-bg:rgba(168,168,176,.42); --kpi-bd:rgba(168,168,176,.55);
-  --card-bd:rgba(168,168,176,.45);
+  --panel:rgba(0,0,0,.82); --panel2:rgba(255,255,255,.06);
+  --kpi-bg:rgba(165,168,166,.42); --kpi-bd:rgba(165,168,166,.55);
+  --card-bd:rgba(165,168,166,.45);
   /* texto dentro dos painéis pretos */
   --ct-txt:#EDEFF3; --ct-mut:rgba(220,222,228,.62); --ct-faint:rgba(200,202,210,.4);
   --ct-line:rgba(255,255,255,.08); --ct-line2:rgba(255,255,255,.14);
   --ct-row:rgba(255,255,255,.04); --ct-rowbd:rgba(255,255,255,.07);
   --mono:'IBM Plex Mono',ui-monospace,monospace;
-  --orange:#E8730C; --orange-dk:#C25A08; --silver:#A8A8A8; --silver-dk:#6B6862;
+  --orange:#DD7900; --orange-dk:#B85F00; --silver:#A5A8A6; --silver-dk:#6E7170;
   --red:#C8102E; --pink:#C25A8C; --blue:#2A6BE0; --bluel:#3A8FD0; --green:#1E7A46;
   --gap:clamp(5px,.55vw,10px);
   position:absolute; inset:0; height:100%; width:100%;
@@ -736,7 +736,7 @@ const CSS_INDUSTRIAL = `
 .ind-root *{box-sizing:border-box; margin:0; padding:0}
 /* fita zebrada laranja STILL + prata */
 .ind-root .ind-hazard{height:13px; flex-shrink:0;
-  background:repeating-linear-gradient(-45deg,#E8730C 0 16px,#A8A8A8 16px 32px)}
+  background:repeating-linear-gradient(-45deg,#DD7900 0 16px,#A5A8A6 16px 32px)}
 .ind-root .ind-hazard.thin{height:9px}
 .ind-root .app{height:calc(100% - 22px); display:flex; flex-direction:column; padding:clamp(5px,.6vw,12px); gap:var(--gap)}
 
@@ -754,9 +754,9 @@ const CSS_INDUSTRIAL = `
   box-shadow:0 1px 3px rgba(20,20,20,.08); position:relative;
 }
 @supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
-  .ind-root .kpi{ -webkit-backdrop-filter:blur(8px) saturate(140%); backdrop-filter:blur(8px) saturate(140%); background:rgba(200,200,208,.4); }
-  .ind-root .card{ -webkit-backdrop-filter:blur(12px) saturate(120%); backdrop-filter:blur(12px) saturate(120%); background:rgba(18,18,20,.78); }
-  .ind-root .pill,.ind-root .themebtn{ -webkit-backdrop-filter:blur(8px) saturate(140%); backdrop-filter:blur(8px) saturate(140%); background:rgba(200,200,208,.4); }
+  .ind-root .kpi{ -webkit-backdrop-filter:blur(8px) saturate(140%); backdrop-filter:blur(8px) saturate(140%); background:rgba(165,168,166,.4); }
+  .ind-root .card{ -webkit-backdrop-filter:blur(12px) saturate(120%); backdrop-filter:blur(12px) saturate(120%); background:rgba(0,0,0,.78); }
+  .ind-root .pill,.ind-root .themebtn{ -webkit-backdrop-filter:blur(8px) saturate(140%); backdrop-filter:blur(8px) saturate(140%); background:rgba(165,168,166,.4); }
 }
 .ind-root .card::after,.ind-root .kpi::after{
   content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
@@ -783,7 +783,7 @@ const CSS_INDUSTRIAL = `
 .ind-root .pill.paused .dot{background:var(--orange); box-shadow:0 0 5px var(--orange); animation:none}
 @keyframes indbp{50%{opacity:.4}}
 .ind-root .clock{font-family:var(--mono); font-weight:700; font-size:clamp(12px,1.05vw,19px); color:#141414; font-variant-numeric:tabular-nums;
-  background:rgba(168,168,176,.3); border:1px solid var(--kpi-bd); padding:5px 10px; border-radius:4px;
+  background:rgba(165,168,166,.3); border:1px solid var(--kpi-bd); padding:5px 10px; border-radius:4px;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.5)}
 .ind-root .clock small{color:var(--silver-dk); font-weight:500; font-size:11px; margin-left:8px; text-transform:capitalize}
 .ind-root .themebtn{width:34px; height:34px; border-radius:4px; color:#141414; font-size:15px; cursor:pointer; display:grid; place-items:center}
